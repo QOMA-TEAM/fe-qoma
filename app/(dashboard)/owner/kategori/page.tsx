@@ -127,7 +127,7 @@ export default function KelolaKategoriPage() {
               <Input placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} className="pr-9 h-9 w-44 text-sm border-gray-200 rounded-full" />
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
-            <Button onClick={() => setTambahOpen(true)} className="h-9 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white gap-1.5 px-4 text-sm">
+            <Button onClick={() => setTambahOpen(true)} className="h-9 rounded-lg bg-[#1D5E84] hover:bg-[#154663] text-white gap-1.5 px-4 text-sm">
               <Plus className="size-4" /> Tambah Kategori
             </Button>
           </div>
@@ -160,9 +160,11 @@ export default function KelolaKategoriPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sorted.map((row) => (
+              {sorted.map((row, index) => (
                 <TableRow key={row.id} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
-                  <TableCell className="text-gray-500 text-sm text-center">{row.id}</TableCell>
+                  <TableCell className="text-gray-500 text-sm text-center">
+                    {sortKey === "id" && sortDir === "desc" ? sorted.length - index : index + 1}
+                  </TableCell>
                   <TableCell className="text-gray-800 text-sm">{row.nama}</TableCell>
                   <TableCell className="text-center">
                     <button onClick={() => setEditItem(row)} className="bg-green-100 hover:bg-green-200 text-green-700 text-xs font-bold h-7 px-5 rounded-full transition-colors">

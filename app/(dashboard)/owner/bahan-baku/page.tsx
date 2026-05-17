@@ -57,8 +57,7 @@ export default function KelolaBahanBakuPage() {
   }
 
   const sortOptions: { key: SortKey; label: string }[] = [
-    { key: "nama", label: "Nama" },
-    { key: "satuan", label: "Satuan" },
+    { key: "id", label: "No" },
     { key: "harga_default", label: "Harga Default" },
   ]
 
@@ -121,7 +120,7 @@ export default function KelolaBahanBakuPage() {
               <Input placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} className="pr-9 h-9 w-44 text-sm border-gray-200 rounded-full" />
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
-            <Button onClick={() => setTambahOpen(true)} className="h-9 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white gap-1.5 px-4 text-sm">
+            <Button onClick={() => setTambahOpen(true)} className="h-9 rounded-lg bg-[#1D5E84] hover:bg-[#154663] text-white gap-1.5 px-4 text-sm">
               <Plus className="size-4" /> Tambah Bahan Baku
             </Button>
           </div>
@@ -138,7 +137,7 @@ export default function KelolaBahanBakuPage() {
                   { key: "satuan" as SortKey, label: "Satuan", className: "" },
                   { key: "harga_default" as SortKey, label: "Harga Default", className: "" },
                 ].map((col) => {
-                  const isSortable = col.key !== "id"
+                  const isSortable = col.key === "id" || col.key === "harga_default"
                   return (
                     <TableHead 
                       key={col.key} 
@@ -168,7 +167,9 @@ export default function KelolaBahanBakuPage() {
               )}
               {!isLoading && !isError && sorted.map((row, index) => (
                 <TableRow key={row.id} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
-                  <TableCell className="text-gray-500 text-sm text-center">{index + 1}</TableCell>
+                  <TableCell className="text-gray-500 text-sm text-center">
+                    {sortKey === "id" && sortDir === "desc" ? sorted.length - index : index + 1}
+                  </TableCell>
                   <TableCell className="text-gray-800 text-sm">{row.nama}</TableCell>
                   <TableCell className="text-gray-600 text-sm">{row.satuan}</TableCell>
                   <TableCell className="text-gray-600 text-sm">{formatRupiah(row.harga_default)}</TableCell>

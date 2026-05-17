@@ -134,7 +134,7 @@ export function TambahOutletDialog({ open, onOpenChange }: TambahOutletDialogPro
             </Button>
             <Button
               type="submit"
-              className="rounded-full px-8 bg-blue-600 hover:bg-blue-700 text-white"
+              className="rounded-full px-8 bg-[#1D5E84] hover:bg-[#154663] text-white"
             >
               Submit
             </Button>

@@ -105,7 +105,7 @@ export default function KelolaMenuPage() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="gap-1.5 text-sm border-gray-200 text-gray-700 h-9 rounded-full px-4">
-                  {selectedCategory === "Semua Kategori" ? "Categories" : selectedCategory} <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+                  {selectedCategory === "Semua Kategori" ? "Kategori" : selectedCategory} <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 max-h-[300px] overflow-y-auto">
@@ -152,7 +152,7 @@ export default function KelolaMenuPage() {
               />
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
-            <Button onClick={() => setTambahOpen(true)} className="h-9 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white gap-1.5 px-4 text-sm">
+            <Button onClick={() => setTambahOpen(true)} className="h-9 rounded-lg bg-[#1D5E84] hover:bg-[#154663] text-white gap-1.5 px-4 text-sm">
               <Plus className="size-4" /> Tambah Menu
             </Button>
           </div>
@@ -202,7 +202,9 @@ export default function KelolaMenuPage() {
                 sorted.map((row, index) => (
                   <TableRow key={row.id} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
                     <TableCell className="text-gray-500 text-sm text-center">
-                       {meta ? (meta.current_page - 1) * meta.per_page + index + 1 : index + 1}
+                       {sortKey === "id" && sortDir === "desc" 
+                         ? (meta ? meta.total - ((meta.current_page - 1) * meta.per_page) - index : sorted.length - index)
+                         : (meta ? (meta.current_page - 1) * meta.per_page + index + 1 : index + 1)}
                     </TableCell>
                     <TableCell className="text-gray-800 text-sm font-medium">{row.nama}</TableCell>
                     <TableCell className="text-gray-600 text-sm">{row.kategori?.nama || '-'}</TableCell>
