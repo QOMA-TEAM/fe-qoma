@@ -16,17 +16,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { ImageIcon } from "lucide-react"
+import { ImageIcon, Loader2 } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
+import { useAddBahanBaku, useUpdateBahanBaku, useDeleteBahanBaku } from "@/hooks/use-bahan-baku"
 
-const satuanOptions = ["Pcs", "Kg", "Gram", "Liter", "Ml", "Pack", "Buah", "Ikat"]
+const satuanOptions = ["pcs", "kg", "gram", "liter", "porsi", "lusin", "botol", "sachet"]
 
 interface BahanBakuFormData {
   gambar: File | null
   gambarPreview: string | null
   namaBahanBaku: string
   satuan: string
-  peringatanStock: number
+  hargaDefault: number
 }
 
 interface BahanBakuFormDialogProps {
@@ -34,9 +35,10 @@ interface BahanBakuFormDialogProps {
   onOpenChange: (open: boolean) => void
   mode: "tambah" | "edit"
   initialData?: {
+    id?: string
     namaBahanBaku: string
     satuan: string
-    peringatanStock: number
+    hargaDefault: number
     gambarUrl?: string
   }
 }
@@ -48,12 +50,18 @@ export function BahanBakuFormDialog({
   initialData,
 }: BahanBakuFormDialogProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const addMutation = useAddBahanBaku()
+  const updateMutation = useUpdateBahanBaku()
+  const deleteMutation = useDeleteBahanBaku()
+  
+  const isPending = addMutation.isPending || updateMutation.isPending || deleteMutation.isPending
+
   const [form, setForm] = useState<BahanBakuFormData>({
     gambar: null,
     gambarPreview: null,
     namaBahanBaku: "",
     satuan: "",
-    peringatanStock: 5,
+    hargaDefault: 0,
   })
 
   useEffect(() => {
@@ -63,10 +71,10 @@ export function BahanBakuFormDialog({
         gambarPreview: initialData.gambarUrl ?? null,
         namaBahanBaku: initialData.namaBahanBaku,
         satuan: initialData.satuan,
-        peringatanStock: initialData.peringatanStock,
+        hargaDefault: initialData.hargaDefault,
       })
     } else if (open && mode === "tambah") {
-      setForm({ gambar: null, gambarPreview: null, namaBahanBaku: "", satuan: "", peringatanStock: 5 })
+      setForm({ gambar: null, gambarPreview: null, namaBahanBaku: "", satuan: "", hargaDefault: 0 })
     }
   }, [open, mode, initialData])
 
@@ -85,9 +93,36 @@ export function BahanBakuFormDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Submit to API
-    console.log(`${mode}:`, form)
-    onOpenChange(false)
+    
+    const formData = new FormData()
+    formData.append("nama", form.namaBahanBaku)
+    formData.append("satuan", form.satuan)
+    formData.append("harga_default", form.hargaDefault.toString())
+    if (form.gambar) {
+      formData.append("gambar", form.gambar)
+    }
+
+    if (mode === "tambah") {
+      addMutation.mutate(formData, {
+        onSuccess: () => {
+          onOpenChange(false)
+        },
+        onError: (err: any) => {
+          console.error("Failed to add:", err)
+          alert(err.response?.data?.message || "Gagal menambahkan bahan baku")
+        }
+      })
+    } else if (mode === "edit" && initialData?.id) {
+      updateMutation.mutate({ id: initialData.id, data: formData }, {
+        onSuccess: () => {
+          onOpenChange(false)
+        },
+        onError: (err: any) => {
+          console.error("Failed to update:", err)
+          alert(err.response?.data?.message || "Gagal mengubah bahan baku")
+        }
+      })
+    }
   }
 
   const title = mode === "tambah" ? "Tambah Bahan Baku" : "Edit Bahan Baku"
@@ -149,7 +184,7 @@ export function BahanBakuFormDialog({
           {/* Satuan */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-700">Satuan</Label>
-            <Select value={form.satuan} onValueChange={(v) => setForm((p) => ({ ...p, satuan: v }))}>
+            <Select value={form.satuan} onValueChange={(v) => setForm((p) => ({ ...p, satuan: v }))} required>
               <SelectTrigger className="rounded-lg border-gray-300">
                 <SelectValue placeholder="Pilih Satuan" />
               </SelectTrigger>
@@ -161,18 +196,18 @@ export function BahanBakuFormDialog({
             </Select>
           </div>
 
-          {/* Peringatan Stock Menipis */}
+          {/* hargaDefault */}
           <div className="space-y-2">
-            <Label htmlFor="peringatanStock" className="text-sm font-semibold text-gray-700">
-              Peringatan Stock Menipis
+            <Label htmlFor="hargaDefault" className="text-sm font-semibold text-gray-700">
+              Harga Default
             </Label>
             <Input
-              id="peringatanStock"
+              id="hargaDefault"
               type="number"
               min={0}
-              placeholder="5"
-              value={form.peringatanStock}
-              onChange={(e) => setForm((p) => ({ ...p, peringatanStock: Number(e.target.value) }))}
+              placeholder="10000"
+              value={form.hargaDefault}
+              onChange={(e) => setForm((p) => ({ ...p, hargaDefault: Number(e.target.value) }))}
               className="rounded-lg border-gray-300"
               required
             />
@@ -185,17 +220,31 @@ export function BahanBakuFormDialog({
                 type="button"
                 variant="destructive"
                 onClick={() => {
-                  console.log("Hapus Item", initialData?.namaBahanBaku)
-                  onOpenChange(false)
+                  if (window.confirm(`Hapus bahan baku ${initialData?.namaBahanBaku}?`)) {
+                    if (initialData?.id) {
+                      deleteMutation.mutate(initialData.id, {
+                        onSuccess: () => onOpenChange(false),
+                        onError: (err: any) => alert(err.response?.data?.message || "Gagal menghapus bahan baku")
+                      })
+                    }
+                  }
                 }}
+                disabled={isPending}
                 className="rounded-full px-8 bg-red-600 hover:bg-red-700 text-white font-semibold"
               >
                 Hapus
               </Button>
             )}
             
-            <Button type="submit" className="rounded-full px-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold">
-              Submit
+            <Button disabled={isPending} type="submit" className="rounded-full px-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold">
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Menyimpan...
+                </>
+              ) : (
+                "Submit"
+              )}
             </Button>
           </div>
         </form>
