@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, CircleDollarSign, TrendingDown, Settings, Bell } from "lucide-react"
+import { Store, CircleDollarSign, TrendingDown, Settings, Bell } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { ActivityLog, type ActivityItem } from "@/components/dashboard/activity-log"
@@ -116,22 +116,22 @@ export default function OwnerDashboardPage() {
         {/* ── Stat Cards ── */}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           <StatCard
-            icon={Home}
+            icon={Store}
             label="Total Outlet"
             value={statCards.totalOutlet.toString()}
-            gradient="bg-gradient-to-br from-blue-500 to-blue-700"
+            gradient="bg-[#2A49B8]"
           />
           <StatCard
             icon={CircleDollarSign}
             label="Total Pendapatan"
             value={statCards.totalPendapatan}
-            gradient="bg-gradient-to-br from-blue-400 to-blue-600"
+            gradient="bg-[#29A364]"
           />
           <StatCard
             icon={TrendingDown}
             label="Total Kerugian"
             value={statCards.totalKerugian}
-            gradient="bg-gradient-to-br from-orange-400 to-orange-600"
+            gradient="bg-[#F29C38]"
           />
         </div>
 

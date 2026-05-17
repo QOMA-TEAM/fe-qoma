@@ -15,24 +15,20 @@ export function StatCard({ icon: Icon, label, value, gradient, className }: Stat
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl p-6 text-white shadow-lg transition-transform duration-200 hover:scale-[1.02] hover:shadow-xl",
+        "relative overflow-hidden rounded-2xl p-6 text-white shadow-sm",
         gradient,
         className
       )}
     >
-      {/* Background decorative circles */}
-      <div className="absolute -right-4 -top-4 size-24 rounded-full bg-white/10" />
-      <div className="absolute -right-2 -top-2 size-16 rounded-full bg-white/5" />
-
-      <div className="relative z-10">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex items-center justify-center size-10 rounded-xl bg-white/20 backdrop-blur-sm">
-            <Icon className="size-5" />
-          </div>
-          <span className="text-sm font-medium text-white/90">{label}</span>
+      <div className="flex items-center gap-3 mb-4 relative z-10">
+        <div className="bg-white/20 p-2 rounded-lg">
+          <Icon className="w-5 h-5 text-white" />
         </div>
-        <p className="text-3xl font-bold tracking-tight">{value}</p>
+        <span className="text-sm font-medium opacity-90">{label}</span>
       </div>
+      <h3 className="text-2xl font-bold relative z-10">{value}</h3>
+      {/* Background Icon Decoration */}
+      <Icon className="absolute -bottom-6 -right-4 w-32 h-32 text-white/10 pointer-events-none" />
     </div>
   )
 }
