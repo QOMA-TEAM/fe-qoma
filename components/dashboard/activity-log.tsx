@@ -16,15 +16,15 @@ interface ActivityLogProps {
 export function ActivityLog({ items, className }: ActivityLogProps) {
   const getBadgeColor = (index: number) => {
     const colors = [
-      "bg-orange-500 text-white",
-      "bg-blue-500 text-white",
-      "bg-emerald-500 text-white",
-      "bg-violet-500 text-white",
-      "bg-pink-500 text-white",
-      "bg-amber-500 text-white",
-      "bg-cyan-500 text-white",
-      "bg-rose-500 text-white",
-      "bg-teal-500 text-white",
+      "bg-orange-50 text-orange-500",
+      "bg-blue-50 text-blue-500",
+      "bg-emerald-50 text-emerald-500",
+      "bg-violet-50 text-violet-500",
+      "bg-pink-50 text-pink-500",
+      "bg-amber-50 text-amber-500",
+      "bg-cyan-50 text-cyan-500",
+      "bg-rose-50 text-rose-500",
+      "bg-teal-50 text-teal-500",
     ]
     return colors[index % colors.length]
   }

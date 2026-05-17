@@ -238,10 +238,10 @@ export function MenuFormDialog({
                     <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" />
                   </div>
                 </div>
-                <div className="border border-gray-200 rounded-lg p-3 max-h-36 overflow-y-auto">
-                  <div className="flex flex-wrap gap-2">
+                <div className="border border-gray-200 rounded-lg p-3 max-h-[220px] overflow-y-auto">
+                  <div className="grid grid-cols-3 gap-3">
                     {filteredBahan.length === 0 ? (
-                       <p className="text-xs text-gray-400 py-2">Bahan baku tidak ditemukan.</p>
+                       <p className="text-xs text-gray-400 py-2 col-span-3 text-center">Bahan baku tidak ditemukan.</p>
                     ) : (
                       filteredBahan.map((bahan) => {
                         const isSelected = bahanBaku.some((b) => b.bahan_master_id === bahan.id)
@@ -250,13 +250,28 @@ export function MenuFormDialog({
                             key={bahan.id}
                             type="button"
                             onClick={() => (isSelected ? removeBahanBakuItem(bahan.id) : addBahanBakuItem(bahan))}
-                            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                            className={`flex flex-col items-center overflow-hidden rounded-xl border transition-all ${
                               isSelected
-                                ? "bg-emerald-100 border-emerald-400 text-emerald-700 font-semibold"
-                                : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"
+                                ? "border-emerald-500 ring-1 ring-emerald-500 bg-emerald-50"
+                                : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
                             }`}
                           >
-                            {bahan.nama}
+                            <div className="w-full aspect-square bg-gray-100 flex items-center justify-center p-1">
+                              {bahan.gambar ? (
+                                <img 
+                                  src={`http://localhost:8000/storage/${bahan.gambar}`} 
+                                  alt={bahan.nama}
+                                  className="w-full h-full object-cover rounded-lg"
+                                />
+                              ) : (
+                                <ImageIcon className="w-8 h-8 text-gray-300" />
+                              )}
+                            </div>
+                            <div className="w-full p-2 text-center border-t border-gray-100 bg-white/50">
+                              <span className={`text-[11px] leading-tight font-medium line-clamp-2 ${isSelected ? "text-emerald-700" : "text-gray-700"}`}>
+                                {bahan.nama}
+                              </span>
+                            </div>
                           </button>
                         )
                       })
