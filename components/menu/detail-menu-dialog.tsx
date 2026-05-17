@@ -7,10 +7,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import type { MenuItem } from "@/app/(dashboard)/owner/menu/page"
+import type { MenuMaster } from "@/types/menu"
 
 interface DetailMenuDialogProps {
-  menu: MenuItem | null
+  menu: MenuMaster | null
   onClose: () => void
 }
 
@@ -28,8 +28,8 @@ export function DetailMenuDialog({ menu, onClose }: DetailMenuDialogProps) {
 
         <div className="space-y-4 mt-2">
           <div>
-            <h3 className="text-lg font-bold text-gray-800">{menu.namaMenu}</h3>
-            <span className="text-sm text-gray-500">{menu.kategori}</span>
+            <h3 className="text-lg font-bold text-gray-800">{menu.nama}</h3>
+            <span className="text-sm text-gray-500">{menu.kategori?.nama || '-'}</span>
           </div>
 
           <div className="grid grid-cols-2 gap-x-8 gap-y-3">
@@ -38,15 +38,15 @@ export function DetailMenuDialog({ menu, onClose }: DetailMenuDialogProps) {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-500">Harga</span>
-                  <span className="text-gray-800 font-medium">Rp {menu.harga.toLocaleString("id-ID")}</span>
+                  <span className="text-gray-800 font-medium">Rp {Number(menu.harga_default).toLocaleString("id-ID")}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Jumlah Bahan Baku</span>
-                  <span className="text-gray-800 font-medium">{menu.jumlahBahanBaku}</span>
+                  <span className="text-gray-800 font-medium">{menu.bahan_masters?.length || 0}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Kategori</span>
-                  <span className="text-gray-800 font-medium">{menu.kategori}</span>
+                  <span className="text-gray-800 font-medium">{menu.kategori?.nama || '-'}</span>
                 </div>
               </div>
             </div>
@@ -54,10 +54,10 @@ export function DetailMenuDialog({ menu, onClose }: DetailMenuDialogProps) {
             <div>
               <h4 className="text-sm font-bold text-gray-700 mb-2">Bahan Baku</h4>
               <div className="space-y-1.5 text-sm max-h-[180px] overflow-y-auto">
-                {menu.bahanBaku.map((b) => (
-                  <div key={b.nama} className="flex justify-between">
+                {menu.bahan_masters?.map((b) => (
+                  <div key={b.id} className="flex justify-between">
                     <span className="text-gray-500">{b.nama}</span>
-                    <span className="text-gray-800 font-medium">{b.jumlah}</span>
+                    <span className="text-gray-800 font-medium">{b.pivot.jumlah_pakai} {b.satuan}</span>
                   </div>
                 ))}
               </div>

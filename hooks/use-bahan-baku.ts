@@ -2,13 +2,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/axios"
 import { PaginatedBahanResponse, BahanMaster } from "@/types/bahan-baku"
 
-export const useBahanBaku = (page: number = 1, search: string = "") => {
+export const useBahanBaku = (page: number = 1, search: string = "", per_page: number = 15) => {
   return useQuery({
-    queryKey: ["bahan-baku", page, search],
+    queryKey: ["bahan-baku", page, search, per_page],
     queryFn: async () => {
       const response = await api.get<PaginatedBahanResponse>("/owner/bahan-baku", {
         params: {
           page,
+          per_page,
           ...(search && { search })
         }
       })
