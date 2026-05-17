@@ -58,19 +58,17 @@ const ownerNav = {
       url: "/owner/kategori",
       icon: Tags,
     },
+    {
+      title: "Plan",
+      url: "/owner/plan",
+      icon: CreditCard,
+    },
   ],
   keuangan: [
     {
       title: "Detail",
       url: "/owner/keuangan",
       icon: CircleDollarSign,
-    },
-  ],
-  subscription: [
-    {
-      title: "Plan",
-      url: "/owner/plan",
-      icon: CreditCard,
     },
   ],
 }
@@ -150,29 +148,6 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
           </SidebarGroupLabel>
           <SidebarMenu>
             {ownerNav.keuangan.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === item.url}
-                  className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
-                >
-                  <Link href={item.url}>
-                    <item.icon className="size-4" />
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
-
-        {/* SUBSCRIPTION */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-muted-foreground/70 uppercase">
-            Subscription
-          </SidebarGroupLabel>
-          <SidebarMenu>
-            {ownerNav.subscription.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   asChild

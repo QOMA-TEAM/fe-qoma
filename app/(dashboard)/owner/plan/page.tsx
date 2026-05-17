@@ -22,7 +22,7 @@ export default function PlanPage() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <span className="text-sm text-muted-foreground">SUBSCRIPTION</span>
+              <span className="text-sm text-muted-foreground">KELOLA</span>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
