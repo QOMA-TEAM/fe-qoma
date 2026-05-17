@@ -74,7 +74,7 @@ export function DetailOutletDialog({ outlet, onClose }: DetailOutletDialogProps)
             <h4 className="text-sm font-bold text-gray-700 mb-3">Data Tenant</h4>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-500">Nama Perusahaan</span>
+                <span className="text-gray-500">Nama Outlet</span>
                 <span className="text-gray-800 font-medium">{outlet.namaPerusahaan}</span>
               </div>
               <div className="flex justify-between">

@@ -103,10 +103,9 @@ export default function KelolaOutletPage() {
 
   const columns: { key: SortKey; label: string; className?: string }[] = [
     { key: "id", label: "No", className: "w-16 text-center" },
-    { key: "namaPerusahaan", label: "Nama Perusahaan" },
-    { key: "alamatPerusahaan", label: "Alamat Perusahaan" },
-    { key: "emailAdmin", label: "Email Admin Cabang" },
-    { key: "adminCabang", label: "Admin Cabang" },
+    { key: "namaPerusahaan", label: "Nama Outlet" },
+    { key: "alamatPerusahaan", label: "Alamat Outlet" },
+    { key: "emailAdmin", label: "Email Outlet" },
   ]
 
   return (
@@ -206,7 +205,6 @@ export default function KelolaOutletPage() {
                   <TableCell className="text-gray-800 text-sm">{row.namaPerusahaan}</TableCell>
                   <TableCell className="text-gray-600 text-sm">{row.alamatPerusahaan}</TableCell>
                   <TableCell className="text-gray-600 text-sm">{row.emailAdmin}</TableCell>
-                  <TableCell className="text-gray-600 text-sm">{row.adminCabang}</TableCell>
                   <TableCell className="text-center">
                     <button onClick={() => setDetailOutlet(row)} className="bg-green-100 hover:bg-green-200 text-green-700 text-xs font-bold h-7 px-5 rounded-full transition-colors">
                       VIEW
@@ -216,7 +214,7 @@ export default function KelolaOutletPage() {
               ))}
               {sorted.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-gray-400 py-12 text-sm">Tidak ada data ditemukan.</TableCell>
+                  <TableCell colSpan={5} className="text-center text-gray-400 py-12 text-sm">Tidak ada data ditemukan.</TableCell>
                 </TableRow>
               )}
             </TableBody>
