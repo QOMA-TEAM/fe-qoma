@@ -1,32 +1,132 @@
-import { GalleryVerticalEnd } from "lucide-react";
+"use client"
 
-import { LoginForm } from "@/components/login-form";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import Image from "next/image"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { api } from "@/lib/axios"
 
 export default function LoginPage() {
+  const router = useRouter()
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setError("")
+
+    try {
+      const response = await api.post("/auth/login", {
+        username,
+        password,
+      })
+      
+      // Mengambil token
+      const token = response.data.access_token || response.data.token || response.data.data?.access_token
+      if (token) {
+        localStorage.setItem("token", token)
+        router.push("/owner/dashboard")
+      } else {
+        setError("Token tidak ditemukan pada respons server.")
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Username atau password salah.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
-    <div className="grid min-h-svh lg:grid-cols-2">
-      <div className="flex flex-col gap-4 p-6 md:p-10">
-        <div className="flex justify-center gap-2 md:justify-start">
-          <a href="#" className="flex items-center gap-2 font-medium">
-            <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <GalleryVerticalEnd className="size-4" />
-            </div>
-            Acme Inc.
-          </a>
+    <div className="flex min-h-screen bg-white">
+      {/* Kolom Kiri: Branding Oranye */}
+      <div className="hidden md:flex flex-col items-center justify-center w-[45%] relative bg-[#FF6600]">
+        
+        {/* Efek Wavy SVG */}
+        <div className="absolute inset-y-0 right-0 w-24 pointer-events-none z-0 translate-x-[2px]">
+          <svg viewBox="0 0 100 1000" preserveAspectRatio="none" className="h-full w-full fill-white">
+            <path d="M100,0 C-20,300 120,700 100,1000 Z" />
+          </svg>
         </div>
-        <div className="flex flex-1 items-center justify-center">
-          <div className="w-full max-w-xs">
-            <LoginForm />
+
+        <div className="relative z-10 flex flex-col items-center -ml-8">
+          <div className="bg-white rounded-[2rem] p-6 shadow-xl mb-8 flex items-center justify-center size-48">
+            <Image
+              src="/logoqoma.svg" 
+              alt="QOMA Logo"
+              width={140}
+              height={140}
+              className="object-contain"
+            />
           </div>
+          <h1 className="text-white text-[32px] font-extrabold text-center leading-tight tracking-wide">
+            QOMA - QR ORDER<br />MANAJEMEN
+          </h1>
         </div>
       </div>
-      <div className="relative hidden bg-muted lg:block">
-        <img
-          src="/placeholder.svg"
-          alt="Image"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-        />
+
+      {/* Kolom Kanan: Form Login */}
+      <div className="flex flex-col items-center justify-center w-full md:w-[55%] p-8 lg:p-24 bg-white relative z-10">
+        <div className="w-full max-w-sm space-y-10">
+          <div className="text-center mb-12">
+            <h2 className="text-[40px] font-extrabold tracking-tight text-gray-900">
+              Welcome Back
+            </h2>
+          </div>
+          
+          <form onSubmit={handleLogin} className="space-y-6">
+            {error && (
+              <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm font-medium border border-red-200">
+                {error}
+              </div>
+            )}
+            
+            <div className="space-y-2.5">
+              <Label htmlFor="username" className="text-[15px] font-bold text-gray-900">
+                Username
+              </Label>
+              <Input
+                id="username"
+                type="text"
+                placeholder="Masukkan username"
+                required
+                className="h-[46px] border-gray-200 bg-gray-50/30 text-gray-800 placeholder:text-gray-400 rounded-xl px-4 text-[15px] focus-visible:ring-1 focus-visible:ring-[#FF6600] focus-visible:border-[#FF6600]"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2.5 pt-2">
+              <Label htmlFor="password" className="text-[15px] font-bold text-gray-900">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Masukkan password"
+                required
+                className="h-[46px] border-gray-200 bg-gray-50/30 text-gray-800 placeholder:text-gray-400 rounded-xl px-4 text-[15px] focus-visible:ring-1 focus-visible:ring-[#FF6600] focus-visible:border-[#FF6600]"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+
+            <div className="pt-8 flex justify-center">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-36 h-[46px] bg-[#3B82F6] hover:bg-blue-600 text-white rounded-[14px] font-semibold text-[17px] shadow-sm transition-all active:scale-95"
+              >
+                {isLoading ? "Loading..." : "Login"}
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-  );
+  )
 }
