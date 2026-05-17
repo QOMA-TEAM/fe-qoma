@@ -1,0 +1,4515 @@
+{
+  "info": {
+    "_postman_id": "812a6242-d48e-41f6-a060-8e0472e334f1",
+    "name": "QOMA",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "54017081"
+  },
+  "item": [
+    {
+      "name": "Super Admin",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.environment.set(\"token\", pm.response.json().access_token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"superadmin\",\r\n  \"password\": \"password123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "me",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Dashboard",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/dashboard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "dashboard"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registrasi free",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2F1dGgvbG9naW4iLCJpYXQiOjE3Nzc3MTA1OTAsImV4cCI6MTc3NzcxNDE5MCwibmJmIjoxNzc3NzEwNTkwLCJqdGkiOiJTUjZGV0U5RHFjc2s0RU5LIiwic3ViIjoiN2E2ZmViYzktZDg2ZS00OTIwLWFmY2EtYjk5NDM4MWZmM2Q4IiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.YpBHvshBezHn_UwpOfS9sMp7-_wnCtTcueiovz7Sdig",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"nama_usaha\"   : \"Kedai Sumber Rejeki\",\r\n    \"alamat\"       : \"Jl. Veteran No. 5, Semarang\",\r\n    \"email\"        : \"sumberrejeki@email.com\",\r\n    \"nama_owner\"   : \"Andi Prasetyo\",\r\n    \"username\"     : \"andi_prasetyo\",\r\n    \"password\"     : \"password123\",\r\n    \"password_confirmation\": \"password123\",\r\n    \"plan_id\"      : \"plan_free_trial\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registrasi Pro",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"nama_usaha\"          : \"Restoran Maju Jaya\",\r\n    \"alamat\"              : \"Jl. Pandanaran No. 10\",\r\n    \"email\"               : \"majujaya@email.com\",\r\n    \"nama_owner\"          : \"Budi Hartono\",\r\n    \"username\"            : \"budi_hartono\",\r\n    \"password\"            : \"password123\",\r\n    \"password_confirmation\": \"password123\",\r\n    \"plan_id\"             : \"plan_pro\",\r\n    \"metode_pembayaran\"   : \"transfer\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "30 hari",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/dashboard/mrr?filter=daily",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "dashboard",
+                "mrr"
+              ],
+              "query": [
+                {
+                  "key": "filter",
+                  "value": "daily"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7 hari",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/dashboard/mrr?filter=weekly",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "dashboard",
+                "mrr"
+              ],
+              "query": [
+                {
+                  "key": "filter",
+                  "value": "weekly"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "12 bulan",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/super-admin/dashboard/mrr?filter=monthly",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "dashboard",
+                "mrr"
+              ],
+              "query": [
+                {
+                  "key": "filter",
+                  "value": "monthly"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Subscriptions",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/subscriptions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "subscriptions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Subscriptions Pending",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/subscriptions?status=pending",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "subscriptions"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Subscriptions active",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/subscriptions?status=active",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "subscriptions"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Subscriptions filter by plan",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/subscriptions?plan_id=plan_pro",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "subscriptions"
+              ],
+              "query": [
+                {
+                  "key": "plan_id",
+                  "value": "plan_pro"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Subscriptions filter tanggal",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/subscriptions?dari=2026-04-01&sampai=2026-04-30",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "subscriptions"
+              ],
+              "query": [
+                {
+                  "key": "dari",
+                  "value": "2026-04-01"
+                },
+                {
+                  "key": "sampai",
+                  "value": "2026-04-30"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Subscriptions Search nama usaha",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/subscriptions?search=kedai",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "subscriptions"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "kedai"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Detail Subscription",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/subscriptions/3f0d365b-ed32-45f4-bdbc-c0efb6311caf",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "subscriptions",
+                "3f0d365b-ed32-45f4-bdbc-c0efb6311caf"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Konfirmasi Pembayaran",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/subscriptions/1886e137-00c2-4249-93ba-d1e0b4652858/konfirmasi-pembayaran",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "subscriptions",
+                "1886e137-00c2-4249-93ba-d1e0b4652858",
+                "konfirmasi-pembayaran"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actitivy Log",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/activity-logs",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "activity-logs"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Log Filter kategori subscription",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/activity-logs?kategori=subscription",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "activity-logs"
+              ],
+              "query": [
+                {
+                  "key": "kategori",
+                  "value": "subscription"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Log Filter kategori Usaha",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/activity-logs?kategori=usaha",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "activity-logs"
+              ],
+              "query": [
+                {
+                  "key": "kategori",
+                  "value": "usaha"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Log Filter by tanggal",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/activity-logs?dari=2026-04-01&sampai=2026-04-30",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "activity-logs"
+              ],
+              "query": [
+                {
+                  "key": "dari",
+                  "value": "2026-04-01"
+                },
+                {
+                  "key": "sampai",
+                  "value": "2026-04-30"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Notifikasi",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/notifications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "notifications"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tandai telah dibaca",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/super-admin/notifications/ca671ae1-ac37-4392-94a5-b16f18f015af/read",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "super-admin",
+                "notifications",
+                "ca671ae1-ac37-4392-94a5-b16f18f015af",
+                "read"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Semua telah dibaca",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/notifications/read-all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "notifications",
+                "read-all"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Lihat usaha",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/usaha",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "usaha"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Lihat per usaha",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/usaha/e6515a14-3803-4946-9bd3-72ab0b1ec778",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "usaha",
+                "e6515a14-3803-4946-9bd3-72ab0b1ec778"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Lihat usaha pending",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/usaha/pending",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "usaha",
+                "pending"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Lihat owner",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/owner",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "owner"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Lihat owner dari id usaha",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/usaha/d0c0f95c-bff2-4ed6-be83-135eeb47787c/owner",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "usaha",
+                "d0c0f95c-bff2-4ed6-be83-135eeb47787c",
+                "owner"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Nonaktifkan/aktifkan owner",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/owner/881d4b14-d1c2-4802-a3ac-c03a9fc1072c/toggle-status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "owner",
+                "881d4b14-d1c2-4802-a3ac-c03a9fc1072c",
+                "toggle-status"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Lihat Plans",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/super-admin/plans",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "plans"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reject usaha",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"alasan\": \"Data usaha tidak lengkap\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/super-admin/usaha/d9a517c4-a92c-4cfc-98f8-defd89ae320c/reject",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "super-admin",
+                "usaha",
+                "d9a517c4-a92c-4cfc-98f8-defd89ae320c",
+                "reject"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "**ROLE SUPER ADMIN**\n\n- superadmin login username pasword\n    \n- di dashboard superadmin itu ada total usaha, total outlet, total pendapatan dari orang yang Subscription, sama total pendapatan perbulan\n    \n- di dashboard juga ada grafik yang menunjukan Monthly Recurring Revenue (MRR) atau Pendapatan Berulang Bulanan nanti ada pilihannya mau dibuat 1 hari, 7 hari atau 1 bulan\n    \n- ada activity log\n    \n- ada fitur yang Namanya Subscription yang isinya itu ada 2 plan sama pelanggan, untuk yang plan itu nanti\n    \n- ada pilihan 2 plan yang isinya (free trial, pro) bisa CRUD(nama paket, Harga, batas outlet), untuk yang pelanggan itu list dari no, nama perusahaan, nama owner, jenis subscription, start subscription, action (view jadi dalemnya nanti ada detail subscription (subscription id, plan id, start date, created ad, update at) ada detail usaha (nama perusahaan, email, alamat, total outlet))\n    \n- ada notifikasi yang berisi notifikasi kalo ada pendaftaran owner baru, subscription baru"
+    },
+    {
+      "name": "Owner",
+      "item": [
+        {
+          "name": "Owner1",
+          "item": [
+            {
+              "name": "Login owner1",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.environment.set(\"token\", pm.response.json().access_token);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"username\": \"owner1\",\r\n  \"password\": \"password123\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/auth/login",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "me",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/auth/me",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "me"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Info Subscription",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/owner/subscription",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "subscription"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Request Upgrade Plan",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"plan_id\": \"plan_pro\",\r\n    \"metode_pembayaran\": \"transfer\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/subscription/upgrade",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "subscription",
+                    "upgrade"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Dashboard",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/owner/dashboard",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "dashboard"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Grafik per outlet 7 hari",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/owner/dashboard/graph?range=7days",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "dashboard",
+                    "graph"
+                  ],
+                  "query": [
+                    {
+                      "key": "range",
+                      "value": "7days"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Grafik per outlet 30 hari",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/owner/dashboard/graph?range=30days&outlet_id=486091c3-b564-468f-b0ac-087166e47ff1",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "dashboard",
+                    "graph"
+                  ],
+                  "query": [
+                    {
+                      "key": "range",
+                      "value": "30days"
+                    },
+                    {
+                      "key": "outlet_id",
+                      "value": "486091c3-b564-468f-b0ac-087166e47ff1"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Grafik per outlet 1 hari",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/owner/dashboard/graph?range=1day",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "dashboard",
+                    "graph"
+                  ],
+                  "query": [
+                    {
+                      "key": "range",
+                      "value": "1day"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Laporan keuangan 7 hari",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/owner/keuangan?range=7days",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "keuangan"
+                  ],
+                  "query": [
+                    {
+                      "key": "range",
+                      "value": "7days"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Laporan keuangan 1 hari",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/owner/keuangan?range=1day",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "keuangan"
+                  ],
+                  "query": [
+                    {
+                      "key": "range",
+                      "value": "1day"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Laporan keuangan 30 hari",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/owner/keuangan?range=30days",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "keuangan"
+                  ],
+                  "query": [
+                    {
+                      "key": "range",
+                      "value": "30days"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Activity Log",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/owner/activity-log",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "activity-log"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Kategori",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"nama\" : \"Minuman\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/kategori",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "kategori"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Buat Bahan Baku",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "nama",
+                      "value": "telur",
+                      "type": "text",
+                      "uuid": "4b50051f-54e7-4a2c-bbbc-ade0b326730f"
+                    },
+                    {
+                      "key": "satuan",
+                      "value": "pcs",
+                      "type": "text",
+                      "uuid": "b7044eb6-0251-469d-8cbb-2c2623bbd245"
+                    },
+                    {
+                      "key": "harga_default",
+                      "value": "20",
+                      "type": "text",
+                      "uuid": "e65bb46e-3328-4d80-a448-20611793871b"
+                    },
+                    {
+                      "key": "gambar",
+                      "type": "file",
+                      "uuid": "7bf7f1e3-ae7f-4234-9fe1-a41d5b1c9644",
+                      "src": "/C:/Users/ASUS/Downloads/download (7).jpg"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/bahan-baku",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "bahan-baku"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Bahan Baku",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/owner/bahan-baku",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "bahan-baku"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Menu",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "nama",
+                      "value": "Nasi Goreng Telur",
+                      "type": "text",
+                      "uuid": "1425c996-15d0-4f4f-ac53-aea113f41ccc"
+                    },
+                    {
+                      "key": "kategori_id",
+                      "value": "f290ee1b-f716-4817-bf5e-07c10d256e43",
+                      "type": "text",
+                      "uuid": "15382358-c0d3-4a61-af29-bd155d4bdc29"
+                    },
+                    {
+                      "key": "harga_default",
+                      "value": "25000",
+                      "type": "text",
+                      "uuid": "5bc4d441-7865-492a-8630-d4b7da753c71"
+                    },
+                    {
+                      "key": "keterangan",
+                      "value": "Nasi goreng dengan telur",
+                      "type": "text",
+                      "uuid": "3fcfe7e4-7f4f-40cc-8069-40d18c123a49"
+                    },
+                    {
+                      "key": "bahan_baku[0][bahan_master_id]",
+                      "value": "9d33da98-0978-4f1d-9498-efb745c5e0cb",
+                      "type": "text",
+                      "uuid": "ef2208d7-549c-4b6e-9fa7-bba8796aecb0"
+                    },
+                    {
+                      "key": "bahan_baku[0][jumlah_pakai]",
+                      "value": "200 ",
+                      "type": "text",
+                      "uuid": "ddda2c2d-cb07-4036-9957-6fe8d79cb076"
+                    },
+                    {
+                      "key": "bahan_baku[1][bahan_master_id]",
+                      "value": "56e187e7-2811-45c9-9ef8-65ab8a3435f5",
+                      "type": "text",
+                      "uuid": "245bc391-7149-49f9-bac5-f3a747e88d3a"
+                    },
+                    {
+                      "key": "bahan_baku[1][jumlah_pakai]",
+                      "value": "2",
+                      "type": "text",
+                      "uuid": "8407756c-9e98-4256-a9bd-b351dacf8268"
+                    },
+                    {
+                      "key": "gambar",
+                      "type": "file",
+                      "uuid": "ac22e2f3-41a1-40ad-8215-e2099f9e24d9",
+                      "src": "/C:/Users/ASUS/Downloads/nasgor.webp"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/menu",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "menu"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Lihat Menu",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/menu",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "menu"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Lihat ketegori",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/kategori",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "kategori"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Bahan Baku",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "nama",
+                      "value": "Beras Putih",
+                      "type": "text",
+                      "uuid": "4b50051f-54e7-4a2c-bbbc-ade0b326730f"
+                    },
+                    {
+                      "key": "satuan",
+                      "value": "kg",
+                      "type": "text",
+                      "uuid": "b7044eb6-0251-469d-8cbb-2c2623bbd245"
+                    },
+                    {
+                      "key": "harga_default",
+                      "value": "15000",
+                      "type": "text",
+                      "uuid": "e65bb46e-3328-4d80-a448-20611793871b"
+                    },
+                    {
+                      "key": "gambar",
+                      "type": "file",
+                      "uuid": "7bf7f1e3-ae7f-4234-9fe1-a41d5b1c9644",
+                      "src": "/C:/Users/ASUS/Downloads/images.webp"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/bahan-baku/becf4319-db2b-4ed4-9ce6-6cf78ec575bd",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "bahan-baku",
+                    "becf4319-db2b-4ed4-9ce6-6cf78ec575bd"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Edit Bahan Baku",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "nama",
+                      "value": "Beras Putih",
+                      "type": "text",
+                      "uuid": "4b50051f-54e7-4a2c-bbbc-ade0b326730f"
+                    },
+                    {
+                      "key": "satuan",
+                      "value": "kg",
+                      "type": "text",
+                      "uuid": "b7044eb6-0251-469d-8cbb-2c2623bbd245"
+                    },
+                    {
+                      "key": "harga_default",
+                      "value": "15000",
+                      "type": "text",
+                      "uuid": "e65bb46e-3328-4d80-a448-20611793871b"
+                    },
+                    {
+                      "key": "gambar",
+                      "type": "file",
+                      "uuid": "7bf7f1e3-ae7f-4234-9fe1-a41d5b1c9644",
+                      "src": "/C:/Users/ASUS/Downloads/images.webp"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/bahan-baku/becf4319-db2b-4ed4-9ce6-6cf78ec575bd",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "bahan-baku",
+                    "becf4319-db2b-4ed4-9ce6-6cf78ec575bd"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Activity log per outlet",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/owner/activity-log?outlet_id=486091c3-b564-468f-b0ac-087166e47ff1&dari=2026-05-01",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "activity-log"
+                  ],
+                  "query": [
+                    {
+                      "key": "outlet_id",
+                      "value": "486091c3-b564-468f-b0ac-087166e47ff1"
+                    },
+                    {
+                      "key": "dari",
+                      "value": "2026-05-01"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Laporan keuangan 1 hari",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/owner/keuangan?range=1day&outlet_id=486091c3-b564-468f-b0ac-087166e47ff1",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "keuangan"
+                  ],
+                  "query": [
+                    {
+                      "key": "range",
+                      "value": "1day"
+                    },
+                    {
+                      "key": "outlet_id",
+                      "value": "486091c3-b564-468f-b0ac-087166e47ff1"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Lihat Usaha",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/usaha",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "usaha"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Buat Usaha",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "nama_usaha",
+                      "value": "Kedai Gacoan Kuah",
+                      "type": "text",
+                      "uuid": "fba045a3-7ce1-409c-83c2-953ae34cb64f"
+                    },
+                    {
+                      "key": "email",
+                      "value": "gacoankuah@enak.com",
+                      "type": "text",
+                      "uuid": "710e3536-ee57-4a0e-8a06-b261ca2df9a9"
+                    },
+                    {
+                      "key": "alamat",
+                      "value": "gajah mada semarang",
+                      "type": "text",
+                      "uuid": "0da47b5b-e80b-4788-901c-99f497783bce"
+                    },
+                    {
+                      "key": "owner_id",
+                      "value": "e5374411-4dd8-496c-8f95-693be94c11ae",
+                      "type": "text",
+                      "uuid": "4bb0bb23-ac5f-4c63-9826-976d121824d3"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/usaha",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "usaha"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Lihat Outlet",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/outlet",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "outlet"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Kerugian",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/keuangan/list?range=7days&tipe=kerugian",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "keuangan",
+                    "list"
+                  ],
+                  "query": [
+                    {
+                      "key": "range",
+                      "value": "7days"
+                    },
+                    {
+                      "key": "tipe",
+                      "value": "kerugian"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Pengeluaran",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/keuangan/list?range=7days&tipe=pengeluaran",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "keuangan",
+                    "list"
+                  ],
+                  "query": [
+                    {
+                      "key": "range",
+                      "value": "7days"
+                    },
+                    {
+                      "key": "tipe",
+                      "value": "pengeluaran"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Pendapatan",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/keuangan/list?range=7days&tipe=pendapatan",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "keuangan",
+                    "list"
+                  ],
+                  "query": [
+                    {
+                      "key": "range",
+                      "value": "7days"
+                    },
+                    {
+                      "key": "tipe",
+                      "value": "pendapatan"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Lihat subscription plans",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/owner/subscription/plans",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "subscription",
+                    "plans"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Status buka outlet",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/owner/usaha/d1fa511e-b754-4482-a204-1128dffa3c6c/outlet/43da16b3-8329-4d4d-97cb-aedfc3a2da2a/toggle-status",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "usaha",
+                    "d1fa511e-b754-4482-a204-1128dffa3c6c",
+                    "outlet",
+                    "43da16b3-8329-4d4d-97cb-aedfc3a2da2a",
+                    "toggle-status"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Addon",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/addon",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "addon"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Buat Addon",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/addon?nama=bakso&harga=3000",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "addon"
+                  ],
+                  "query": [
+                    {
+                      "key": "nama",
+                      "value": "bakso"
+                    },
+                    {
+                      "key": "harga",
+                      "value": "3000"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "List approval pending",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/owner/approval-harga?status=pending\n",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "approval-harga"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "pending\n"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Approve harga menu",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"catatan\": \"Disetujui, harga baru berlaku mulai hari ini.\" }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/approval-harga/{id}/approve",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "approval-harga",
+                    "{id}",
+                    "approve"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Approval reject",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/owner/approval-harga/{id}/reject",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "approval-harga",
+                    "{id}",
+                    "reject"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Owner2",
+          "item": [
+            {
+              "name": "Login owner2",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.environment.set(\"token\", pm.response.json().access_token);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"username\": \"owner2\",\r\n  \"password\": \"password123\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/auth/login",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "me",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/auth/me",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "me"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Ambil bahan baku owner1",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/bahan-baku/becf4319-db2b-4ed4-9ce6-6cf78ec575bd",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "bahan-baku",
+                    "becf4319-db2b-4ed4-9ce6-6cf78ec575bd"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Ambil menu owner1",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/menu/0b0defae-0773-4a61-aa09-e322dc343170",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "menu",
+                    "0b0defae-0773-4a61-aa09-e322dc343170"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Ambil outlet owner1",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/usaha/366a90d0-bd0c-435a-9b7a-e7108f328178/outlet",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "usaha",
+                    "366a90d0-bd0c-435a-9b7a-e7108f328178",
+                    "outlet"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Outlet",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/outlet",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "outlet"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Usaha",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/usaha",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "usaha"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Pembuatan Outlet2",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"nama_outlet\": \"Cabang 2\",\r\n    \"alamat\": \"woltermongingsidi\",\r\n    \"email\": \"cabang2@email.com\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/usaha/8fc74ce6-8616-414a-98c2-a50f80cfdbc8/outlet",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "usaha",
+                    "8fc74ce6-8616-414a-98c2-a50f80cfdbc8",
+                    "outlet"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Pembuatan Outlet3 - batas free",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"nama_outlet\": \"Cabang 3\",\r\n    \"alamat\": \"graha mukti\",\r\n    \"email\": \"cabang3@email.com\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/usaha/8fc74ce6-8616-414a-98c2-a50f80cfdbc8/outlet",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "usaha",
+                    "8fc74ce6-8616-414a-98c2-a50f80cfdbc8",
+                    "outlet"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "cek subscription",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/subscription",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "subscription"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "cek plan tersedia untuk tampil plan Pro",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/subscription/plans",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "subscription",
+                    "plans"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "owner2 mau upgrade plan",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"plan_id\": \"plan_pro\", \"metode_pembayaran\": \"transfer\" }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/subscription/upgrade",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "subscription",
+                    "upgrade"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Buat bahan baku",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "nama",
+                      "value": "Beras",
+                      "type": "text",
+                      "uuid": "902fa802-a51e-4761-b593-84fb09b862e7"
+                    },
+                    {
+                      "key": "satuan",
+                      "value": "kg",
+                      "type": "text",
+                      "uuid": "6b603e7c-88df-4c3a-9a13-38cfaaa0d957"
+                    },
+                    {
+                      "key": "harga_dafault",
+                      "value": "20000",
+                      "type": "text",
+                      "uuid": "b19e0088-ed67-4105-b8a5-d357f66da18c"
+                    },
+                    {
+                      "key": "gambar",
+                      "type": "file",
+                      "uuid": "09be21eb-ccef-40ca-876c-06a66ef96ef7",
+                      "value": ""
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/owner/bahan-baku",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "owner",
+                    "bahan-baku"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ],
+      "description": "**ROLE OWNER**\n\n- owner bisa pilih subscription kalo mau free trial berarti hanya bisa bikin 2 outlet, tapi kalo subscription yang pro bisa bikin lebih dari 2 outlet\n    \n- owner login username, password\n    \n- di dashboard itu ada total usaha, total karyawan, total pendapatan dari berbagai outlet, total kerugian dari berbagai outlet\n    \n- ada grafik yang menunjukan pendapatan (untung/rugi) dari berbagai cabang (pilih cabang berbentuk drop down)\n    \n- ada fitur buat tambah outlet yang berbentuk form pendaftaran (nama outlet, alamat outlet, email outlet, password outlet)\n    \n- terdapat list daftar outlet yang dimiliki\n    \n- ada page list menu yang dibuat dari awal oleh owner, owner menginput (nama, gambar, Harga default menu, bahan baku, kategori(dropdown \"makanan\", \"minuman\", \"snack\", \"dessert\", \"lainnya\"), keterangan)\n    \n- ada page list bahan baku yang dibuat oleh owner, owner menginput (gambar, nama, satuan, harga default bahan baku)\n    \n- ada page detail keuangan ada cardnya dan ada listnya, ada filter 1 hari, 7 hari dan sebulan. carnya berisi (total pendapatan, total pengeluaran, total kerugian, total keuntungan)\n    \n- kalo awalnya milih free itu ada fitur yang bisa upgrade plan jadi nanti yang awalnya free bisa jd pro\n    \n- activity log"
+    },
+    {
+      "name": "Outlet",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.environment.set(\"token\", pm.response.json().access_token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \r\n    \"username\": \"outlet_pusat\", \r\n    \"password\": \"password123\" \r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "me",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Dashboard",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{base_url}}/outlet/dashboard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "outlet",
+                "dashboard"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tambah Meja",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \r\n    \"nomor_meja\": \"3\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/outlet/meja",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "outlet",
+                "meja"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Meja",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{base_url}}/outlet/meja",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "outlet",
+                "meja"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Lihat pesanan pending",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{base_url}}/outlet/pesanan?status=pending",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "outlet",
+                "pesanan"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tambah Item",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \r\n    \"items\": [{ \"menu_id\": \"49d334ce-394e-41dd-91b1-0994eb2aaba7\", \"qty\": 2 }] \r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/outlet/pesanan/49d334ce-394e-41dd-91b1-0994eb2aaba7/tambah-item",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "outlet",
+                "pesanan",
+                "49d334ce-394e-41dd-91b1-0994eb2aaba7",
+                "tambah-item"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Konfirmasi Pesanan",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/outlet/pesanan/357c3e13-e88f-4aa3-9e7c-b6dcbd20817b/konfirmasi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "outlet",
+                "pesanan",
+                "357c3e13-e88f-4aa3-9e7c-b6dcbd20817b",
+                "konfirmasi"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Pembayaran",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"metode\": \"tunai\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/outlet/pesanan/357c3e13-e88f-4aa3-9e7c-b6dcbd20817b/bayar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "outlet",
+                "pesanan",
+                "357c3e13-e88f-4aa3-9e7c-b6dcbd20817b",
+                "bayar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Restock",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"bahan_master_id\": \"7d6150bc-ac21-4d85-ac42-89806ddb56b0\",\r\n    \"jumlah\": 3,\r\n    \"tanggal_masuk\": \"2026-05-04\",\r\n    \"tanggal_kadaluarsa\": \"2026-05-10\",\r\n    \"stok_minimum\": 3\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/outlet/bahan-baku",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "outlet",
+                "bahan-baku"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Stock Opname",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "bahan_master_id",
+                  "value": "4e48f155-3615-49dc-9075-7cd80654475f",
+                  "type": "text",
+                  "uuid": "26fe45a5-e252-4bfa-84e6-80bff7c1cfc8"
+                },
+                {
+                  "key": "tipe",
+                  "value": "busuk",
+                  "type": "text",
+                  "uuid": "26332a19-4308-48f2-917f-0ecc083cbe36"
+                },
+                {
+                  "key": "jumlah",
+                  "value": "2",
+                  "type": "text",
+                  "uuid": "64b5905d-0aae-492b-85f7-89be128d9fba"
+                },
+                {
+                  "key": "keterangan",
+                  "value": "busuk dari sananya",
+                  "type": "text",
+                  "uuid": "152c828a-029b-4020-b77b-003e11842730"
+                },
+                {
+                  "key": "foto_bukti",
+                  "type": "file",
+                  "uuid": "8bb96aa6-b537-4131-8810-a7c50c9c9ef3",
+                  "src": "/C:/Users/ASUS/Downloads/download (7).jpg"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/outlet/stock-opname",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "outlet",
+                "stock-opname"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Alerts",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "bahan_master_id",
+                  "value": "a4f919c9-9111-4bb3-873f-4e253c463a20",
+                  "type": "text",
+                  "uuid": "26fe45a5-e252-4bfa-84e6-80bff7c1cfc8"
+                },
+                {
+                  "key": "tipe",
+                  "value": "rusak",
+                  "type": "text",
+                  "uuid": "26332a19-4308-48f2-917f-0ecc083cbe36"
+                },
+                {
+                  "key": "jumlah",
+                  "value": "2",
+                  "type": "text",
+                  "uuid": "64b5905d-0aae-492b-85f7-89be128d9fba"
+                },
+                {
+                  "key": "keterangan",
+                  "value": "garam bersemut",
+                  "type": "text",
+                  "uuid": "152c828a-029b-4020-b77b-003e11842730"
+                },
+                {
+                  "key": "foto_bukti",
+                  "type": "file",
+                  "uuid": "8bb96aa6-b537-4131-8810-a7c50c9c9ef3",
+                  "src": "/C:/Users/ASUS/Downloads/download.jpg"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/outlet/alerts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "outlet",
+                "alerts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Edit harga menu",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \r\n    \"harga\": 20000 \r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/outlet/menu/82f53abd-123e-4c3e-af42-f3a3b52d4788/harga",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "outlet",
+                "menu",
+                "82f53abd-123e-4c3e-af42-f3a3b52d4788",
+                "harga"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tutup/buka toko",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/outlet/toggle-status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "outlet",
+                "toggle-status"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tambah pesanan saat tutup",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/outlet/pesanan/49d334ce-394e-41dd-91b1-0994eb2aaba7/konfirmasi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "outlet",
+                "pesanan",
+                "49d334ce-394e-41dd-91b1-0994eb2aaba7",
+                "konfirmasi"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Total keuangan 1 hari",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/outlet/keuangan?range=1day",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "outlet",
+                "keuangan"
+              ],
+              "query": [
+                {
+                  "key": "range",
+                  "value": "1day"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Total keuangan 7 day",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/outlet/keuangan?range=7days",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "outlet",
+                "keuangan"
+              ],
+              "query": [
+                {
+                  "key": "range",
+                  "value": "7days"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Total keuangan 30 hari",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/outlet/keuangan?range=30days",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "outlet",
+                "keuangan"
+              ],
+              "query": [
+                {
+                  "key": "range",
+                  "value": "30days"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "lihat semua bahan baku di outlet + bisa difilter sesuai kondisi",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "bahan_master_id",
+                  "value": "a4f919c9-9111-4bb3-873f-4e253c463a20",
+                  "type": "text",
+                  "uuid": "26fe45a5-e252-4bfa-84e6-80bff7c1cfc8"
+                },
+                {
+                  "key": "tipe",
+                  "value": "rusak",
+                  "type": "text",
+                  "uuid": "26332a19-4308-48f2-917f-0ecc083cbe36"
+                },
+                {
+                  "key": "jumlah",
+                  "value": "2",
+                  "type": "text",
+                  "uuid": "64b5905d-0aae-492b-85f7-89be128d9fba"
+                },
+                {
+                  "key": "keterangan",
+                  "value": "garam bersemut",
+                  "type": "text",
+                  "uuid": "152c828a-029b-4020-b77b-003e11842730"
+                },
+                {
+                  "key": "foto_bukti",
+                  "type": "file",
+                  "uuid": "8bb96aa6-b537-4131-8810-a7c50c9c9ef3",
+                  "src": "/C:/Users/ASUS/Downloads/download.jpg"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/outlet/bahan-baku?search=&sort_by=&sort_dir=&menipis=1&mendekati_expired=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "outlet",
+                "bahan-baku"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": ""
+                },
+                {
+                  "key": "sort_by",
+                  "value": ""
+                },
+                {
+                  "key": "sort_dir",
+                  "value": ""
+                },
+                {
+                  "key": "menipis",
+                  "value": "1"
+                },
+                {
+                  "key": "mendekati_expired",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Kasir ubah tipe pesanan",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"tipe_pesanan\": \"dine_in\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "/outlet/pesanan/{id}/tipe",
+              "path": [
+                "outlet",
+                "pesanan",
+                "{id}",
+                "tipe"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Outlet ajukan perubahan harga",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"superadmin\",\r\n  \"password\": \"password123\"\r\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/outlet/approval-harga",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "outlet",
+                "approval-harga"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Pelanggan",
+      "item": [
+        {
+          "name": "Scan QR",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "bahan_master_id",
+                  "value": "a4f919c9-9111-4bb3-873f-4e253c463a20",
+                  "type": "text",
+                  "uuid": "26fe45a5-e252-4bfa-84e6-80bff7c1cfc8"
+                },
+                {
+                  "key": "tipe",
+                  "value": "rusak",
+                  "type": "text",
+                  "uuid": "26332a19-4308-48f2-917f-0ecc083cbe36"
+                },
+                {
+                  "key": "jumlah",
+                  "value": "2",
+                  "type": "text",
+                  "uuid": "64b5905d-0aae-492b-85f7-89be128d9fba"
+                },
+                {
+                  "key": "keterangan",
+                  "value": "garam bersemut",
+                  "type": "text",
+                  "uuid": "152c828a-029b-4020-b77b-003e11842730"
+                },
+                {
+                  "key": "foto_bukti",
+                  "type": "file",
+                  "uuid": "8bb96aa6-b537-4131-8810-a7c50c9c9ef3",
+                  "src": "/C:/Users/ASUS/Downloads/download.jpg"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/public/validasi-meja?outlet_id=b0f98559-d577-4a94-bd44-b627406420dc&meja_id=f2edb339-09f1-4c26-a48f-7519251edd8a",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "validasi-meja"
+              ],
+              "query": [
+                {
+                  "key": "outlet_id",
+                  "value": "b0f98559-d577-4a94-bd44-b627406420dc"
+                },
+                {
+                  "key": "meja_id",
+                  "value": "f2edb339-09f1-4c26-a48f-7519251edd8a"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Daftar Menu",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "bahan_master_id",
+                  "value": "a4f919c9-9111-4bb3-873f-4e253c463a20",
+                  "type": "text",
+                  "uuid": "26fe45a5-e252-4bfa-84e6-80bff7c1cfc8"
+                },
+                {
+                  "key": "tipe",
+                  "value": "rusak",
+                  "type": "text",
+                  "uuid": "26332a19-4308-48f2-917f-0ecc083cbe36"
+                },
+                {
+                  "key": "jumlah",
+                  "value": "2",
+                  "type": "text",
+                  "uuid": "64b5905d-0aae-492b-85f7-89be128d9fba"
+                },
+                {
+                  "key": "keterangan",
+                  "value": "garam bersemut",
+                  "type": "text",
+                  "uuid": "152c828a-029b-4020-b77b-003e11842730"
+                },
+                {
+                  "key": "foto_bukti",
+                  "type": "file",
+                  "uuid": "8bb96aa6-b537-4131-8810-a7c50c9c9ef3",
+                  "src": "/C:/Users/ASUS/Downloads/download.jpg"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/public/menu?outlet_id=b37cefe3-9998-4911-b60b-08580c84fc80",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "menu"
+              ],
+              "query": [
+                {
+                  "key": "outlet_id",
+                  "value": "b37cefe3-9998-4911-b60b-08580c84fc80"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Menu dengan kategori",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "bahan_master_id",
+                  "value": "a4f919c9-9111-4bb3-873f-4e253c463a20",
+                  "type": "text",
+                  "uuid": "26fe45a5-e252-4bfa-84e6-80bff7c1cfc8"
+                },
+                {
+                  "key": "tipe",
+                  "value": "rusak",
+                  "type": "text",
+                  "uuid": "26332a19-4308-48f2-917f-0ecc083cbe36"
+                },
+                {
+                  "key": "jumlah",
+                  "value": "2",
+                  "type": "text",
+                  "uuid": "64b5905d-0aae-492b-85f7-89be128d9fba"
+                },
+                {
+                  "key": "keterangan",
+                  "value": "garam bersemut",
+                  "type": "text",
+                  "uuid": "152c828a-029b-4020-b77b-003e11842730"
+                },
+                {
+                  "key": "foto_bukti",
+                  "type": "file",
+                  "uuid": "8bb96aa6-b537-4131-8810-a7c50c9c9ef3",
+                  "src": "/C:/Users/ASUS/Downloads/download.jpg"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/public/menu?outlet_id=b0f98559-d577-4a94-bd44-b627406420dc&kategori_id=1964b9ac-9812-4eba-bf5b-d057ce0cb5c6",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "menu"
+              ],
+              "query": [
+                {
+                  "key": "outlet_id",
+                  "value": "b0f98559-d577-4a94-bd44-b627406420dc"
+                },
+                {
+                  "key": "kategori_id",
+                  "value": "1964b9ac-9812-4eba-bf5b-d057ce0cb5c6"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Detail Menu + Addon",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/public/menu/{menu_id}?outlet_id=4a929773-6efc-4599-be49-9b91fc243e51",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "menu",
+                "{menu_id}"
+              ],
+              "query": [
+                {
+                  "key": "outlet_id",
+                  "value": "4a929773-6efc-4599-be49-9b91fc243e51"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buat pesanan tanpa addon",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"outlet_id\": \"b37cefe3-9998-4911-b60b-08580c84fc80\",\r\n    \"meja_id\": \"2ad8bfe3-a5df-46f9-87d7-b6afda331d77\",\r\n    \"nama_pelanggan\": \"Jeno Lee\",\r\n    \"no_telp\": \"08123456789\",\r\n    \"items\": [\r\n        { \"menu_id\": \"49f092ac-e64c-4094-836e-baa9d28c6255\", \"qty\": 1 },\r\n        { \"menu_id\": \"bddad79e-cb95-4217-9490-ce6caf4a51f4\", \"qty\": 1 }\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/public/pesanan",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "pesanan"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buat pesanan dengan addon",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"outlet_id\": \"b0f98559-d577-4a94-bd44-b627406420dc\",\r\n    \"meja_id\": \"f2edb339-09f1-4c26-a48f-7519251edd8a\",\r\n    \"nama_pelanggan\": \"Siti\",\r\n    \"no_telp\": \"08987654321\",\r\n    \"items\": [\r\n        {\r\n            \"menu_id\": \"7454eed9-ce56-409e-b3b3-a65b3f31382f\",\r\n            \"qty\": 1,\r\n            \"addons\": [\r\n                { \"addon_id\": \"9d96c9b2-27e4-4097-9885-0b1a1309dac9\", \"qty\": 1 },\r\n                { \"addon_id\": \"ecaf4da6-9f81-4ddd-899f-4b8e41dae8db\", \"qty\": 2 }\r\n            ]\r\n        }\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/public/pesanan",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "pesanan"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cek pesanan",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{base_url}}/public/pesanan/fe9f9c14-df28-4711-832f-1a43479ccb5a?outlet_id=b37cefe3-9998-4911-b60b-08580c84fc80",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "pesanan",
+                "fe9f9c14-df28-4711-832f-1a43479ccb5a"
+              ],
+              "query": [
+                {
+                  "key": "outlet_id",
+                  "value": "b37cefe3-9998-4911-b60b-08580c84fc80"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Menu",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{base_url}}/public/menu?outlet_id=b0f98559-d577-4a94-bd44-b627406420dc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "menu"
+              ],
+              "query": [
+                {
+                  "key": "outlet_id",
+                  "value": "b0f98559-d577-4a94-bd44-b627406420dc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buat pesanan dengan tipe take_away",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"outlet_id\": \"29d80754-4c51-4e2a-83e0-461b60f309a2\",\r\n    \"meja_id\": \"...\",\r\n    \"nama_pelanggan\": \"Budi\",\r\n    \"no_telp\": \"08123\",\r\n    \"tipe_pesanan\": \"take_away\",\r\n    \"items\": [{ \"menu_id\": \"...\", \"qty\": 1 }]\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/public/pesanan",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "pesanan"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Pelanggan cancel pesanan",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"outlet_id\": \"b37cefe3-9998-4911-b60b-08580c84fc80\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/public/pesanan/fe9f9c14-df28-4711-832f-1a43479ccb5a/cancel",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "pesanan",
+                "fe9f9c14-df28-4711-832f-1a43479ccb5a",
+                "cancel"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
