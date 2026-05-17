@@ -82,18 +82,6 @@ export function KategoriFormDialog({
                 Hapus
               </Button>
             )}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className={
-                mode === "edit"
-                  ? "rounded-full px-8 border-gray-300 text-gray-600 hover:bg-gray-50 hover:text-gray-800 font-semibold"
-                  : "rounded-full px-8 border-red-400 text-red-500 hover:bg-red-50 hover:text-red-600 font-semibold"
-              }
-            >
-              Batal
-            </Button>
             <Button type="submit" className="rounded-full px-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold">
               Submit
             </Button>

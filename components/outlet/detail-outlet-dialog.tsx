@@ -85,10 +85,7 @@ export function DetailOutletDialog({ outlet, onClose }: DetailOutletDialogProps)
                 <span className="text-gray-500">Alamat</span>
                 <span className="text-gray-800 font-medium text-right max-w-[140px]">{outlet.alamatPerusahaan}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Total Outlet</span>
-                <span className="text-gray-800 font-medium">{outlet.totalOutlet}</span>
-              </div>
+
             </div>
           </div>
         </div>

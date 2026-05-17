@@ -76,7 +76,6 @@ export default function KelolaKategoriPage() {
 
   const sortOptions: { key: SortKey; label: string }[] = [
     { key: "id", label: "No" },
-    { key: "nama", label: "Nama Kategori" },
   ]
 
   return (
@@ -140,24 +139,32 @@ export default function KelolaKategoriPage() {
             <TableHeader>
               <TableRow className="bg-gray-50/80 hover:bg-gray-50/80 border-gray-200">
                 {[
-                  { key: "id" as SortKey, label: "No", className: "w-16 pl-6" },
-                  { key: "nama" as SortKey, label: "Nama Kategori", className: "w-[60%]" },
-                ].map((col) => (
-                  <TableHead key={col.key} className={cn("cursor-pointer select-none", col.className)} onClick={() => handleSort(col.key)}>
-                    <div className="flex items-center text-gray-600 font-semibold text-sm">
-                      {col.label}<SortIcon col={col.key} />
-                    </div>
-                  </TableHead>
-                ))}
-                <TableHead className="text-gray-600 font-semibold text-sm text-right pr-20">Action</TableHead>
+                  { key: "id" as SortKey, label: "No", className: "w-16 text-center" },
+                  { key: "nama" as SortKey, label: "Nama Kategori", className: "" },
+                ].map((col) => {
+                  const isSortable = col.key === "id"
+                  return (
+                    <TableHead 
+                      key={col.key} 
+                      className={cn(col.className, isSortable && "cursor-pointer select-none")} 
+                      onClick={isSortable ? () => handleSort(col.key) : undefined}
+                    >
+                      <div className={cn("flex items-center text-gray-600 font-semibold text-sm", col.key === "id" && "justify-center")}>
+                        {col.label}
+                        {isSortable && <SortIcon col={col.key} />}
+                      </div>
+                    </TableHead>
+                  )
+                })}
+                <TableHead className="w-28 text-center text-gray-600 font-semibold text-sm">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {sorted.map((row) => (
                 <TableRow key={row.id} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
-                  <TableCell className="text-gray-500 text-sm pl-6">{row.id}</TableCell>
+                  <TableCell className="text-gray-500 text-sm text-center">{row.id}</TableCell>
                   <TableCell className="text-gray-800 text-sm">{row.nama}</TableCell>
-                  <TableCell className="text-right pr-16">
+                  <TableCell className="text-center">
                     <button onClick={() => setEditItem(row)} className="bg-green-100 hover:bg-green-200 text-green-700 text-xs font-bold h-7 px-5 rounded-full transition-colors">
                       EDIT
                     </button>
