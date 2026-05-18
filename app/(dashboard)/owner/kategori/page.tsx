@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Settings, Bell, Search, ChevronDown, ChevronUp, ChevronsUpDown, Plus } from "lucide-react"
+import { Settings, Bell, Search, ChevronDown, ChevronUp, ChevronsUpDown, Plus, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -15,30 +15,8 @@ import {
 } from "@/components/ui/breadcrumb"
 import { cn } from "@/lib/utils"
 import { KategoriFormDialog } from "@/components/kategori/kategori-form-dialog"
-
-// ── Types & Dummy Data ──
-type Kategori = {
-  id: number
-  nama: string
-}
-
-const kategoriList: Kategori[] = [
-  { id: 1, nama: "Makanan Berat" },
-  { id: 2, nama: "Makanan Ringan" },
-  { id: 3, nama: "Minuman Dingin" },
-  { id: 4, nama: "Minuman Panas" },
-  { id: 5, nama: "Dessert" },
-  { id: 6, nama: "Appetizer" },
-  { id: 7, nama: "Lauk Pauk" },
-  { id: 8, nama: "Sayuran" },
-  { id: 9, nama: "Sambal" },
-  { id: 10, nama: "Gorengan" },
-  { id: 11, nama: "Sup & Soto" },
-  { id: 12, nama: "Nasi & Mie" },
-  { id: 13, nama: "Jus & Smoothie" },
-  { id: 14, nama: "Kopi & Teh" },
-  { id: 15, nama: "Paket Hemat" },
-]
+import { useKategori } from "@/hooks/use-kategori"
+import { KategoriMaster } from "@/types/kategori"
 
 type SortKey = "id" | "nama"
 type SortDir = "asc" | "desc"
@@ -48,26 +26,25 @@ export default function KelolaKategoriPage() {
   const [sortKey, setSortKey] = useState<SortKey>("id")
   const [sortDir, setSortDir] = useState<SortDir>("asc")
   const [tambahOpen, setTambahOpen] = useState(false)
-  const [editItem, setEditItem] = useState<Kategori | null>(null)
+  const [editItem, setEditItem] = useState<KategoriMaster | null>(null)
+
+  const { data: paginatedResponse, isLoading, isError } = useKategori(1, search, 100)
+  const kategoriList = paginatedResponse?.data || []
+  const meta = paginatedResponse?.meta
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir((p) => (p === "asc" ? "desc" : "asc"))
     else { setSortKey(key); setSortDir("asc") }
   }
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase()
-    return kategoriList.filter((k) => k.nama.toLowerCase().includes(q))
-  }, [search])
-
   const sorted = useMemo(() => {
-    return [...filtered].sort((a, b) => {
+    return [...kategoriList].sort((a, b) => {
       const av = a[sortKey]; const bv = b[sortKey]
       if (av < bv) return sortDir === "asc" ? -1 : 1
       if (av > bv) return sortDir === "asc" ? 1 : -1
       return 0
     })
-  }, [filtered, sortKey, sortDir])
+  }, [kategoriList, sortKey, sortDir])
 
   const SortIcon = ({ col }: { col: SortKey }) => {
     if (sortKey !== col) return <ChevronsUpDown className="w-3 h-3 ml-1 opacity-40" />
@@ -160,10 +137,29 @@ export default function KelolaKategoriPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sorted.map((row, index) => (
+              {isLoading && (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center text-gray-400 py-12 text-sm">
+                    <Loader2 className="size-6 animate-spin text-blue-600 mx-auto" />
+                  </TableCell>
+                </TableRow>
+              )}
+              {isError && (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center text-red-500 py-12 text-sm">Gagal mengambil data dari server.</TableCell>
+                </TableRow>
+              )}
+              {!isLoading && !isError && sorted.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center text-gray-400 py-12 text-sm">Tidak ada data ditemukan.</TableCell>
+                </TableRow>
+              )}
+              {!isLoading && !isError && sorted.map((row, index) => (
                 <TableRow key={row.id} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
                   <TableCell className="text-gray-500 text-sm text-center">
-                    {sortKey === "id" && sortDir === "desc" ? sorted.length - index : index + 1}
+                    {sortKey === "id" && sortDir === "desc" 
+                      ? (meta ? meta.total - ((meta.current_page - 1) * meta.per_page) - index : sorted.length - index)
+                      : (meta ? (meta.current_page - 1) * meta.per_page + index + 1 : index + 1)}
                   </TableCell>
                   <TableCell className="text-gray-800 text-sm">{row.nama}</TableCell>
                   <TableCell className="text-center">
@@ -173,11 +169,6 @@ export default function KelolaKategoriPage() {
                   </TableCell>
                 </TableRow>
               ))}
-              {sorted.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center text-gray-400 py-12 text-sm">Tidak ada data ditemukan.</TableCell>
-                </TableRow>
-              )}
             </TableBody>
           </Table>
         </div>
@@ -189,7 +180,7 @@ export default function KelolaKategoriPage() {
         open={!!editItem}
         onOpenChange={(open) => { if (!open) setEditItem(null) }}
         mode="edit"
-        initialData={editItem ? { namaKategori: editItem.nama } : undefined}
+        initialData={editItem ? { id: editItem.id, nama: editItem.nama } : undefined}
       />
     </div>
   )

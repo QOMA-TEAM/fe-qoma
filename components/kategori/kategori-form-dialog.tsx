@@ -10,12 +10,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState, useEffect } from "react"
+import { Loader2 } from "lucide-react"
+import { useAddKategori, useUpdateKategori, useDeleteKategori } from "@/hooks/use-kategori"
+import { toast } from "sonner"
 
 interface KategoriFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   mode: "tambah" | "edit"
-  initialData?: { namaKategori: string }
+  initialData?: { id: string; nama: string }
 }
 
 export function KategoriFormDialog({
@@ -26,9 +29,15 @@ export function KategoriFormDialog({
 }: KategoriFormDialogProps) {
   const [namaKategori, setNamaKategori] = useState("")
 
+  const addMutation = useAddKategori()
+  const updateMutation = useUpdateKategori()
+  const deleteMutation = useDeleteKategori()
+
+  const isPending = addMutation.isPending || updateMutation.isPending || deleteMutation.isPending
+
   useEffect(() => {
     if (open && mode === "edit" && initialData) {
-      setNamaKategori(initialData.namaKategori)
+      setNamaKategori(initialData.nama)
     } else if (open && mode === "tambah") {
       setNamaKategori("")
     }
@@ -36,9 +45,43 @@ export function KategoriFormDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Submit to API
-    console.log(`${mode}:`, namaKategori)
-    onOpenChange(false)
+    
+    if (mode === "tambah") {
+      addMutation.mutate(namaKategori, {
+        onSuccess: () => {
+          toast.success("Kategori berhasil ditambahkan")
+          onOpenChange(false)
+        },
+        onError: (error: any) => {
+          toast.error(error.response?.data?.message || "Gagal menambahkan kategori")
+        }
+      })
+    } else if (mode === "edit" && initialData) {
+      updateMutation.mutate({ id: initialData.id, nama: namaKategori }, {
+        onSuccess: () => {
+          toast.success("Kategori berhasil diupdate")
+          onOpenChange(false)
+        },
+        onError: (error: any) => {
+          toast.error(error.response?.data?.message || "Gagal mengupdate kategori")
+        }
+      })
+    }
+  }
+
+  const handleDelete = () => {
+    if (!initialData) return
+    if (!confirm("Apakah Anda yakin ingin menghapus kategori ini?")) return
+
+    deleteMutation.mutate(initialData.id, {
+      onSuccess: () => {
+        toast.success("Kategori berhasil dihapus")
+        onOpenChange(false)
+      },
+      onError: (error: any) => {
+        toast.error(error.response?.data?.message || "Gagal menghapus kategori")
+      }
+    })
   }
 
   const title = mode === "tambah" ? "Tambah Kategori" : "Edit Kategori"
@@ -64,6 +107,7 @@ export function KategoriFormDialog({
               onChange={(e) => setNamaKategori(e.target.value)}
               className="rounded-lg border-gray-300"
               required
+              disabled={isPending}
             />
           </div>
 
@@ -73,17 +117,15 @@ export function KategoriFormDialog({
               <Button
                 type="button"
                 variant="destructive"
-                onClick={() => {
-                  console.log("Hapus Kategori", initialData?.namaKategori)
-                  onOpenChange(false)
-                }}
+                onClick={handleDelete}
+                disabled={isPending}
                 className="rounded-full px-8 bg-red-600 hover:bg-red-700 text-white font-semibold"
               >
-                Hapus
+                {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Hapus"}
               </Button>
             )}
-            <Button type="submit" className="rounded-lg px-8 bg-[#1D5E84] hover:bg-[#154663] text-white font-semibold">
-              {mode === "edit" ? "Update" : "Simpan"}
+            <Button type="submit" disabled={isPending} className="rounded-lg px-8 bg-[#1D5E84] hover:bg-[#154663] text-white font-semibold">
+              {addMutation.isPending || updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : mode === "edit" ? "Update" : "Simpan"}
             </Button>
           </div>
         </form>
