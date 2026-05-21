@@ -113,17 +113,6 @@ export function KategoriFormDialog({
 
           {/* Buttons */}
           <div className="flex items-center justify-center gap-4 pt-2">
-            {mode === "edit" && (
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={isPending}
-                className="rounded-lg px-8 bg-red-600 hover:bg-red-700 text-white font-semibold cursor-pointer  "
-              >
-                {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Hapus"}
-              </Button>
-            )}
             <Button type="submit" disabled={isPending} className="rounded-lg px-8 bg-[#1D5E84] hover:bg-[#154663] text-white font-semibold cursor-pointer">
               {addMutation.isPending || updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : mode === "edit" ? "Update" : "Simpan"}
             </Button>

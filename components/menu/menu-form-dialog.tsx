@@ -363,18 +363,7 @@ export function MenuFormDialog({
 
           {/* Buttons */}
           <div className="flex items-center justify-center gap-4 pt-6">
-            {mode === "edit" && (
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={isPending}
-                className="rounded-full px-8 bg-red-600 hover:bg-red-700 text-white font-semibold cursor-pointer"
-              >
-                {deleteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Hapus"}
-              </Button>
-            )}
-            <Button type="submit" disabled={isPending} className="rounded-full px-8 bg-[#1D5E84] hover:bg-[#154663] text-white font-semibold cursor-pointer">
+            <Button type="submit" disabled={isPending} className="rounded-lg px-8 bg-[#1D5E84] hover:bg-[#154663] text-white font-semibold cursor-pointer">
               {(addMutation.isPending || updateMutation.isPending) ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
             </Button>
           </div>

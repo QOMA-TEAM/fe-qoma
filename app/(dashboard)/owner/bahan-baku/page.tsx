@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Settings, Bell, Search, ChevronDown, ChevronUp, ChevronsUpDown, Plus } from "lucide-react"
+import { Settings, Bell, Search, ChevronDown, ChevronUp, ChevronsUpDown, Plus, Pencil, Trash2 } from "lucide-react"
 import { HeaderActions } from "@/components/dashboard/header-actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { cn } from "@/lib/utils"
 import { BahanBakuFormDialog } from "@/components/bahan-baku/bahan-baku-form-dialog"
-import { useBahanBaku } from "@/hooks/use-bahan-baku"
+import { useBahanBaku, useDeleteBahanBaku } from "@/hooks/use-bahan-baku"
 import { BahanMaster } from "@/types/bahan-baku"
 import { useDebounce } from "@/hooks/use-debounce"
 
@@ -32,6 +32,7 @@ export default function KelolaBahanBakuPage() {
   const [editItem, setEditItem] = useState<BahanMaster | null>(null)
 
   const debouncedSearch = useDebounce(search, 1000)
+  const { mutate: deleteBahan } = useDeleteBahanBaku()
 
   useEffect(() => {
     setPage(1)
@@ -163,9 +164,26 @@ export default function KelolaBahanBakuPage() {
                   <TableCell className="text-gray-600 text-sm">{row.satuan}</TableCell>
                   <TableCell className="text-gray-600 text-sm">{formatRupiah(row.harga_default)}</TableCell>
                   <TableCell className="text-center">
-                    <button onClick={() => setEditItem(row)} className="bg-green-100 hover:bg-green-200 text-green-700 text-xs font-bold h-7 px-5 rounded-full transition-colors">
-                      EDIT
-                    </button>
+                    <div className="flex items-center justify-center gap-2">
+                      <button 
+                        onClick={() => setEditItem(row)} 
+                        className="flex items-center justify-center size-7 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md transition-colors cursor-pointer"
+                        title="Edit"
+                      >
+                        <Pencil className="size-4" />
+                      </button>
+                      <button 
+                        onClick={() => {
+                          if (window.confirm("Apakah Anda yakin ingin menghapus bahan baku ini?")) {
+                            deleteBahan(row.id)
+                          }
+                        }} 
+                        className="flex items-center justify-center size-7 bg-red-50 hover:bg-red-100 text-red-600 rounded-md transition-colors cursor-pointer"
+                        title="Hapus"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Settings, Bell, Search, ChevronDown, ChevronUp, ChevronsUpDown, Plus, Loader2 } from "lucide-react"
+import { Settings, Bell, Search, ChevronDown, ChevronUp, ChevronsUpDown, Plus, Loader2, Pencil, Trash2 } from "lucide-react"
 import { HeaderActions } from "@/components/dashboard/header-actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { cn } from "@/lib/utils"
 import { MenuFormDialog } from "@/components/menu/menu-form-dialog"
-import { useMenu } from "@/hooks/use-menu"
+import { useMenu, useDeleteMenu } from "@/hooks/use-menu"
 import { useKategori } from "@/hooks/use-kategori"
 import { MenuMaster } from "@/types/menu"
 import { useDebounce } from "@/hooks/use-debounce"
@@ -35,6 +35,7 @@ export default function KelolaMenuPage() {
   const [editItem, setEditItem] = useState<MenuMaster | null>(null)
 
   const debouncedSearch = useDebounce(search, 1000)
+  const { mutate: deleteMenu } = useDeleteMenu()
 
   useEffect(() => {
     setPage(1)
@@ -194,9 +195,26 @@ export default function KelolaMenuPage() {
                     <TableCell className="text-gray-600 text-sm text-center">{row.bahan_masters?.length || 0}</TableCell>
                     <TableCell className="text-gray-600 text-sm">Rp {Number(row.harga_default).toLocaleString("id-ID")}</TableCell>
                     <TableCell className="text-center">
-                      <button onClick={() => setEditItem(row)} className="bg-green-100 hover:bg-green-200 text-green-700 text-xs font-bold h-7 px-5 rounded-full transition-colors cursor-pointer">
-                        EDIT
-                      </button>
+                      <div className="flex items-center justify-center gap-2">
+                        <button 
+                          onClick={() => setEditItem(row)} 
+                          className="flex items-center justify-center size-7 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md transition-colors cursor-pointer"
+                          title="Edit"
+                        >
+                          <Pencil className="size-4" />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            if (window.confirm("Apakah Anda yakin ingin menghapus menu ini?")) {
+                              deleteMenu(row.id)
+                            }
+                          }} 
+                          className="flex items-center justify-center size-7 bg-red-50 hover:bg-red-100 text-red-600 rounded-md transition-colors cursor-pointer"
+                          title="Hapus"
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))

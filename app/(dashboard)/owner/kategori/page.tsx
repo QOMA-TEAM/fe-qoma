@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Settings, Bell, Search, ChevronDown, ChevronUp, ChevronsUpDown, Plus, Loader2 } from "lucide-react"
+import { Settings, Bell, Search, ChevronDown, ChevronUp, ChevronsUpDown, Plus, Loader2, Pencil, Trash2 } from "lucide-react"
 import { HeaderActions } from "@/components/dashboard/header-actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { cn } from "@/lib/utils"
 import { KategoriFormDialog } from "@/components/kategori/kategori-form-dialog"
-import { useKategori } from "@/hooks/use-kategori"
+import { useKategori, useDeleteKategori } from "@/hooks/use-kategori"
 import { KategoriMaster } from "@/types/kategori"
 import { useDebounce } from "@/hooks/use-debounce"
 
@@ -30,7 +30,8 @@ export default function KelolaKategoriPage() {
   const [sortDir, setSortDir] = useState<SortDir>("asc")
   const [tambahOpen, setTambahOpen] = useState(false)
   const [editItem, setEditItem] = useState<KategoriMaster | null>(null)
-
+  
+  const { mutate: deleteKategori } = useDeleteKategori()
   const debouncedSearch = useDebounce(search, 1000)
 
   useEffect(() => {
@@ -149,9 +150,26 @@ export default function KelolaKategoriPage() {
                   </TableCell>
                   <TableCell className="text-gray-800 text-sm">{row.nama}</TableCell>
                   <TableCell className="text-center">
-                    <button onClick={() => setEditItem(row)} className="bg-green-100 hover:bg-green-200 text-green-700 text-xs font-bold h-7 px-5 rounded-full transition-colors cursor-pointer">
-                      EDIT
-                    </button>
+                    <div className="flex items-center justify-center gap-2">
+                      <button 
+                        onClick={() => setEditItem(row)} 
+                        className="flex items-center justify-center size-7 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md transition-colors cursor-pointer"
+                        title="Edit"
+                      >
+                        <Pencil className="size-4" />
+                      </button>
+                      <button 
+                        onClick={() => {
+                          if (window.confirm("Apakah Anda yakin ingin menghapus kategori ini?")) {
+                            deleteKategori(row.id)
+                          }
+                        }} 
+                        className="flex items-center justify-center size-7 bg-red-50 hover:bg-red-100 text-red-600 rounded-md transition-colors cursor-pointer"
+                        title="Hapus"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
