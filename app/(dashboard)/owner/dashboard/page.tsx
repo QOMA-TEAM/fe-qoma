@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { useDashboardSummary, useDashboardGraph, useActivityLog } from "@/hooks/use-dashboard"
 import { useProfile } from "@/hooks/use-auth"
 import { MetricChart, type MetricDataPoint } from "@/components/dashboard/metric-chart"
+import { HeaderActions } from "@/components/dashboard/header-actions"
 import { cn } from "@/lib/utils"
 
 const formatRupiah = (number: number) => {
@@ -87,15 +88,7 @@ export default function OwnerDashboardPage() {
         <h2 className="text-[#1E293B] text-[15px] font-bold">
           Welcome back, {profile?.username || 'Owner'}
         </h2>
-        <div className="flex items-center gap-3">
-          <button type="button" className="flex items-center justify-center size-9 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-100 transition-colors" aria-label="Settings">
-            <Settings className="size-4" />
-          </button>
-          <button type="button" className="relative flex items-center justify-center size-9 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-100 transition-colors" aria-label="Notifications">
-            <Bell className="size-4" />
-            <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-orange-500 ring-2 ring-white" />
-          </button>
-        </div>
+        <HeaderActions />
       </header>
 
       <div className="p-8 space-y-8">
@@ -254,7 +247,7 @@ export default function OwnerDashboardPage() {
             )}
           </div>
         </div>
-        </div>
+      </div>
       </div>
     </div>
   )
