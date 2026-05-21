@@ -101,7 +101,7 @@ export function DetailOutletDialog({ outlet, onClose }: DetailOutletDialogProps)
         <div className="flex justify-center mt-4">
           <Button
             onClick={onClose}
-            className="rounded-full px-10 bg-[#1D5E84] hover:bg-[#154663] text-white"
+            className="rounded-full px-10 bg-[#1D5E84] hover:bg-[#154663] text-white cursor-pointer"
           >
             Tutup
           </Button>

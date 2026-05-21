@@ -98,7 +98,7 @@ export default function PlanPage() {
 
             <button 
               onClick={() => setUpgradeOpen(true)}
-              className="w-full mt-auto bg-[#EA580C] hover:bg-[#c2410c] text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+              className="w-full mt-auto bg-[#EA580C] hover:bg-[#c2410c] text-white font-semibold py-3 px-4 rounded-lg transition-colors cursor-pointer"
             >
               Upgrade Plan
             </button>

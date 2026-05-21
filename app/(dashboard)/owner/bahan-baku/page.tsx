@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Settings, Bell, Search, ChevronDown, ChevronUp, ChevronsUpDown, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,19 +17,28 @@ import { cn } from "@/lib/utils"
 import { BahanBakuFormDialog } from "@/components/bahan-baku/bahan-baku-form-dialog"
 import { useBahanBaku } from "@/hooks/use-bahan-baku"
 import { BahanMaster } from "@/types/bahan-baku"
+import { useDebounce } from "@/hooks/use-debounce"
 
 type SortKey = "id" | "nama" | "satuan" | "harga_default"
 type SortDir = "asc" | "desc"
 
 export default function KelolaBahanBakuPage() {
+  const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
   const [sortKey, setSortKey] = useState<SortKey>("id")
   const [sortDir, setSortDir] = useState<SortDir>("asc")
   const [tambahOpen, setTambahOpen] = useState(false)
   const [editItem, setEditItem] = useState<BahanMaster | null>(null)
 
-  const { data: paginatedResponse, isLoading, isError } = useBahanBaku(1, search)
+  const debouncedSearch = useDebounce(search, 1000)
+
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch])
+
+  const { data: paginatedResponse, isLoading, isError } = useBahanBaku(page, debouncedSearch)
   const bahanBakuList = paginatedResponse?.data || []
+  const meta = paginatedResponse?.meta
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir((p) => (p === "asc" ? "desc" : "asc"))
@@ -101,26 +110,11 @@ export default function KelolaBahanBakuPage() {
             <p className="text-sm text-gray-500 mt-0.5">Informasi detail bahan baku</p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-1.5 text-sm border-gray-200 text-gray-700 h-9 rounded-full px-4">
-                  Sort By <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                {sortOptions.map((item) => (
-                  <DropdownMenuItem key={item.key} onClick={() => handleSort(item.key)} className={cn("cursor-pointer", sortKey === item.key && "font-medium text-blue-600")}>
-                    {item.label}
-                    {sortKey === item.key && <span className="ml-auto text-xs text-gray-400">{sortDir === "asc" ? "↑" : "↓"}</span>}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
             <div className="relative">
               <Input placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} className="pr-9 h-9 w-44 text-sm border-gray-200 rounded-full" />
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
-            <Button onClick={() => setTambahOpen(true)} className="h-9 rounded-lg bg-[#1D5E84] hover:bg-[#154663] text-white gap-1.5 px-4 text-sm">
+            <Button onClick={() => setTambahOpen(true)} className="h-9 rounded-lg bg-[#1D5E84] hover:bg-[#154663] text-white gap-1.5 px-4 text-sm cursor-pointer">
               <Plus className="size-4" /> Tambah Bahan Baku
             </Button>
           </div>
@@ -168,7 +162,9 @@ export default function KelolaBahanBakuPage() {
               {!isLoading && !isError && sorted.map((row, index) => (
                 <TableRow key={row.id} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
                   <TableCell className="text-gray-500 text-sm text-center">
-                    {sortKey === "id" && sortDir === "desc" ? sorted.length - index : index + 1}
+                    {sortKey === "id" && sortDir === "desc" 
+                      ? (meta ? meta.total - ((meta.current_page - 1) * meta.per_page) - index : sorted.length - index)
+                      : (meta ? (meta.current_page - 1) * meta.per_page + index + 1 : index + 1)}
                   </TableCell>
                   <TableCell className="text-gray-800 text-sm">{row.nama}</TableCell>
                   <TableCell className="text-gray-600 text-sm">{row.satuan}</TableCell>
@@ -188,6 +184,51 @@ export default function KelolaBahanBakuPage() {
             </TableBody>
           </Table>
         </div>
+
+        {/* Pagination Controls */}
+        {meta && meta.total > 0 && (
+          <div className="flex items-center justify-between pt-2 cursor-pointer">
+            <p className="text-sm text-gray-500">
+              Menampilkan <span className="font-medium text-gray-900">{meta.from || 0}</span> hingga <span className="font-medium text-gray-900">{meta.to || 0}</span> dari <span className="font-medium text-gray-900">{meta.total}</span> data
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="h-8 rounded-full px-4 text-xs font-medium cursor-pointer"
+              >
+                Previous
+              </Button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: meta.last_page }, (_, i) => i + 1).map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    onClick={() => setPage(pageNum)}
+                    className={cn(
+                      "size-8 rounded-full text-xs font-medium transition-colors",
+                      page === pageNum
+                        ? "bg-orange-500 text-white"
+                        : "text-gray-600 hover:bg-gray-100 cursor-pointer"
+                    )}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(p => Math.min(meta.last_page, p + 1))}
+                disabled={page === meta.last_page}
+                className="h-8 rounded-full px-4 text-xs font-medium cursor-pointer"
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Dialogs */}

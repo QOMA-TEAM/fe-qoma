@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Settings, Bell, Search, ChevronDown, ChevronUp, ChevronsUpDown, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,6 +18,7 @@ import { TambahOutletDialog } from "@/components/outlet/tambah-outlet-dialog"
 import { DetailOutletDialog } from "@/components/outlet/detail-outlet-dialog"
 import { useOutlets } from "@/hooks/use-outlets"
 import { Outlet } from "@/types/outlet"
+import { useDebounce } from "@/hooks/use-debounce"
 
 type SortKey = "id" | "nama_outlet" | "alamat" | "email"
 type SortDir = "asc" | "desc"
@@ -33,8 +34,14 @@ export default function KelolaOutletPage() {
   // or update DetailOutletDialog later. Let's pass Outlet.
   const [detailOutlet, setDetailOutlet] = useState<Outlet | null>(null)
 
+  const debouncedSearch = useDebounce(search, 1000)
+
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch])
+
   // Mengambil data dari backend via React Query
-  const { data: paginatedResponse, isLoading, isError } = useOutlets(page, search)
+  const { data: paginatedResponse, isLoading, isError } = useOutlets(page, debouncedSearch)
   const outlets = paginatedResponse?.data || []
   const meta = paginatedResponse?.meta
 
@@ -119,7 +126,7 @@ export default function KelolaOutletPage() {
               />
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
-            <Button onClick={() => setTambahOpen(true)} className="h-9 rounded-lg bg-[#1D5E84] hover:bg-[#154663] text-white gap-1.5 px-4 text-sm">
+            <Button onClick={() => setTambahOpen(true)} className="h-9 rounded-lg bg-[#1D5E84] hover:bg-[#154663] text-white gap-1.5 px-4 text-sm cursor-pointer">
               <Plus className="size-4" /> Tambah Outlet
             </Button>
           </div>
@@ -175,7 +182,7 @@ export default function KelolaOutletPage() {
                   <TableCell className="text-gray-600 text-sm">{row.alamat || "-"}</TableCell>
                   <TableCell className="text-gray-600 text-sm">{row.email || "-"}</TableCell>
                   <TableCell className="text-center">
-                    <button onClick={() => setDetailOutlet(row)} className="bg-green-100 hover:bg-green-200 text-green-700 text-xs font-bold h-7 px-5 rounded-full transition-colors">
+                    <button onClick={() => setDetailOutlet(row)} className="bg-green-100 hover:bg-green-200 text-green-700 text-xs font-bold h-7 px-5 rounded-full transition-colors cursor-pointer">
                       VIEW
                     </button>
                   </TableCell>
@@ -187,7 +194,7 @@ export default function KelolaOutletPage() {
 
         {/* Pagination Controls */}
         {meta && meta.total > 0 && (
-          <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center justify-between pt-2 cursor-pointer">
             <p className="text-sm text-gray-500">
               Menampilkan <span className="font-medium text-gray-900">{meta.from || 0}</span> hingga <span className="font-medium text-gray-900">{meta.to || 0}</span> dari <span className="font-medium text-gray-900">{meta.total}</span> data
             </p>

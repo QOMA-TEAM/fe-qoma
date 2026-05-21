@@ -63,30 +63,30 @@ export function UpgradePlanDialog({ open, onOpenChange }: UpgradePlanDialogProps
                 Pilih Metode Pembayaran
               </Label>
               <Select value={metode} onValueChange={setMetode} required>
-                <SelectTrigger className="w-full border-gray-300 rounded-lg">
+                <SelectTrigger className="w-full border-gray-300 rounded-lg cursor-pointer">
                   <SelectValue placeholder="Pilih Metode pembayaran" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="transfer_bank">Transfer Bank</SelectItem>
-                  <SelectItem value="qris">QRIS</SelectItem>
-                  <SelectItem value="ewallet">E-Wallet (OVO/Dana/Gopay)</SelectItem>
+                  <SelectItem value="transfer_bank" className="cursor-pointer">Transfer Bank</SelectItem>
+                  <SelectItem value="qris" className="cursor-pointer">QRIS</SelectItem>
+                  <SelectItem value="ewallet" className="cursor-pointer">E-Wallet (OVO/Dana/Gopay)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="flex items-center justify-center gap-4 pt-2">
+            <div className="flex items-center justify-center gap-4 pt-2 ">
               <Button
                 type="button"
                 variant="destructive"
                 onClick={() => onOpenChange(false)}
-                className="rounded-lg px-10 bg-[#dc2626] hover:bg-red-700 text-white font-medium"
+                className="rounded-lg px-10 bg-[#dc2626] hover:bg-red-700 text-white font-medium cursor-pointer"
               >
                 Batal
               </Button>
               <Button 
                 type="submit" 
                 disabled={!metode}
-                className="rounded-lg px-10 bg-[#1d4ed8] hover:bg-blue-800 text-white font-medium disabled:opacity-50"
+                className="rounded-lg px-10 bg-[#1d4ed8] hover:bg-blue-800 text-white font-medium disabled:opacity-50 cursor-pointer"
               >
                 Next
               </Button>

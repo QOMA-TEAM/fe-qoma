@@ -172,17 +172,9 @@ export function TambahOutletDialog({ open, onOpenChange }: TambahOutletDialogPro
 
           <div className="flex items-center justify-center gap-4 pt-2">
             <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="rounded-full px-8 border-red-400 text-red-500 hover:bg-red-50 hover:text-red-600"
-            >
-              Batal
-            </Button>
-            <Button
               type="submit"
               disabled={addMutation.isPending || isLoadingUsaha}
-              className="rounded-full px-8 bg-[#1D5E84] hover:bg-[#154663] text-white"
+              className="rounded-full px-8 bg-[#1D5E84] hover:bg-[#154663] text-white cursor-pointer"
             >
               {(addMutation.isPending || isLoadingUsaha) ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
             </Button>
