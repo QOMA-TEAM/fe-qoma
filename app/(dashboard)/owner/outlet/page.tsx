@@ -23,6 +23,7 @@ type SortKey = "id" | "nama_outlet" | "alamat" | "email"
 type SortDir = "asc" | "desc"
 
 export default function KelolaOutletPage() {
+  const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
   const [sortKey, setSortKey] = useState<SortKey>("id")
   const [sortDir, setSortDir] = useState<SortDir>("asc")
@@ -32,9 +33,10 @@ export default function KelolaOutletPage() {
   // or update DetailOutletDialog later. Let's pass Outlet.
   const [detailOutlet, setDetailOutlet] = useState<Outlet | null>(null)
 
-  // Mengambil data dari backend via React Query (sementara page 1)
-  const { data: paginatedResponse, isLoading, isError } = useOutlets(1)
+  // Mengambil data dari backend via React Query
+  const { data: paginatedResponse, isLoading, isError } = useOutlets(page, search)
   const outlets = paginatedResponse?.data || []
+  const meta = paginatedResponse?.meta
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -45,24 +47,15 @@ export default function KelolaOutletPage() {
     }
   }
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase()
-    return outlets.filter(
-      (o) =>
-        o.nama_outlet.toLowerCase().includes(q) ||
-        (o.email && o.email.toLowerCase().includes(q))
-    )
-  }, [search, outlets])
-
   const sorted = useMemo(() => {
-    return [...filtered].sort((a, b) => {
+    return [...outlets].sort((a, b) => {
       const av = a[sortKey] || ""
       const bv = b[sortKey] || ""
       if (av < bv) return sortDir === "asc" ? -1 : 1
       if (av > bv) return sortDir === "asc" ? 1 : -1
       return 0
     })
-  }, [filtered, sortKey, sortDir])
+  }, [outlets, sortKey, sortDir])
 
   const SortIcon = ({ col }: { col: SortKey }) => {
     if (sortKey !== col) return <ChevronsUpDown className="w-3 h-3 ml-1 opacity-40" />
@@ -86,10 +79,6 @@ export default function KelolaOutletPage() {
       <header className="flex h-16 shrink-0 items-center justify-between border-b bg-white px-6 shadow-sm">
         <Breadcrumb>
           <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/owner/dashboard" className="text-sm text-muted-foreground">QOMA</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
             <BreadcrumbItem>
               <span className="text-sm text-muted-foreground">KELOLA</span>
             </BreadcrumbItem>
@@ -119,25 +108,15 @@ export default function KelolaOutletPage() {
             <p className="text-sm text-gray-500 mt-0.5">Informasi detail Data Tenant</p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Sort By */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-1.5 text-sm border-gray-200 text-gray-700 h-9 rounded-full px-4">
-                  Sort By <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                {sortOptions.map((item) => (
-                  <DropdownMenuItem key={item.key} onClick={() => handleSort(item.key)} className={cn("cursor-pointer", sortKey === item.key && "font-medium text-blue-600")}>
-                    {item.label}
-                    {sortKey === item.key && <span className="ml-auto text-xs text-gray-400">{sortDir === "asc" ? "↑" : "↓"}</span>}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            
             {/* Search */}
             <div className="relative">
-              <Input placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} className="pr-9 h-9 w-44 text-sm border-gray-200 rounded-full" />
+              <Input 
+                placeholder="Search" 
+                value={search} 
+                onChange={(e) => { setSearch(e.target.value); setPage(1); }} 
+                className="pr-9 h-9 w-44 text-sm border-gray-200 rounded-full bg-white" 
+              />
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
             <Button onClick={() => setTambahOpen(true)} className="h-9 rounded-lg bg-[#1D5E84] hover:bg-[#154663] text-white gap-1.5 px-4 text-sm">
@@ -188,7 +167,9 @@ export default function KelolaOutletPage() {
               {!isLoading && !isError && sorted.map((row, index) => (
                 <TableRow key={row.id} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
                   <TableCell className="text-gray-500 text-sm text-center">
-                    {sortKey === "id" && sortDir === "desc" ? sorted.length - index : index + 1}
+                    {sortKey === "id" && sortDir === "desc" 
+                      ? (meta ? meta.total - ((meta.current_page - 1) * meta.per_page) - index : sorted.length - index)
+                      : (meta ? (meta.current_page - 1) * meta.per_page + index + 1 : index + 1)}
                   </TableCell>
                   <TableCell className="text-gray-800 text-sm">{row.nama_outlet}</TableCell>
                   <TableCell className="text-gray-600 text-sm">{row.alamat || "-"}</TableCell>
@@ -203,6 +184,51 @@ export default function KelolaOutletPage() {
             </TableBody>
           </Table>
         </div>
+
+        {/* Pagination Controls */}
+        {meta && meta.total > 0 && (
+          <div className="flex items-center justify-between pt-2">
+            <p className="text-sm text-gray-500">
+              Menampilkan <span className="font-medium text-gray-900">{meta.from || 0}</span> hingga <span className="font-medium text-gray-900">{meta.to || 0}</span> dari <span className="font-medium text-gray-900">{meta.total}</span> data
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="h-8 rounded-full px-4 text-xs font-medium"
+              >
+                Previous
+              </Button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: meta.last_page }, (_, i) => i + 1).map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    onClick={() => setPage(pageNum)}
+                    className={cn(
+                      "size-8 rounded-full text-xs font-medium transition-colors",
+                      page === pageNum
+                        ? "bg-orange-500 text-white"
+                        : "text-gray-600 hover:bg-gray-100"
+                    )}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(p => Math.min(meta.last_page, p + 1))}
+                disabled={page === meta.last_page}
+                className="h-8 rounded-full px-4 text-xs font-medium"
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Dialogs */}

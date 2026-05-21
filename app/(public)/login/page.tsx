@@ -10,7 +10,7 @@ import { api } from "@/lib/axios"
 
 export default function LoginPage() {
   const router = useRouter()
-  const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
@@ -22,7 +22,7 @@ export default function LoginPage() {
 
     try {
       const response = await api.post("/auth/login", {
-        username,
+        email,
         password,
       })
       
@@ -35,7 +35,7 @@ export default function LoginPage() {
         setError("Token tidak ditemukan pada respons server.")
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Username atau password salah.")
+      setError(err.response?.data?.message || "Email atau password salah.")
     } finally {
       setIsLoading(false)
     }
@@ -86,17 +86,17 @@ export default function LoginPage() {
             )}
             
             <div className="space-y-2.5">
-              <Label htmlFor="username" className="text-[15px] font-bold text-gray-900">
-                Username
+              <Label htmlFor="email" className="text-[15px] font-bold text-gray-900">
+                Email
               </Label>
               <Input
-                id="username"
-                type="text"
-                placeholder="Masukkan username"
+                id="email"
+                type="email"
+                placeholder="Masukkan email"
                 required
                 className="h-[46px] border-gray-200 bg-gray-50/30 text-gray-800 placeholder:text-gray-400 rounded-xl px-4 text-[15px] focus-visible:ring-1 focus-visible:ring-[#FF6600] focus-visible:border-[#FF6600]"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
