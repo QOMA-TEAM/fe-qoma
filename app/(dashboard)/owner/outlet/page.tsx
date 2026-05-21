@@ -91,7 +91,7 @@ export default function KelolaOutletPage() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage className="text-sm">Kelola Outlet</BreadcrumbPage>
+              <BreadcrumbPage className="text-sm">Outlet</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

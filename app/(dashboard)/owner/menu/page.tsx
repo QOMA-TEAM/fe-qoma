@@ -84,8 +84,6 @@ export default function KelolaMenuPage() {
       <header className="flex h-16 shrink-0 items-center justify-between border-b bg-white px-6 shadow-sm">
         <Breadcrumb>
           <BreadcrumbList>
-            <BreadcrumbItem><BreadcrumbLink href="/owner/dashboard" className="text-sm text-muted-foreground">QOMA</BreadcrumbLink></BreadcrumbItem>
-            <BreadcrumbSeparator />
             <BreadcrumbItem><span className="text-sm text-muted-foreground">KELOLA</span></BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem><BreadcrumbPage className="text-sm">Menu</BreadcrumbPage></BreadcrumbItem>
