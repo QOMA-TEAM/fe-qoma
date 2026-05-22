@@ -174,7 +174,7 @@ export function TambahOutletDialog({ open, onOpenChange }: TambahOutletDialogPro
             <Button
               type="submit"
               disabled={addMutation.isPending || isLoadingUsaha}
-              className="rounded-full px-8 bg-[#1D5E84] hover:bg-[#154663] text-white cursor-pointer"
+              className="rounded-lg px-8 bg-[#1D5E84] hover:bg-[#154663] text-white cursor-pointer"
             >
               {(addMutation.isPending || isLoadingUsaha) ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
             </Button>
