@@ -10,7 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { subscriptionService } from "@/services/superadmin/newTenantServices";
+import { subscriptionService } from "@/hooks/superadmin/new-tenant";
 import type {
   SubscriptionDetailResponse,
   SubscriptionStatus,

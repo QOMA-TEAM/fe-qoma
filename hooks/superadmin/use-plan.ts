@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { planService } from "@/services/superadmin/planServices";
+import { planService } from "@/hooks/superadmin/plan";
 import {
   CreatePlanPayload,
   Plan,

@@ -1,16 +1,7 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { RecentActivity } from "@/types/superadmin/dashboard";
-import { formatDistanceToNow } from "date-fns";
-import { id } from "date-fns/locale";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -18,63 +9,14 @@ import { cn } from "@/lib/utils";
 function formatTime(dateStr: string): string {
   try {
     const date = new Date(dateStr);
-    return date.toLocaleTimeString("id-ID", {
-      hour: "2-digit",
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
       minute: "2-digit",
-      hour12: false,
+      hour12: true,
     });
   } catch {
     return "";
   }
-}
-
-function formatRelative(dateStr: string): string {
-  try {
-    return formatDistanceToNow(new Date(dateStr), {
-      addSuffix: true,
-      locale: id,
-    });
-  } catch {
-    return "";
-  }
-}
-
-// ─── Activity Item ───────────────────────────────────────────────────────────
-
-interface ActivityItemProps {
-  index: number;
-  activity: RecentActivity;
-}
-
-function ActivityItem({ index, activity }: ActivityItemProps) {
-  return (
-    <div className="flex items-start gap-3 py-3 border-b border-gray-50 last:border-0">
-      {/* Number Badge */}
-      <div
-        className={cn(
-          "flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold",
-          "bg-orange-50 text-orange-500",
-        )}
-      >
-        {index}
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-800 truncate">
-          {activity.aktivitas}
-        </p>
-        {activity.deskripsi && (
-          <p className="text-xs text-gray-400 truncate mt-0.5">
-            {activity.deskripsi}
-          </p>
-        )}
-        <p className="text-xs text-orange-400 mt-0.5">
-          {formatTime(activity.created_at)}
-        </p>
-      </div>
-    </div>
-  );
 }
 
 // ─── Activity Log Card ────────────────────────────────────────────────────────
@@ -82,41 +24,49 @@ function ActivityItem({ index, activity }: ActivityItemProps) {
 interface ActivityLogProps {
   activities: RecentActivity[];
   isLoading?: boolean;
+  className?: string;
 }
 
-export function ActivityLog({ activities, isLoading }: ActivityLogProps) {
+export function ActivityLog({ activities, isLoading, className }: ActivityLogProps) {
   return (
-    <Card className="border border-gray-100 shadow-sm h-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base font-semibold text-gray-800">
-          Activity Log
-        </CardTitle>
-        <CardDescription className="text-xs text-orange-400 font-medium mt-0">
-          History
-        </CardDescription>
-      </CardHeader>
+    <div className={cn("bg-white rounded-2xl p-6 shadow-sm border border-[#F1F5F9] flex flex-col h-[400px]", className)}>
+      <div className="mb-6">
+        <h4 className="text-[#1E293B] font-bold text-lg">Activity Log</h4>
+        <p className="text-[#44A5E6] text-sm font-medium">History</p>
+      </div>
 
-      <CardContent className="pt-0">
+      <div className="flex-1 overflow-y-auto pr-2 pb-4">
         {isLoading ? (
-          <div className="flex items-center justify-center h-40 text-sm text-gray-400">
-            Memuat aktivitas...
+          <div className="flex justify-center py-10">
+            <Loader2 className="w-6 h-6 animate-spin text-[#94A3B8]" />
           </div>
         ) : activities.length === 0 ? (
-          <div className="flex items-center justify-center h-40 text-sm text-gray-400">
-            Belum ada aktivitas
-          </div>
+          <div className="text-center py-10 text-sm text-[#94A3B8]">Belum ada aktivitas.</div>
         ) : (
-          <ScrollArea className="h-[420px] pr-3">
-            {activities.map((activity, idx) => (
-              <ActivityItem
-                key={activity.id}
-                index={idx + 1}
-                activity={activity}
-              />
+          <div className="relative border-l-2 border-[#E2E8F0] ml-4 mt-2 space-y-6">
+            {activities.map((activity) => (
+              <div key={activity.id} className="relative flex items-start pl-6 group">
+                {/* Stepper Dot */}
+                <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-white border-[3px] border-[#F69C35] transition-transform group-hover:scale-125" />
+
+                <div className="flex flex-col">
+                  <span className="text-[#1E293B] font-bold text-sm leading-tight mb-1">
+                    {activity.aktivitas}
+                  </span>
+                  {activity.deskripsi && (
+                    <span className="text-[#64748B] text-xs mb-1">
+                      {activity.deskripsi}
+                    </span>
+                  )}
+                  <span className="text-[#44A5E6] text-xs font-semibold">
+                    {formatTime(activity.created_at)}
+                  </span>
+                </div>
+              </div>
             ))}
-          </ScrollArea>
+          </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

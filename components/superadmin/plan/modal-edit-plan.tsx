@@ -77,7 +77,15 @@ export function ModalEditPlan({
       return;
     }
     if (!plan) return;
-    const ok = await onSubmit(plan.id, values);
+    
+    // Konversi "30 Hari" menjadi angka 30 untuk dikirim ke backend
+    const durasi = parseInt(values.tagihan || "30");
+    const payloadToSend = {
+      ...values,
+      durasi_hari: isNaN(durasi) ? 30 : durasi
+    };
+
+    const ok = await onSubmit(plan.id, payloadToSend);
     if (ok) {
       setErrors({});
       onClose();

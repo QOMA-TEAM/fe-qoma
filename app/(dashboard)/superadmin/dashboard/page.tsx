@@ -8,7 +8,7 @@ import { ActivityLog } from "@/components/superadmin/dashboard/activity-log";
 import { PendingApprovals } from "@/components/superadmin/dashboard/pending-approval";
 import { SubscriptionPlanChart } from "@/components/superadmin/dashboard/subcription-plan-chart";
 import { UsahaStatusChart } from "@/components/superadmin/dashboard/usaha-status";
-import { dashboardService } from "@/services/superadmin/dashboardServices";
+import { dashboardService } from "@/hooks/superadmin/use-dashboard";
 import {
   DashboardStatsResponse,
   MRRFilter,
@@ -85,38 +85,36 @@ export default function DashboardPage() {
           }
         />
 
-        {/* Main Grid: Chart + Activity Log */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* MRR Chart (spans 2 cols) */}
-          <div className="xl:col-span-2 space-y-6">
-            <MRRChart
-              mrrData={mrr ?? undefined}
-              filter={mrrFilter}
-              onFilterChange={setMrrFilter}
-              isLoading={loadingMrr}
-            />
+        {/* MRR Chart (Full width) */}
+        <MRRChart
+          mrrData={mrr ?? undefined}
+          filter={mrrFilter}
+          onFilterChange={setMrrFilter}
+          isLoading={loadingMrr}
+        />
 
-            {/* Second row: Subscription + Status */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <SubscriptionPlanChart
-                plans={stats?.subscription_by_plan ?? []}
-                isLoading={loadingStats}
-              />
-              <UsahaStatusChart
-                status={
-                  stats?.usaha_by_status ?? {
-                    active: 0,
-                    pending: 0,
-                    suspended: 0,
-                    rejected: 0,
-                  }
+        {/* Bottom Grid: 2 Charts + Activity Log */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Left Side: Subscription + Status (2 cols) */}
+          <div className="xl:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <SubscriptionPlanChart
+              plans={stats?.subscription_by_plan ?? []}
+              isLoading={loadingStats}
+            />
+            <UsahaStatusChart
+              status={
+                stats?.usaha_by_status ?? {
+                  active: 0,
+                  pending: 0,
+                  suspended: 0,
+                  rejected: 0,
                 }
-                isLoading={loadingStats}
-              />
-            </div>
+              }
+              isLoading={loadingStats}
+            />
           </div>
 
-          {/* Activity Log (1 col) */}
+          {/* Right Side: Activity Log (1 col) */}
           <div className="xl:col-span-1">
             <ActivityLog
               activities={stats?.recent_activities ?? []}

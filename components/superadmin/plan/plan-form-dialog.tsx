@@ -68,8 +68,8 @@ export function PlanFormFields({
             type="number"
             min={0}
             placeholder="0"
-            value={values.harga ?? ""}
-            onChange={(e) => onChange("harga", Number(e.target.value))}
+            value={values.harga === 0 ? "" : values.harga?.toString()}
+            onChange={(e) => onChange("harga", e.target.value === "" ? 0 : Number(e.target.value))}
             className={`h-10 border-gray-200 focus-visible:ring-blue-500 ${
               errors?.harga ? "border-red-400" : ""
             }`}
@@ -120,8 +120,8 @@ export function PlanFormFields({
             type="number"
             min={1}
             placeholder="0"
-            value={values.batas_outlet ?? ""}
-            onChange={(e) => onChange("batas_outlet", Number(e.target.value))}
+            value={values.batas_outlet === 0 ? "" : values.batas_outlet?.toString()}
+            onChange={(e) => onChange("batas_outlet", e.target.value === "" ? 0 : Number(e.target.value))}
             className={`h-10 border-gray-200 focus-visible:ring-blue-500 ${
               errors?.batas_outlet ? "border-red-400" : ""
             }`}

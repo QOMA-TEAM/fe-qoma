@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Loader2, XCircle } from "lucide-react";
-import { subscriptionService } from "@/services/superadmin/newTenantServices";
+import { subscriptionService } from "@/hooks/superadmin/new-tenant";
 
 interface Props {
   subscriptionId: string | null;

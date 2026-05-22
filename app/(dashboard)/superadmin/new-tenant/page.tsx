@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { subscriptionService } from "@/services/superadmin/newTenantServices";
+import { subscriptionService } from "@/hooks/superadmin/new-tenant";
 import type {
   Subscription,
   SubscriptionStatus,
@@ -30,6 +30,7 @@ import type {
 import { DetailNewTenantDialog } from "@/components/superadmin/new-tenant/newTenant-detail-dialog";
 import { NewTenantFormDialog } from "@/components/superadmin/new-tenant/newTenant-form-dialog";
 import { CancelSubscriptionDialog } from "@/components/superadmin/new-tenant/modul-cancel";
+import { SuperadminHeader } from "@/components/superadmin/header";
 
 // ── Status badge config ───────────────────────────────────────────────────────
 const statusConfig: Record<
@@ -110,13 +111,15 @@ export default function NewTenantPage() {
 
   const openCancel = (sub: Subscription) => {
     setSelectedId(sub.id);
-    setSelectedName(sub.usaha.nama_usaha);
+    // Safe access with a fallback name
+    setSelectedName(sub.usaha?.nama_usaha ?? "Tenant Tidak Diketahui");
     setCancelOpen(true);
   };
-
   return (
     <div className="space-y-5">
       {/* ── Header ── */}
+      <SuperadminHeader title="Kelola New Tenant" description="Total" />
+
       <div>
         <h2 className="text-2xl font-bold text-gray-800">Kelola New Tenant</h2>
         <p className="text-sm text-gray-500 mt-0.5">
@@ -188,81 +191,89 @@ export default function NewTenantPage() {
           <tbody>
             {loading
               ? Array.from({ length: 8 }).map((_, i) => (
-                  <tr key={i} className="border-b border-gray-50">
-                    {Array.from({ length: 7 }).map((__, j) => (
-                      <td key={j} className="px-5 py-3.5">
-                        <Skeleton className="h-4 w-full" />
-                      </td>
-                    ))}
-                  </tr>
-                ))
+                <tr key={i} className="border-b border-gray-50">
+                  {Array.from({ length: 7 }).map((__, j) => (
+                    <td key={j} className="px-5 py-3.5">
+                      <Skeleton className="h-4 w-full" />
+                    </td>
+                  ))}
+                </tr>
+              ))
               : rows.map((sub, i) => (
-                  <tr
-                    key={sub.id}
-                    className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
-                  >
-                    <td className="px-5 py-3.5 text-gray-400">
-                      {(page - 1) * 15 + i + 1}
-                    </td>
-                    <td className="px-5 py-3.5 font-medium text-gray-800">
-                      {sub.usaha.nama_usaha}
-                    </td>
-                    <td className="px-5 py-3.5 text-gray-600">
-                      {sub.usaha.owner.nama_lengkap}
-                    </td>
-                    <td className="px-5 py-3.5 text-gray-600">
-                      {sub.plan.nama_plan}
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <Badge
-                        variant="outline"
-                        className={statusConfig[sub.status].className}
-                      >
-                        {statusConfig[sub.status].label}
-                      </Badge>
-                    </td>
-                    <td className="px-5 py-3.5 text-gray-500 whitespace-nowrap">
-                      {new Date(sub.start_date).toLocaleDateString("id-ID")}
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-1.5">
-                        {/* Detail */}
+                <tr
+                  key={sub.id}
+                  className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
+                >
+                  <td className="px-5 py-3.5 text-gray-400">
+                    {(page - 1) * 15 + i + 1}
+                  </td>
+
+                  {/* Safely handle usaha.nama_usaha */}
+                  <td className="px-5 py-3.5 font-medium text-gray-800">
+                    {sub.usaha?.nama_usaha ?? "-"}
+                  </td>
+
+                  {/* Safely handle usaha.owner.nama_lengkap */}
+                  <td className="px-5 py-3.5 text-gray-600">
+                    {sub.usaha?.owner?.nama_lengkap ?? "-"}
+                  </td>
+
+                  {/* Safely handle plan.nama_plan */}
+                  <td className="px-5 py-3.5 text-gray-600">
+                    {sub.plan?.nama_plan ?? "-"}
+                  </td>
+
+                  <td className="px-5 py-3.5">
+                    <Badge
+                      variant="outline"
+                      className={statusConfig[sub.status]?.className}
+                    >
+                      {statusConfig[sub.status]?.label}
+                    </Badge>
+                  </td>
+
+                  <td className="px-5 py-3.5 text-gray-500 whitespace-nowrap">
+                    {sub.start_date ? new Date(sub.start_date).toLocaleDateString("id-ID") : "-"}
+                  </td>
+
+                  {/* ... rest of your action buttons ... */}
+                  <td className="px-5 py-3.5 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      {sub.status === "pending" && (
                         <Button
+                          variant="ghost"
                           size="sm"
-                          variant="outline"
-                          className="h-7 px-2 text-xs gap-1"
-                          onClick={() => openDetail(sub.id)}
+                          className="text-blue-600 hover:bg-blue-50 hover:text-blue-700 h-8 w-8 px-0"
+                          onClick={() => openKonfirm(sub.id)}
+                          title="Konfirmasi"
                         >
-                          <Eye size={12} /> Detail
+                          <CheckCircle size={18} />
                         </Button>
-
-                        {/* Konfirmasi — hanya untuk pending */}
-                        {sub.status === "pending" && (
-                          <Button
-                            size="sm"
-                            className="h-7 px-2 text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
-                            onClick={() => openKonfirm(sub.id)}
-                          >
-                            <CheckCircle size={12} /> Konfirmasi
-                          </Button>
-                        )}
-
-                        {/* Cancel — hanya untuk pending & active */}
-                        {(sub.status === "pending" ||
-                          sub.status === "active") && (
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            className="h-7 px-2 text-xs gap-1"
-                            onClick={() => openCancel(sub)}
-                          >
-                            <XCircle size={12} /> Batalkan
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-400 hover:bg-gray-100 hover:text-gray-600 h-8 w-8 px-0"
+                        onClick={() => openDetail(sub.id)}
+                        title="Detail"
+                      >
+                        <Eye size={18} />
+                      </Button>
+                      {sub.status === "active" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:bg-red-50 hover:text-red-600 h-8 w-8 px-0"
+                          onClick={() => openCancel(sub)}
+                          title="Cancel"
+                        >
+                          <XCircle size={18} />
+                        </Button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
 

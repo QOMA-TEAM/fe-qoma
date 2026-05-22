@@ -37,6 +37,7 @@ export interface CreatePlanPayload {
   nama_plan: string;
   harga: number;
   tagihan: string;
+  durasi_hari?: number;
   batas_outlet: number | "Unlimited";
   deskripsi: string | null;
   status: "aktif" | "tidak aktif";
