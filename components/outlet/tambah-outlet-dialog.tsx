@@ -10,6 +10,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
+import { useAddOutlet } from "@/hooks/use-outlets"
+import { useUsaha } from "@/hooks/use-usaha"
+import { Loader2 } from "lucide-react"
 
 interface TambahOutletDialogProps {
   open: boolean
@@ -21,9 +24,13 @@ export function TambahOutletDialog({ open, onOpenChange }: TambahOutletDialogPro
     namaOutlet: "",
     alamatOutlet: "",
     emailOutlet: "",
+    username: "",
     password: "",
     konfirmasiPassword: "",
   })
+
+  const { data: usahaData, isLoading: isLoadingUsaha } = useUsaha()
+  const addMutation = useAddOutlet()
 
   const handleChange = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -31,10 +38,35 @@ export function TambahOutletDialog({ open, onOpenChange }: TambahOutletDialogPro
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Submit to API
-    console.log("Submit:", form)
-    onOpenChange(false)
-    setForm({ namaOutlet: "", alamatOutlet: "", emailOutlet: "", password: "", konfirmasiPassword: "" })
+
+    if (form.password !== form.konfirmasiPassword) {
+      alert("Password dan Konfirmasi Password tidak cocok!")
+      return
+    }
+
+    const usahaId = usahaData?.data?.[0]?.id
+    if (!usahaId) {
+      alert("Data usaha tidak ditemukan. Silakan reload halaman.")
+      return
+    }
+
+    const payload = {
+      nama_outlet: form.namaOutlet,
+      alamat: form.alamatOutlet,
+      email_outlet: form.emailOutlet,
+      username: form.username,
+      password: form.password,
+    }
+
+    addMutation.mutate({ usahaId, data: payload }, {
+      onSuccess: () => {
+        onOpenChange(false)
+        setForm({ namaOutlet: "", alamatOutlet: "", emailOutlet: "", username: "", password: "", konfirmasiPassword: "" })
+      },
+      onError: (err: any) => {
+        alert(err.response?.data?.message || "Gagal menambahkan outlet")
+      }
+    })
   }
 
   return (
@@ -92,6 +124,21 @@ export function TambahOutletDialog({ open, onOpenChange }: TambahOutletDialogPro
             />
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="username" className="text-sm font-semibold text-gray-700">
+              Username
+            </Label>
+            <Input
+              id="username"
+              type="text"
+              placeholder="Username Outlet"
+              value={form.username}
+              onChange={(e) => handleChange("username", e.target.value)}
+              className="rounded-lg border-gray-300"
+              required
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="password" className="text-sm font-semibold text-gray-700">
@@ -125,18 +172,11 @@ export function TambahOutletDialog({ open, onOpenChange }: TambahOutletDialogPro
 
           <div className="flex items-center justify-center gap-4 pt-2">
             <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="rounded-full px-8 border-red-400 text-red-500 hover:bg-red-50 hover:text-red-600"
-            >
-              Batal
-            </Button>
-            <Button
               type="submit"
-              className="rounded-full px-8 bg-[#1D5E84] hover:bg-[#154663] text-white"
+              disabled={addMutation.isPending || isLoadingUsaha}
+              className="rounded-lg px-8 bg-[#1D5E84] hover:bg-[#154663] text-white cursor-pointer"
             >
-              Submit
+              {(addMutation.isPending || isLoadingUsaha) ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
             </Button>
           </div>
         </form>

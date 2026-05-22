@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { Settings, Bell, Search, ChevronDown, ChevronUp, ChevronsUpDown, Store, Coins, TrendingDown, CircleDollarSign } from "lucide-react"
+import { useState } from "react"
+import { Settings, Bell, Search, ChevronDown, Store, Coins, TrendingDown, CircleDollarSign, Loader2, ArrowLeft, ArrowRight } from "lucide-react"
+import { HeaderActions } from "@/components/dashboard/header-actions"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
@@ -14,78 +14,49 @@ import {
   Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { cn } from "@/lib/utils"
+import { Badge } from "@/components/ui/badge"
 
-// ── Dummy Data ──
-type KeuanganItem = {
-  id: number
-  outlet: string
-  startDate: string
-  endDate: string
-  keuntungan: number
-  pengeluaran: number
+// Hooks
+import { useKeuanganSummary, useKeuanganList } from "@/hooks/use-keuangan"
+import { useOutlets } from "@/hooks/use-outlets"
+
+const formatRupiah = (number: number) => {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(number)
 }
 
-const keuanganList: KeuanganItem[] = [
-  { id: 1, outlet: "Budiono Burjo", startDate: "2026-04-29", endDate: "2026-04-29", keuntungan: 100000, pengeluaran: 10000 },
-  { id: 2, outlet: "Sari Dewi", startDate: "2026-05-15", endDate: "2026-05-15", keuntungan: 200000, pengeluaran: 20000 },
-  { id: 3, outlet: "Arief Hasan", startDate: "2026-06-10", endDate: "2026-06-10", keuntungan: 150000, pengeluaran: 15000 },
-  { id: 4, outlet: "Rina Sari", startDate: "2026-06-25", endDate: "2026-06-25", keuntungan: 250000, pengeluaran: 25000 },
-  { id: 5, outlet: "Budi Santoso", startDate: "2026-06-26", endDate: "2026-06-26", keuntungan: 300000, pengeluaran: 30000 },
-  { id: 6, outlet: "Siti Aminah", startDate: "2026-06-27", endDate: "2026-06-27", keuntungan: 150000, pengeluaran: 15000 },
-  { id: 7, outlet: "Joko Widodo", startDate: "2026-06-28", endDate: "2026-06-28", keuntungan: 500000, pengeluaran: 50000 },
-  { id: 8, outlet: "Dewi Lestari", startDate: "2026-06-29", endDate: "2026-06-29", keuntungan: 400000, pengeluaran: 40000 },
-  { id: 9, outlet: "Agus Prabowo", startDate: "2026-06-30", endDate: "2026-06-30", keuntungan: 350000, pengeluaran: 35000 },
-  { id: 10, outlet: "Nina Fitria", startDate: "2026-07-01", endDate: "2026-07-01", keuntungan: 450000, pengeluaran: 45000 },
-  { id: 11, outlet: "Hendri Gani", startDate: "2026-07-02", endDate: "2026-07-02", keuntungan: 550000, pengeluaran: 55000 },
-  { id: 12, outlet: "Lina Safitri", startDate: "2026-07-03", endDate: "2026-07-03", keuntungan: 600000, pengeluaran: 60000 },
-]
-
-type SortKey = "id" | "outlet" | "startDate" | "endDate" | "keuntungan" | "pengeluaran"
-type SortDir = "asc" | "desc"
-
 export default function DetailKeuanganPage() {
-  const [search, setSearch] = useState("")
-  const [sortKey, setSortKey] = useState<SortKey>("id")
-  const [sortDir, setSortDir] = useState<SortDir>("asc")
+  const [range, setRange] = useState("7days")
+  const [tipe, setTipe] = useState("semua")
+  const [outletId, setOutletId] = useState<string>("")
+  const [page, setPage] = useState(1)
 
-  const handleSort = (key: SortKey) => {
-    if (sortKey === key) setSortDir((p) => (p === "asc" ? "desc" : "asc"))
-    else { setSortKey(key); setSortDir("asc") }
+  // Fetch Data
+  const { data: summaryResponse, isLoading: isLoadingSummary } = useKeuanganSummary(range, outletId || undefined)
+  const { data: listResponse, isLoading: isLoadingList } = useKeuanganList(page, range, tipe, outletId || undefined, 15)
+  const { data: outletsResponse } = useOutlets()
+
+  const summary = summaryResponse?.data
+  const transactions = listResponse?.data || []
+  const meta = listResponse?.meta
+  const outlets = outletsResponse?.data || []
+
+  const rangeLabels: Record<string, string> = {
+    "1day": "Hari Ini",
+    "7days": "7 Hari Terakhir",
+    "30days": "30 Hari Terakhir"
   }
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase()
-    return keuanganList.filter((item) => item.outlet.toLowerCase().includes(q))
-  }, [search])
-
-  const sorted = useMemo(() => {
-    return [...filtered].sort((a, b) => {
-      const av = a[sortKey]; const bv = b[sortKey]
-      if (av < bv) return sortDir === "asc" ? -1 : 1
-      if (av > bv) return sortDir === "asc" ? 1 : -1
-      return 0
-    })
-  }, [filtered, sortKey, sortDir])
-
-  const SortIcon = ({ col }: { col: SortKey }) => {
-    if (sortKey !== col) return <ChevronsUpDown className="w-3 h-3 ml-1 opacity-40" />
-    return sortDir === "asc" ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />
+  const tipeLabels: Record<string, string> = {
+    "semua": "Semua Tipe",
+    "pendapatan": "Pendapatan",
+    "pengeluaran": "Pengeluaran",
+    "kerugian": "Kerugian"
   }
-
-  const columns: { key: SortKey; label: string; className?: string }[] = [
-    { key: "id", label: "No", className: "w-16 text-center" },
-    { key: "outlet", label: "Outlet", className: "text-center" },
-    { key: "startDate", label: "Start Date", className: "text-center" },
-    { key: "endDate", label: "End Date", className: "text-center" },
-    { key: "keuntungan", label: "Keuntungan", className: "text-center" },
-    { key: "pengeluaran", label: "Pengeluaran", className: "text-center" },
-  ]
-
-  const sortOptions: { key: SortKey; label: string }[] = [
-    { key: "id", label: "No" },
-    { key: "keuntungan", label: "Keuntungan" },
-    { key: "pengeluaran", label: "Pengeluaran" },
-  ]
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50/40">
@@ -94,27 +65,15 @@ export default function DetailKeuanganPage() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/owner/dashboard" className="text-sm text-muted-foreground">QOMA</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
               <span className="text-sm text-muted-foreground">KEUANGAN</span>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage className="text-sm">Detail Keuangan</BreadcrumbPage>
+              <BreadcrumbPage className="text-sm">Detail</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="flex items-center gap-3">
-          <button type="button" className="flex items-center justify-center size-9 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-100 transition-colors" aria-label="Settings">
-            <Settings className="size-4" />
-          </button>
-          <button type="button" className="relative flex items-center justify-center size-9 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-100 transition-colors" aria-label="Notifications">
-            <Bell className="size-4" />
-            <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-orange-500 ring-2 ring-white" />
-          </button>
-        </div>
+        <HeaderActions />
       </header>
 
       {/* Content */}
@@ -126,75 +85,108 @@ export default function DetailKeuanganPage() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-[#2A49B8] text-white p-6 rounded-2xl shadow-sm relative overflow-hidden">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-white/20 p-2 rounded-lg">
-                <Store className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-sm font-medium opacity-90">Total Pendapatan</span>
-            </div>
-            <h3 className="text-2xl font-bold">Rp. 12.000.000</h3>
+        {isLoadingSummary ? (
+          <div className="flex justify-center items-center h-32">
+            <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
           </div>
+        ) : summary ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-[#2A49B8] text-white p-6 rounded-2xl shadow-sm relative overflow-hidden">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="bg-white/20 p-2 rounded-lg">
+                  <Store className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-sm font-medium opacity-90">Total Pendapatan</span>
+              </div>
+              <h3 className="text-2xl font-bold">{formatRupiah(summary.total_pendapatan)}</h3>
+            </div>
 
-          <div className="bg-[#29A364] text-white p-6 rounded-2xl shadow-sm relative overflow-hidden">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-white/20 p-2 rounded-lg">
-                <Coins className="w-5 h-5 text-white" />
+            <div className="bg-[#29A364] text-white p-6 rounded-2xl shadow-sm relative overflow-hidden">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="bg-white/20 p-2 rounded-lg">
+                  <Coins className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-sm font-medium opacity-90">Total Pengeluaran</span>
               </div>
-              <span className="text-sm font-medium opacity-90">Total Pengeluaran</span>
+              <h3 className="text-2xl font-bold">{formatRupiah(summary.total_pengeluaran)}</h3>
             </div>
-            <h3 className="text-2xl font-bold">Rp. 8.000.000</h3>
-          </div>
 
-          <div className="bg-[#F29C38] text-white p-6 rounded-2xl shadow-sm relative overflow-hidden">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-white/20 p-2 rounded-lg">
-                <TrendingDown className="w-5 h-5 text-white" />
+            <div className="bg-[#F29C38] text-white p-6 rounded-2xl shadow-sm relative overflow-hidden">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="bg-white/20 p-2 rounded-lg">
+                  <TrendingDown className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-sm font-medium opacity-90">Total Kerugian</span>
               </div>
-              <span className="text-sm font-medium opacity-90">Total Kerugian</span>
+              <h3 className="text-2xl font-bold">{formatRupiah(summary.total_kerugian)}</h3>
             </div>
-            <h3 className="text-2xl font-bold">Rp. 2.000.000</h3>
-          </div>
 
-          <div className="bg-[#5A9BE7] text-white p-6 rounded-2xl shadow-sm relative overflow-hidden">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-white/20 p-2 rounded-lg">
-                <CircleDollarSign className="w-5 h-5 text-white" />
+            <div className="bg-[#5A9BE7] text-white p-6 rounded-2xl shadow-sm relative overflow-hidden">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="bg-white/20 p-2 rounded-lg">
+                  <CircleDollarSign className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-sm font-medium opacity-90">Total Keuntungan</span>
               </div>
-              <span className="text-sm font-medium opacity-90">Total Keuntungan</span>
+              <h3 className="text-2xl font-bold">{formatRupiah(summary.total_keuntungan)}</h3>
+              {/* Background Icon Decoration */}
+              <CircleDollarSign className="absolute -bottom-6 -right-4 w-32 h-32 text-white/10" />
             </div>
-            <h3 className="text-2xl font-bold">Rp. 10.000.000</h3>
-            {/* Background Icon Decoration */}
-            <CircleDollarSign className="absolute -bottom-6 -right-4 w-32 h-32 text-white/10" />
           </div>
-        </div>
+        ) : null}
 
         {/* Controls */}
-        <div className="flex items-center justify-end gap-2 flex-wrap pt-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-1.5 text-sm border-gray-200 text-gray-700 h-9 rounded-full px-4 bg-white">
-                Sort By <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-36">
-              {sortOptions.map((item) => (
-                <DropdownMenuItem key={item.key} onClick={() => handleSort(item.key)} className={cn("cursor-pointer", sortKey === item.key && "font-medium text-blue-600")}>
-                  {item.label}
-                  {sortKey === item.key && <span className="ml-auto text-xs text-gray-400">{sortDir === "asc" ? "↑" : "↓"}</span>}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+          <div className="flex gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-1.5 text-sm border-gray-200 text-gray-700 h-9 rounded-full px-4 bg-white">
+                  {rangeLabels[range]} <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-40">
+                {Object.entries(rangeLabels).map(([key, label]) => (
+                  <DropdownMenuItem key={key} onClick={() => { setRange(key); setPage(1); }} className={cn("cursor-pointer", range === key && "font-medium text-blue-600")}>
+                    {label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-1.5 text-sm border-gray-200 text-gray-700 h-9 rounded-full px-4 bg-white">
+                  {tipeLabels[tipe]} <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-40">
+                {Object.entries(tipeLabels).map(([key, label]) => (
+                  <DropdownMenuItem key={key} onClick={() => { setTipe(key); setPage(1); }} className={cn("cursor-pointer", tipe === key && "font-medium text-blue-600")}>
+                    {label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <div className="flex gap-2 w-full sm:w-auto">
+             <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-1.5 text-sm border-gray-200 text-gray-700 h-9 rounded-full px-4 bg-white whitespace-nowrap">
+                  {outletId ? outlets.find(o => o.id === outletId)?.nama_outlet : "Semua Outlet"} <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 max-h-60 overflow-y-auto">
+                <DropdownMenuItem onClick={() => { setOutletId(""); setPage(1); }} className={cn("cursor-pointer", !outletId && "font-medium text-blue-600")}>
+                  Semua Outlet
                 </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <div className="relative">
-            <Input 
-              placeholder="Search" 
-              value={search} 
-              onChange={(e) => setSearch(e.target.value)} 
-              className="pr-9 h-9 w-44 text-sm border-gray-200 rounded-full bg-white" 
-            />
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                {outlets.map((outlet) => (
+                  <DropdownMenuItem key={outlet.id} onClick={() => { setOutletId(outlet.id); setPage(1); }} className={cn("cursor-pointer", outletId === outlet.id && "font-medium text-blue-600")}>
+                    {outlet.nama_outlet}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -203,48 +195,110 @@ export default function DetailKeuanganPage() {
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-100 hover:bg-gray-100 border-gray-200">
-                {columns.map((col) => {
-                  const isSortable = col.key === "id" || col.key === "keuntungan" || col.key === "pengeluaran"
-                  return (
-                    <TableHead 
-                      key={col.key} 
-                      className={cn(col.className, isSortable && "cursor-pointer select-none")} 
-                      onClick={isSortable ? () => handleSort(col.key) : undefined}
-                    >
-                      <div className={cn("flex items-center text-gray-600 font-semibold text-sm", (col.key === "id" || col.key === "outlet" || col.key === "startDate" || col.key === "endDate" || col.key === "keuntungan" || col.key === "pengeluaran") && "justify-center")}>
-                        {col.label}
-                        {isSortable && <SortIcon col={col.key} />}
-                      </div>
-                    </TableHead>
-                  )
-                })}
-                <TableHead className="w-28 text-center text-gray-600 font-semibold text-sm">Action</TableHead>
+                <TableHead className="w-32 text-gray-600 font-semibold text-sm">Tanggal</TableHead>
+                <TableHead className="text-gray-600 font-semibold text-sm">ID Transaksi</TableHead>
+                <TableHead className="text-gray-600 font-semibold text-sm">Outlet</TableHead>
+                <TableHead className="w-36 text-gray-600 font-semibold text-sm text-center">Tipe</TableHead>
+                <TableHead className="text-gray-600 font-semibold text-sm">Keterangan</TableHead>
+                <TableHead className="text-gray-600 font-semibold text-sm text-right">Nominal</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sorted.map((row) => (
-                <TableRow key={row.id} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
-                  <TableCell className="text-gray-500 text-sm text-center">{row.id}</TableCell>
-                  <TableCell className="text-gray-800 text-sm text-center">{row.outlet}</TableCell>
-                  <TableCell className="text-gray-600 text-sm text-center">{row.startDate}</TableCell>
-                  <TableCell className="text-gray-600 text-sm text-center">{row.endDate}</TableCell>
-                  <TableCell className="text-gray-600 text-sm text-center">Rp. {row.keuntungan.toLocaleString("id-ID")}</TableCell>
-                  <TableCell className="text-gray-600 text-sm text-center">Rp. {row.pengeluaran.toLocaleString("id-ID")}</TableCell>
-                  <TableCell className="text-center">
-                    <button onClick={() => console.log("View Keuangan", row.id)} className="bg-green-100 hover:bg-green-200 text-green-700 text-xs font-bold h-7 px-5 rounded-full transition-colors">
-                      VIEW
-                    </button>
+              {isLoadingList ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-48 text-center">
+                    <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
                   </TableCell>
                 </TableRow>
-              ))}
-              {sorted.length === 0 && (
+              ) : transactions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-gray-400 py-12 text-sm">Tidak ada data ditemukan.</TableCell>
+                  <TableCell colSpan={6} className="text-center text-gray-400 py-12 text-sm">Tidak ada transaksi ditemukan.</TableCell>
                 </TableRow>
+              ) : (
+                transactions.map((row) => (
+                  <TableRow key={row.id} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
+                    <TableCell className="text-gray-600 text-sm whitespace-nowrap">{row.tanggal}</TableCell>
+                    <TableCell className="text-gray-500 text-sm font-mono text-xs max-w-[120px] truncate" title={row.id}>{row.id}</TableCell>
+                    <TableCell className="text-gray-800 text-sm">{row.outlet}</TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="outline" className={cn(
+                        "rounded-full px-3 py-0.5 text-xs font-medium uppercase",
+                        row.tipe === "pendapatan" ? "border-emerald-400 text-emerald-700 bg-emerald-50" : 
+                        row.tipe === "pengeluaran" ? "border-rose-400 text-rose-700 bg-rose-50" : 
+                        "border-orange-400 text-orange-700 bg-orange-50"
+                      )}>
+                        {row.tipe}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-gray-600 text-sm truncate max-w-[200px]" title={row.keterangan}>{row.keterangan}</TableCell>
+                    <TableCell className="text-gray-800 font-medium text-sm text-right whitespace-nowrap">
+                      {row.tipe === 'pendapatan' ? '+' : '-'}{formatRupiah(row.nominal)}
+                    </TableCell>
+                  </TableRow>
+                ))
               )}
             </TableBody>
           </Table>
         </div>
+
+        {/* Pagination */}
+        {meta && meta.last_page > 1 && (
+          <div className="flex items-center justify-between mt-6">
+            <div className="text-sm text-gray-500">
+              Menampilkan <span className="font-medium text-gray-900">{meta.from}</span> sampai <span className="font-medium text-gray-900">{meta.to}</span> dari <span className="font-medium text-gray-900">{meta.total}</span> data
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="h-9 px-3 border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 bg-white"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Previous
+              </Button>
+              
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, meta.last_page) }, (_, i) => {
+                  let pageNum = page
+                  if (meta.last_page <= 5) pageNum = i + 1
+                  else if (page <= 3) pageNum = i + 1
+                  else if (page >= meta.last_page - 2) pageNum = meta.last_page - 4 + i
+                  else pageNum = page - 2 + i
+
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={page === pageNum ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setPage(pageNum)}
+                      className={cn(
+                        "h-9 w-9 p-0 border-gray-200",
+                        page === pageNum 
+                          ? "bg-[#1D5E84] hover:bg-[#154663] text-white border-transparent" 
+                          : "text-gray-600 hover:bg-gray-50 bg-white"
+                      )}
+                    >
+                      {pageNum}
+                    </Button>
+                  )
+                })}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
+                disabled={page === meta.last_page}
+                className="h-9 px-3 border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 bg-white"
+              >
+                Next
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   )

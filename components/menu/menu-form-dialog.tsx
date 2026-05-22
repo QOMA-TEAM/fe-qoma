@@ -226,7 +226,7 @@ export function MenuFormDialog({
 
               {/* Bahan Baku Gallery */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between ">
                   <Label className="text-sm font-semibold text-gray-700">Resep (Bahan Baku)</Label>
                   <div className="relative">
                     <Input
@@ -256,7 +256,7 @@ export function MenuFormDialog({
                                 : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
                             }`}
                           >
-                            <div className="w-full aspect-square bg-gray-100 flex items-center justify-center p-1">
+                            <div className="w-full aspect-square bg-gray-100 flex items-center justify-center p-1 cursor-pointer">
                               {bahan.gambar ? (
                                 <img 
                                   src={`http://localhost:8000/storage/${bahan.gambar}`} 
@@ -319,8 +319,8 @@ export function MenuFormDialog({
                         <Label className="text-xs text-gray-500 mb-1 block">Jml ({item.satuan || 'pcs'})</Label>
                         <Input
                           type="number"
-                          min={0.01}
-                          step={0.01}
+                          min={1}
+                          step={1}
                           value={item.jumlah}
                           onChange={(e) => updateJumlah(item.bahan_master_id, Number(e.target.value))}
                           className="rounded-lg border-gray-300 text-sm h-9"
@@ -339,6 +339,7 @@ export function MenuFormDialog({
                   id="harga"
                   type="number"
                   placeholder="15000"
+                  min={0}
                   value={harga}
                   onChange={(e) => setHarga(e.target.value)}
                   className="rounded-lg border-gray-300"
@@ -362,18 +363,7 @@ export function MenuFormDialog({
 
           {/* Buttons */}
           <div className="flex items-center justify-center gap-4 pt-6">
-            {mode === "edit" && (
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={isPending}
-                className="rounded-full px-8 bg-red-600 hover:bg-red-700 text-white font-semibold"
-              >
-                {deleteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Hapus"}
-              </Button>
-            )}
-            <Button type="submit" disabled={isPending} className="rounded-full px-8 bg-[#1D5E84] hover:bg-[#154663] text-white font-semibold">
+            <Button type="submit" disabled={isPending} className="rounded-lg px-8 bg-[#1D5E84] hover:bg-[#154663] text-white font-semibold cursor-pointer">
               {(addMutation.isPending || updateMutation.isPending) ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
             </Button>
           </div>
