@@ -12,7 +12,7 @@ import { ModalEditPlan } from "@/components/superadmin/plan/modal-edit-plan";
 import { ModalHapusPlan } from "@/components/superadmin/plan/modal-hapus-plan";
 import { PlanBreadcrumb } from "@/components/superadmin/plan/breadcrumb";
 import { SuperadminHeader } from "@/components/superadmin/header";
-import { usePlan } from "@/hooks/use-plan";
+import { usePlan } from "@/hooks/superadmin/use-plan";
 import { Plan } from "@/types/plan";
 
 export default function ManagementPlanPage() {

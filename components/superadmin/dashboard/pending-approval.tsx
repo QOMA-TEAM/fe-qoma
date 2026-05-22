@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { PendingApproval } from "@/types/dashboard";
+import { PendingApproval } from "@/types/superadmin/dashboard";
 import { CheckCircle, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
