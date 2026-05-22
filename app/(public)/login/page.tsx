@@ -1,62 +1,93 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { api } from "@/lib/axios"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { api } from "@/lib/axios";
+
+// ── Peta role → route ────────────────────────────────────────────────────────
+const ROLE_REDIRECT: Record<string, string> = {
+  super_admin: "/superadmin/dashboard",
+  owner: "/owner/dashboard",
+  kasir: "/kasir/dashboard",
+};
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     try {
-      const response = await api.post("/auth/login", {
-        email,
-        password,
-      })
-      
-      // Mengambil token
-      const token = response.data.access_token || response.data.token || response.data.data?.access_token
-      if (token) {
-        localStorage.setItem("token", token)
-        router.push("/owner/dashboard")
-      } else {
-        setError("Token tidak ditemukan pada respons server.")
+      const response = await api.post("/auth/login", { email, password });
+      const data = response.data;
+
+      // ── Ambil token ──────────────────────────────────────────────────────
+      const token: string =
+        data.access_token ?? data.token ?? data.data?.access_token ?? "";
+
+      if (!token) {
+        setError("Token tidak ditemukan pada respons server.");
+        return;
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Email atau password salah.")
+
+      // ── Ambil role ───────────────────────────────────────────────────────
+      const role: string =
+        data.role ??
+        data.user?.role ??
+        data.data?.role ??
+        data.data?.user?.role ??
+        "";
+
+      const destination = ROLE_REDIRECT[role];
+
+      if (!destination) {
+        setError(`Role "${role}" tidak dikenali. Hubungi administrator.`);
+        return;
+      }
+
+      // ── Simpan token & role ke localStorage + cookie (untuk middleware) ──
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", role);
+      document.cookie = `token=${token}; path=/; SameSite=Lax`;
+      document.cookie = `role=${role}; path=/; SameSite=Lax`;
+
+      router.push(destination);
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })
+        ?.response?.data?.message;
+      setError(msg ?? "Email atau password salah.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen bg-white">
       {/* Kolom Kiri: Branding Oranye */}
       <div className="hidden md:flex flex-col items-center justify-center w-[45%] relative bg-[#FF6600]">
-        
-        {/* Efek Wavy SVG */}
         <div className="absolute inset-y-0 right-0 w-24 pointer-events-none z-0 translate-x-[2px]">
-          <svg viewBox="0 0 100 1000" preserveAspectRatio="none" className="h-full w-full fill-white">
+          <svg
+            viewBox="0 0 100 1000"
+            preserveAspectRatio="none"
+            className="h-full w-full fill-white"
+          >
             <path d="M100,0 C-20,300 120,700 100,1000 Z" />
           </svg>
         </div>
-
         <div className="relative z-10 flex flex-col items-center -ml-8">
           <div className="bg-white rounded-[2rem] p-6 shadow-xl mb-8 flex items-center justify-center size-48">
             <Image
-              src="/logoqoma.svg" 
+              src="/logoqoma.svg"
               alt="QOMA Logo"
               width={140}
               height={140}
@@ -64,7 +95,9 @@ export default function LoginPage() {
             />
           </div>
           <h1 className="text-white text-[32px] font-extrabold text-center leading-tight tracking-wide">
-            QOMA - QR ORDER<br />MANAJEMEN
+            QOMA - QR ORDER
+            <br />
+            MANAJEMEN
           </h1>
         </div>
       </div>
@@ -77,16 +110,19 @@ export default function LoginPage() {
               Welcome Back
             </h2>
           </div>
-          
+
           <form onSubmit={handleLogin} className="space-y-6">
             {error && (
               <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm font-medium border border-red-200">
                 {error}
               </div>
             )}
-            
+
             <div className="space-y-2.5">
-              <Label htmlFor="email" className="text-[15px] font-bold text-gray-900">
+              <Label
+                htmlFor="email"
+                className="text-[15px] font-bold text-gray-900"
+              >
                 Email
               </Label>
               <Input
@@ -101,7 +137,10 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2.5 pt-2">
-              <Label htmlFor="password" className="text-[15px] font-bold text-gray-900">
+              <Label
+                htmlFor="password"
+                className="text-[15px] font-bold text-gray-900"
+              >
                 Password
               </Label>
               <Input
@@ -128,5 +167,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
