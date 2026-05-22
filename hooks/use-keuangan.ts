@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { api } from "@/lib/axios"
+import api from "@/lib/axios"
 import { KeuanganSummaryResponse, KeuanganListResponse } from "@/types/keuangan"
 
 export const useKeuanganSummary = (range: string = "7days", outletId?: string) => {

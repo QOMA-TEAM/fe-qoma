@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { api } from "@/lib/axios"
+import api from "@/lib/axios"
 import { PaginatedKategoriResponse, KategoriMaster } from "@/types/kategori"
 
 export const useKategori = (page: number = 1, search: string = "", per_page: number = 10) => {

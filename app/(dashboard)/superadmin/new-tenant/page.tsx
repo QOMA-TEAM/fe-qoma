@@ -1,444 +1,339 @@
 "use client";
 
-import { AppSidebar } from "@/components/app-sidebar";
+import { useCallback, useEffect, useState } from "react";
 import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { useState, useMemo } from "react";
+  Eye,
+  CheckCircle,
+  XCircle,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ChevronDown, ChevronUp, ChevronsUpDown, Search } from "lucide-react";
-import { cn } from "@/lib/utils";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-type Subscription = {
-  id: number;
-  namaPerusahaan: string;
-  createdAt: string;
-  updatedAt: string;
-  jenisSubscription: string;
-  kadaluarsaSubscription: string;
+import { subscriptionService } from "@/hooks/superadmin/new-tenant";
+import type {
+  Subscription,
+  SubscriptionStatus,
+} from "@/types/superadmin/new-tenant";
+
+import { DetailNewTenantDialog } from "@/components/superadmin/new-tenant/newTenant-detail-dialog";
+import { NewTenantFormDialog } from "@/components/superadmin/new-tenant/newTenant-form-dialog";
+import { CancelSubscriptionDialog } from "@/components/superadmin/new-tenant/modul-cancel";
+import { SuperadminHeader } from "@/components/superadmin/header";
+
+// ── Status badge config ───────────────────────────────────────────────────────
+const statusConfig: Record<
+  SubscriptionStatus,
+  { label: string; className: string }
+> = {
+  active: {
+    label: "Aktif",
+    className: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  },
+  pending: {
+    label: "Pending",
+    className: "bg-amber-100 text-amber-700 border-amber-200",
+  },
+  cancelled: {
+    label: "Dibatalkan",
+    className: "bg-red-100 text-red-700 border-red-200",
+  },
+  expired: {
+    label: "Expired",
+    className: "bg-gray-100 text-gray-600 border-gray-200",
+  },
 };
 
-const subscriptions: Subscription[] = [
-  {
-    id: 1,
-    namaPerusahaan: "Budiono Burjo",
-    createdAt: "2026-04-29",
-    updatedAt: "2026-04-29",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-05-29",
-  },
-  {
-    id: 2,
-    namaPerusahaan: "Aisha Karim",
-    createdAt: "2026-05-01",
-    updatedAt: "2026-05-01",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-06-01",
-  },
-  {
-    id: 3,
-    namaPerusahaan: "Carlos Mendez",
-    createdAt: "2026-05-05",
-    updatedAt: "2026-05-05",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-06-05",
-  },
-  {
-    id: 4,
-    namaPerusahaan: "Diana Lee",
-    createdAt: "2026-05-10",
-    updatedAt: "2026-05-10",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-06-10",
-  },
-  {
-    id: 5,
-    namaPerusahaan: "Ethan Kim",
-    createdAt: "2026-05-15",
-    updatedAt: "2026-05-15",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-06-15",
-  },
-  {
-    id: 6,
-    namaPerusahaan: "Fatima Zahir",
-    createdAt: "2026-05-20",
-    updatedAt: "2026-05-20",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-06-20",
-  },
-  {
-    id: 7,
-    namaPerusahaan: "George Clark",
-    createdAt: "2026-05-25",
-    updatedAt: "2026-05-25",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-06-25",
-  },
-  {
-    id: 8,
-    namaPerusahaan: "Hannah Patel",
-    createdAt: "2026-06-01",
-    updatedAt: "2026-06-01",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-07-01",
-  },
-  {
-    id: 9,
-    namaPerusahaan: "Ian Chen",
-    createdAt: "2026-06-05",
-    updatedAt: "2026-06-05",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-07-05",
-  },
-  {
-    id: 10,
-    namaPerusahaan: "Jasmine Wu",
-    createdAt: "2026-06-10",
-    updatedAt: "2026-06-10",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-07-10",
-  },
-  {
-    id: 11,
-    namaPerusahaan: "Kevin O'Brien",
-    createdAt: "2026-06-15",
-    updatedAt: "2026-06-15",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-07-15",
-  },
-  {
-    id: 12,
-    namaPerusahaan: "Lara Thompson",
-    createdAt: "2026-06-20",
-    updatedAt: "2026-06-20",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-07-20",
-  },
-  {
-    id: 13,
-    namaPerusahaan: "Mohammed Ali",
-    createdAt: "2026-06-25",
-    updatedAt: "2026-06-25",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-07-25",
-  },
-  {
-    id: 14,
-    namaPerusahaan: "Nora Smith",
-    createdAt: "2026-07-01",
-    updatedAt: "2026-07-01",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-08-01",
-  },
-  {
-    id: 15,
-    namaPerusahaan: "Oscar Garcia",
-    createdAt: "2026-07-05",
-    updatedAt: "2026-07-05",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-08-05",
-  },
-  {
-    id: 16,
-    namaPerusahaan: "Penny Wong",
-    createdAt: "2026-07-10",
-    updatedAt: "2026-07-10",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-08-10",
-  },
-  {
-    id: 17,
-    namaPerusahaan: "Quinton Reyes",
-    createdAt: "2026-07-15",
-    updatedAt: "2026-07-15",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-08-15",
-  },
-  {
-    id: 18,
-    namaPerusahaan: "Rita Johnson",
-    createdAt: "2026-07-20",
-    updatedAt: "2026-07-20",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-08-20",
-  },
-  {
-    id: 19,
-    namaPerusahaan: "Simon Hayes",
-    createdAt: "2026-07-25",
-    updatedAt: "2026-07-25",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-08-25",
-  },
-  {
-    id: 20,
-    namaPerusahaan: "Tina Nguyen",
-    createdAt: "2026-07-30",
-    updatedAt: "2026-07-30",
-    jenisSubscription: "Pro",
-    kadaluarsaSubscription: "2026-08-30",
-  },
-];
+export default function NewTenantPage() {
+  // ── Data state ──────────────────────────────────────────────────────────────
+  const [rows, setRows] = useState<Subscription[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+  const [total, setTotal] = useState(0);
 
-type SortKey = keyof Subscription;
-type SortDir = "asc" | "desc";
-
-export default function DetailSubscriptionPage() {
+  // ── Filter state ────────────────────────────────────────────────────────────
   const [search, setSearch] = useState("");
-  const [sortKey, setSortKey] = useState<SortKey>("id");
-  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [status, setStatus] = useState<string>("all");
 
-  const handleColumnSort = (key: SortKey) => {
-    if (sortKey === key) {
-      setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortKey(key);
-      setSortDir("asc");
+  // ── Dialog state ────────────────────────────────────────────────────────────
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedName, setSelectedName] = useState<string>("");
+
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [konfirmOpen, setKonfirmOpen] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
+
+  // ── Fetch ───────────────────────────────────────────────────────────────────
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await subscriptionService.list(
+        {
+          search: search || undefined,
+          status: status !== "all" ? (status as SubscriptionStatus) : undefined,
+        },
+        15,
+      );
+      setRows(res.data);
+      setLastPage(res.meta.last_page);
+      setTotal(res.meta.total);
+    } finally {
+      setLoading(false);
     }
+  }, [search, status, page]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // ── Helpers ─────────────────────────────────────────────────────────────────
+  const openDetail = (id: string) => {
+    setSelectedId(id);
+    setDetailOpen(true);
   };
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase();
-    return subscriptions.filter(
-      (s) =>
-        s.namaPerusahaan.toLowerCase().includes(q) ||
-        s.jenisSubscription.toLowerCase().includes(q),
-    );
-  }, [search]);
-
-  const sorted = useMemo(() => {
-    return [...filtered].sort((a, b) => {
-      const av = a[sortKey];
-      const bv = b[sortKey];
-      if (av < bv) return sortDir === "asc" ? -1 : 1;
-      if (av > bv) return sortDir === "asc" ? 1 : -1;
-      return 0;
-    });
-  }, [filtered, sortKey, sortDir]);
-
-  const SortIcon = ({ col }: { col: SortKey }) => {
-    if (sortKey !== col)
-      return <ChevronsUpDown className="w-3 h-3 ml-1 opacity-40" />;
-    return sortDir === "asc" ? (
-      <ChevronUp className="w-3 h-3 ml-1" />
-    ) : (
-      <ChevronDown className="w-3 h-3 ml-1" />
-    );
+  const openKonfirm = (id: string) => {
+    setSelectedId(id);
+    setKonfirmOpen(true);
   };
 
-  const sortOptions: { key: SortKey; label: string }[] = [
-    { key: "id", label: "No" },
-    { key: "namaPerusahaan", label: "Nama Perusahaan" },
-    { key: "createdAt", label: "Created At" },
-    { key: "kadaluarsaSubscription", label: "Kadaluarsa" },
-  ];
-
+  const openCancel = (sub: Subscription) => {
+    setSelectedId(sub.id);
+    // Safe access with a fallback name
+    setSelectedName(sub.usaha?.nama_usaha ?? "Tenant Tidak Diketahui");
+    setCancelOpen(true);
+  };
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        {/* Top Header Bar */}
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <span className="text-muted-foreground text-sm">
-                  Management Subscription
-                </span>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Detail Subscription</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </header>
+    <div className="space-y-5">
+      {/* ── Header ── */}
+      <SuperadminHeader title="Kelola New Tenant" description="Total" />
 
-        {/* Page Content */}
-        <div className="p-8">
-          {/* Page Title + Controls */}
-          <div className="flex items-start justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">
-                Detail Subscription
-              </h1>
-              <p className="text-sm text-orange-400 mt-0.5">
-                Informasi Subscription
-              </p>
-            </div>
+      <div>
+        <h2 className="text-2xl font-bold text-gray-800">Kelola New Tenant</h2>
+        <p className="text-sm text-gray-500 mt-0.5">
+          Total <span className="font-semibold text-gray-700">{total}</span>{" "}
+          subscription
+        </p>
+      </div>
 
-            <div className="flex items-center gap-2">
-              {/* Sort By Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="gap-1.5 text-sm border-gray-200 text-gray-700 h-9 rounded-full px-4"
-                  >
-                    Sort By
-                    <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  {sortOptions.map((item) => (
-                    <DropdownMenuItem
-                      key={item.key}
-                      onClick={() => handleColumnSort(item.key)}
-                      className={cn(
-                        "cursor-pointer",
-                        sortKey === item.key && "font-medium text-blue-600",
-                      )}
-                    >
-                      {item.label}
-                      {sortKey === item.key && (
-                        <span className="ml-auto text-xs text-gray-400">
-                          {sortDir === "asc" ? "↑" : "↓"}
-                        </span>
-                      )}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {/* Search */}
-              <div className="relative">
-                <Input
-                  placeholder="Search"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pr-9 h-9 w-44 text-sm border-gray-200 rounded-full"
-                />
-                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              </div>
-            </div>
-          </div>
-
-          {/* Table */}
-          <div className="rounded-xl border border-gray-200 overflow-hidden bg-white">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-gray-50/80 hover:bg-gray-50/80 border-gray-200">
-                  {[
-                    { key: "id" as SortKey, label: "No", className: "w-16" },
-                    {
-                      key: "namaPerusahaan" as SortKey,
-                      label: "Nama Perusahaan",
-                      className: "",
-                    },
-                    {
-                      key: "createdAt" as SortKey,
-                      label: "Created At",
-                      className: "",
-                    },
-                    {
-                      key: "updatedAt" as SortKey,
-                      label: "Updated At",
-                      className: "",
-                    },
-                    {
-                      key: "jenisSubscription" as SortKey,
-                      label: "Jenis Subscription",
-                      className: "",
-                    },
-                    {
-                      key: "kadaluarsaSubscription" as SortKey,
-                      label: "Kadaluarsa Subscription",
-                      className: "",
-                    },
-                  ].map((col) => (
-                    <TableHead
-                      key={col.key}
-                      className={cn(
-                        "cursor-pointer select-none",
-                        col.className,
-                      )}
-                      onClick={() => handleColumnSort(col.key)}
-                    >
-                      <div className="flex items-center text-gray-600 font-semibold text-sm">
-                        {col.label}
-                        <SortIcon col={col.key} />
-                      </div>
-                    </TableHead>
-                  ))}
-                  <TableHead className="text-gray-600 font-semibold text-sm">
-                    Action
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sorted.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    className="hover:bg-gray-50/50 border-gray-100 transition-colors"
-                  >
-                    <TableCell className="text-gray-500 text-sm">
-                      {row.id}
-                    </TableCell>
-                    <TableCell className="text-gray-800 text-sm">
-                      {row.namaPerusahaan}
-                    </TableCell>
-                    <TableCell className="text-gray-600 text-sm">
-                      {row.createdAt}
-                    </TableCell>
-                    <TableCell className="text-gray-600 text-sm">
-                      {row.updatedAt}
-                    </TableCell>
-                    <TableCell className="text-gray-600 text-sm">
-                      {row.jenisSubscription}
-                    </TableCell>
-                    <TableCell className="text-gray-600 text-sm">
-                      {row.kadaluarsaSubscription}
-                    </TableCell>
-                    <TableCell>
-                      <button className="bg-green-100 hover:bg-green-200 text-green-700 text-xs font-bold h-7 px-5 rounded-full transition-colors">
-                        VIEW
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {sorted.length === 0 && (
-                  <TableRow>
-                    <TableCell
-                      colSpan={7}
-                      className="text-center text-gray-400 py-12 text-sm"
-                    >
-                      Tidak ada data ditemukan.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+      {/* ── Filters ── */}
+      <div className="flex gap-3 flex-wrap">
+        <div className="relative">
+          <Search
+            size={15}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
+          <Input
+            placeholder="Cari nama usaha..."
+            className="pl-9 w-64 text-sm"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+          />
         </div>
-      </SidebarInset>
-    </SidebarProvider>
+        <Select
+          value={status}
+          onValueChange={(v) => {
+            setStatus(v);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="w-40 text-sm">
+            <SelectValue placeholder="Semua Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua Status</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="active">Aktif</SelectItem>
+            <SelectItem value="cancelled">Dibatalkan</SelectItem>
+            <SelectItem value="expired">Expired</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* ── Table ── */}
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-gray-100 text-left">
+              {[
+                "No",
+                "Nama Usaha",
+                "Owner",
+                "Plan",
+                "Status",
+                "Mulai",
+                "Action",
+              ].map((h) => (
+                <th
+                  key={h}
+                  className="px-5 py-3.5 text-xs font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap"
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {loading
+              ? Array.from({ length: 8 }).map((_, i) => (
+                <tr key={i} className="border-b border-gray-50">
+                  {Array.from({ length: 7 }).map((__, j) => (
+                    <td key={j} className="px-5 py-3.5">
+                      <Skeleton className="h-4 w-full" />
+                    </td>
+                  ))}
+                </tr>
+              ))
+              : rows.map((sub, i) => (
+                <tr
+                  key={sub.id}
+                  className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
+                >
+                  <td className="px-5 py-3.5 text-gray-400">
+                    {(page - 1) * 15 + i + 1}
+                  </td>
+
+                  {/* Safely handle usaha.nama_usaha */}
+                  <td className="px-5 py-3.5 font-medium text-gray-800">
+                    {sub.usaha?.nama_usaha ?? "-"}
+                  </td>
+
+                  {/* Safely handle usaha.owner.nama_lengkap */}
+                  <td className="px-5 py-3.5 text-gray-600">
+                    {sub.usaha?.owner?.nama_lengkap ?? "-"}
+                  </td>
+
+                  {/* Safely handle plan.nama_plan */}
+                  <td className="px-5 py-3.5 text-gray-600">
+                    {sub.plan?.nama_plan ?? "-"}
+                  </td>
+
+                  <td className="px-5 py-3.5">
+                    <Badge
+                      variant="outline"
+                      className={statusConfig[sub.status]?.className}
+                    >
+                      {statusConfig[sub.status]?.label}
+                    </Badge>
+                  </td>
+
+                  <td className="px-5 py-3.5 text-gray-500 whitespace-nowrap">
+                    {sub.start_date ? new Date(sub.start_date).toLocaleDateString("id-ID") : "-"}
+                  </td>
+
+                  {/* ... rest of your action buttons ... */}
+                  <td className="px-5 py-3.5 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      {sub.status === "pending" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-blue-600 hover:bg-blue-50 hover:text-blue-700 h-8 w-8 px-0"
+                          onClick={() => openKonfirm(sub.id)}
+                          title="Konfirmasi"
+                        >
+                          <CheckCircle size={18} />
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-400 hover:bg-gray-100 hover:text-gray-600 h-8 w-8 px-0"
+                        onClick={() => openDetail(sub.id)}
+                        title="Detail"
+                      >
+                        <Eye size={18} />
+                      </Button>
+                      {sub.status === "active" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:bg-red-50 hover:text-red-600 h-8 w-8 px-0"
+                          onClick={() => openCancel(sub)}
+                          title="Cancel"
+                        >
+                          <XCircle size={18} />
+                        </Button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+
+        {/* ── Pagination ── */}
+        {!loading && rows.length > 0 && (
+          <div className="flex items-center justify-between px-5 py-3.5 border-t border-gray-100">
+            <p className="text-xs text-gray-400">
+              Halaman {page} dari {lastPage}
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 px-3 text-xs"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                <ChevronLeft size={14} />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 px-3 text-xs"
+                onClick={() => setPage((p) => Math.min(lastPage, p + 1))}
+                disabled={page === lastPage}
+              >
+                <ChevronRight size={14} />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {!loading && rows.length === 0 && (
+          <div className="py-16 text-center text-sm text-gray-400">
+            Tidak ada data subscription.
+          </div>
+        )}
+      </div>
+
+      {/* ── Dialogs ── */}
+      <DetailNewTenantDialog
+        subscriptionId={selectedId}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+      />
+
+      <NewTenantFormDialog
+        subscriptionId={selectedId}
+        open={konfirmOpen}
+        onOpenChange={setKonfirmOpen}
+        onSuccess={fetchData}
+      />
+
+      <CancelSubscriptionDialog
+        subscriptionId={selectedId}
+        namaTenant={selectedName}
+        open={cancelOpen}
+        onOpenChange={setCancelOpen}
+        onSuccess={fetchData}
+      />
+    </div>
   );
 }

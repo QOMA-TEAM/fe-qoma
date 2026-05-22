@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { api } from "@/lib/axios"
+import api from "@/lib/axios"
 import { PaginatedBahanResponse, BahanMaster } from "@/types/bahan-baku"
 
 export const useBahanBaku = (page: number = 1, search: string = "", per_page: number = 10) => {

@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { api } from "@/lib/axios"
+import api from "@/lib/axios"
 
 interface ChangePasswordDialogProps {
   open: boolean
@@ -55,7 +55,7 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
     try {
       const response = await api.post("/auth/change-password", formData)
       setSuccess(response.data.message || "Password berhasil diubah.")
-      
+
       // Logout and redirect after 2 seconds
       setTimeout(() => {
         localStorage.removeItem("token")
@@ -119,7 +119,7 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
                 placeholder="Masukkan password lama"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="password_baru">Password Baru</Label>
               <Input
