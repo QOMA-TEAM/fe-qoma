@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { api } from "@/lib/axios";
+import api from "@/lib/axios";
 
 // ── Peta role → route ────────────────────────────────────────────────────────
 const ROLE_REDIRECT: Record<string, string> = {

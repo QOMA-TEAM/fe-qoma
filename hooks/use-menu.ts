@@ -1,11 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { api } from "@/lib/axios"
+import api from "@/lib/axios"
 import { PaginatedMenuResponse } from "@/types/menu"
 
 export const useMenu = (
-  page: number = 1, 
-  search: string = "", 
-  kategori_id: string = "", 
+  page: number = 1,
+  search: string = "",
+  kategori_id: string = "",
   is_active: string = ""
 ) => {
   return useQuery({

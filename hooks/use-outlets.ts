@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { api } from "@/lib/axios"
+import api from "@/lib/axios"
 import { PaginatedResponse, Outlet } from "@/types/outlet"
 
 export const useOutlets = (page: number = 1, search: string = "") => {

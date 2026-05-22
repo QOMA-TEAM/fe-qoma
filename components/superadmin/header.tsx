@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { Bell, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,12 +20,30 @@ export function SuperadminHeader({
   username = "Super Admin",
   notificationCount = 3,
 }: SuperadminHeader) {
+  const pathname = usePathname();
+
+  const getPageTitle = () => {
+    if (pathname === "/superadmin/dashboard") {
+      return `Welcome back, ${username}`;
+    }
+    if (pathname.includes("/superadmin/new-tenant")) {
+      return "Persetujuan Tenant Baru";
+    }
+    if (pathname.includes("/superadmin/plan")) {
+      return "Manajemen Plan";
+    }
+    if (pathname.includes("/superadmin/tenant")) {
+      return "Manajemen Tenant";
+    }
+    return "Dashboard";
+  };
+
   return (
     <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100">
       {/* Left: Welcome Text */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
-          Welcome back, {username}
+          {getPageTitle()}
         </h1>
       </div>
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { SuperadminHeader } from "@/components/superadmin/header";
 import { Separator } from "@/components/ui/separator";
 import {
   Breadcrumb,
@@ -256,25 +257,24 @@ export default function DetailSubscriptionPage() {
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <header className="flex items-center h-14 border-b px-6">
-        <Separator orientation="vertical" className="mr-2 h-4" />
+      <SuperadminHeader />
+      <Separator orientation="vertical" className="mr-2 h-4" />
 
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <span className="text-muted-foreground text-sm">
-                Management Subscription
-              </span>
-            </BreadcrumbItem>
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <span className="text-muted-foreground text-sm">
+              Management Subscription
+            </span>
+          </BreadcrumbItem>
 
-            <BreadcrumbSeparator />
+          <BreadcrumbSeparator />
 
-            <BreadcrumbItem>
-              <BreadcrumbPage>Detail Subscription</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </header>
+          <BreadcrumbItem>
+            <BreadcrumbPage>Detail Subscription</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       {/* Page Content */}
       <div className="p-8">
@@ -442,6 +442,6 @@ export default function DetailSubscriptionPage() {
           </Table>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
