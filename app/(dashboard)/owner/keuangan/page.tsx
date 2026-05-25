@@ -155,7 +155,7 @@ export default function DetailKeuanganPage() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-1.5 text-sm border-gray-200 text-gray-700 h-9 rounded-full px-4 bg-white">
+                <Button variant="outline" className="gap-1.5 text-sm border-gray-200 text-gray-700 h-9 rounded-full px-4 bg-white cursor-pointer">
                   {tipeLabels[tipe]} <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
                 </Button>
               </DropdownMenuTrigger>
@@ -172,8 +172,8 @@ export default function DetailKeuanganPage() {
           <div className="flex gap-2 w-full sm:w-auto">
              <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-1.5 text-sm border-gray-200 text-gray-700 h-9 rounded-full px-4 bg-white whitespace-nowrap">
-                  {outletId ? outlets.find(o => o.id === outletId)?.nama_outlet : "Semua Outlet"} <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+                <Button className="gap-1.5 text-sm text-white hover:text-white h-9 rounded-full px-4 bg-orange-600 focus:bg-orange-600 focus:text-white data-[state=open]:bg-orange-600 data-[state=open]:text-white cursor-pointer border-0 ring-0 focus-visible:ring-0">
+                  {outletId ? outlets.find(o => o.id === outletId)?.nama_outlet : "Semua Outlet"} <ChevronDown className="w-3.5 h-3.5 text-white" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 max-h-60 overflow-y-auto">
@@ -218,7 +218,7 @@ export default function DetailKeuanganPage() {
                 transactions.map((row) => (
                   <TableRow key={row.id} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
                     <TableCell className="text-gray-600 text-sm whitespace-nowrap">{row.tanggal}</TableCell>
-                    <TableCell className="text-gray-500 text-sm font-mono text-xs max-w-[120px] truncate" title={row.id}>{row.id}</TableCell>
+                    <TableCell className="text-gray-500 text-sm font-mono max-w-[120px] truncate" title={row.id}>{row.id}</TableCell>
                     <TableCell className="text-gray-800 text-sm">{row.outlet}</TableCell>
                     <TableCell className="text-center">
                       <Badge variant="outline" className={cn(
@@ -241,60 +241,46 @@ export default function DetailKeuanganPage() {
           </Table>
         </div>
 
-        {/* Pagination */}
-        {meta && meta.last_page > 1 && (
-          <div className="flex items-center justify-between mt-6">
-            <div className="text-sm text-gray-500">
-              Menampilkan <span className="font-medium text-gray-900">{meta.from}</span> sampai <span className="font-medium text-gray-900">{meta.to}</span> dari <span className="font-medium text-gray-900">{meta.total}</span> data
-            </div>
+        {/* Pagination Controls */}
+        {meta && meta.total > 0 && (
+          <div className="flex items-center justify-between pt-2">
+            <p className="text-sm text-gray-500">
+              Menampilkan Halaman <span className="font-medium text-gray-900">{meta.current_page}</span> dari <span className="font-medium text-gray-900">{meta.last_page}</span> halaman
+            </p>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="h-9 px-3 border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 bg-white"
+                className="h-8 rounded-full px-4 text-xs font-medium cursor-pointer"
               >
-                <ArrowLeft className="w-4 h-4 mr-2" />
                 Previous
               </Button>
-              
               <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, meta.last_page) }, (_, i) => {
-                  let pageNum = page
-                  if (meta.last_page <= 5) pageNum = i + 1
-                  else if (page <= 3) pageNum = i + 1
-                  else if (page >= meta.last_page - 2) pageNum = meta.last_page - 4 + i
-                  else pageNum = page - 2 + i
-
-                  return (
-                    <Button
-                      key={pageNum}
-                      variant={page === pageNum ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setPage(pageNum)}
-                      className={cn(
-                        "h-9 w-9 p-0 border-gray-200",
-                        page === pageNum 
-                          ? "bg-[#1D5E84] hover:bg-[#154663] text-white border-transparent" 
-                          : "text-gray-600 hover:bg-gray-50 bg-white"
-                      )}
-                    >
-                      {pageNum}
-                    </Button>
-                  )
-                })}
+                {Array.from({ length: meta.last_page }, (_, i) => i + 1).map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    onClick={() => setPage(pageNum)}
+                    className={cn(
+                      "size-8 rounded-full text-xs font-medium transition-colors",
+                      page === pageNum
+                        ? "bg-[#1D5E84] hover:bg-[#154663] text-white"
+                        : "text-gray-600 hover:bg-gray-100 cursor-pointer"
+                    )}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
               </div>
-
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
+                onClick={() => setPage(p => Math.min(meta.last_page, p + 1))}
                 disabled={page === meta.last_page}
-                className="h-9 px-3 border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 bg-white"
+                className="h-8 rounded-full px-4 text-xs font-medium cursor-pointer"
               >
                 Next
-                <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
           </div>

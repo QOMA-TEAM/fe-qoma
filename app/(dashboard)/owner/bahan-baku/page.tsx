@@ -98,21 +98,19 @@ export default function KelolaBahanBakuPage() {
 
       {/* Content */}
       <main className="flex-1 overflow-auto p-6 space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h2 className="text-2xl font-bold text-gray-800">Kelola Bahan Baku</h2>
             <p className="text-sm text-gray-500 mt-0.5">Informasi detail bahan baku</p>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap sm:justify-between">
             <div className="relative">
               <Input placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} className="pr-9 h-9 w-44 text-sm border-gray-200 rounded-full" />
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
-            <Button onClick={() => setTambahOpen(true)} className="h-9 rounded-lg bg-[#1D5E84] hover:bg-[#154663] text-white gap-1.5 px-4 text-sm cursor-pointer">
+            <Button onClick={() => setTambahOpen(true)} className="h-9 rounded-lg bg-orange-600 hover:bg-orange-700 text-white gap-1.5 px-4 text-sm cursor-pointer">
               <Plus className="size-4" /> Tambah Bahan Baku
             </Button>
           </div>
-        </div>
 
         {/* Table */}
         <div className="rounded-xl border border-gray-200 overflow-hidden bg-white">
@@ -198,9 +196,9 @@ export default function KelolaBahanBakuPage() {
 
         {/* Pagination Controls */}
         {meta && meta.total > 0 && (
-          <div className="flex items-center justify-between pt-2 cursor-pointer">
+          <div className="flex items-center justify-between pt-2">
             <p className="text-sm text-gray-500">
-              Menampilkan <span className="font-medium text-gray-900">{meta.from || 0}</span> hingga <span className="font-medium text-gray-900">{meta.to || 0}</span> dari <span className="font-medium text-gray-900">{meta.total}</span> data
+              Menampilkan Halaman <span className="font-medium text-gray-900">{meta.current_page}</span> dari <span className="font-medium text-gray-900">{meta.last_page}</span> halaman
             </p>
             <div className="flex items-center gap-2">
               <Button
@@ -220,7 +218,7 @@ export default function KelolaBahanBakuPage() {
                     className={cn(
                       "size-8 rounded-full text-xs font-medium transition-colors",
                       page === pageNum
-                        ? "bg-orange-500 text-white"
+                        ? "bg-[#1D5E84] hover:bg-[#154663] text-white"
                         : "text-gray-600 hover:bg-gray-100 cursor-pointer"
                     )}
                   >

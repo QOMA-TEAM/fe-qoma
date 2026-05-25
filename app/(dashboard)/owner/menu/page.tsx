@@ -101,46 +101,48 @@ export default function KelolaMenuPage() {
             <h2 className="text-2xl font-bold text-gray-800">Kelola Menu</h2>
             <p className="text-sm text-gray-500 mt-0.5">Informasi detail menu dan resep</p>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
+        </div>
+          <div className="flex items-center gap-2 flex-wrap sm:justify-between">
             {/* Categories Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-1.5 text-sm border-gray-200 text-gray-700 h-9 rounded-full px-4 cursor-pointer">
-                  {selectedCategory === "Semua Kategori" ? "Kategori" : selectedCategory} <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 max-h-[300px] overflow-y-auto">
-                <DropdownMenuItem 
-                  onClick={() => { setSelectedCategory("Semua Kategori"); setSelectedCategoryId(""); setPage(1); }} 
-                  className={cn("cursor-pointer", selectedCategory === "Semua Kategori" && "font-medium text-blue-600")}
-                >
-                  Semua Kategori
-                </DropdownMenuItem>
-                {categories.map((cat) => (
+            <div className="flex gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-1.5 text-sm border-gray-200 text-gray-700 h-9 rounded-full px-4 cursor-pointer">
+                    {selectedCategory === "Semua Kategori" ? "Kategori" : selectedCategory} <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 max-h-[300px] overflow-y-auto">
                   <DropdownMenuItem 
-                    key={cat.id} 
-                    onClick={() => { setSelectedCategory(cat.nama); setSelectedCategoryId(cat.id); setPage(1); }} 
-                    className={cn("cursor-pointer", selectedCategory === cat.nama && "font-medium text-blue-600")}
+                    onClick={() => { setSelectedCategory("Semua Kategori"); setSelectedCategoryId(""); setPage(1); }} 
+                    className={cn("cursor-pointer", selectedCategory === "Semua Kategori" && "font-medium text-blue-600")}
                   >
-                    {cat.nama}
+                    Semua Kategori
                   </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <div className="relative">
-              <Input 
-                placeholder="Search" 
-                value={search} 
-                onChange={(e) => { setSearch(e.target.value); setPage(1); }} 
-                className="pr-9 h-9 w-44 text-sm border-gray-200 rounded-full bg-white" 
-              />
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  {categories.map((cat) => (
+                    <DropdownMenuItem 
+                      key={cat.id} 
+                      onClick={() => { setSelectedCategory(cat.nama); setSelectedCategoryId(cat.id); setPage(1); }} 
+                      className={cn("cursor-pointer", selectedCategory === cat.nama && "font-medium text-blue-600")}
+                    >
+                      {cat.nama}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <div className="relative">
+                <Input 
+                  placeholder="Search" 
+                  value={search} 
+                  onChange={(e) => { setSearch(e.target.value); setPage(1); }} 
+                  className="pr-9 h-9 w-44 text-sm border-gray-200 rounded-full bg-white" 
+                />
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              </div>
             </div>
-            <Button onClick={() => setTambahOpen(true)} className="h-9 rounded-lg bg-[#1D5E84] hover:bg-[#154663] text-white gap-1.5 px-4 text-sm cursor-pointer">
+            <Button onClick={() => setTambahOpen(true)} className="h-9 rounded-lg bg-orange-600 hover:bg-orange-700 text-white gap-1.5 px-4 text-sm cursor-pointer">
               <Plus className="size-4" /> Tambah Menu
             </Button>
           </div>
-        </div>
 
         {/* Table */}
         <div className="rounded-xl border border-gray-200 overflow-hidden bg-white">
@@ -225,9 +227,9 @@ export default function KelolaMenuPage() {
 
         {/* Pagination Controls */}
         {meta && meta.total > 0 && (
-          <div className="flex items-center justify-between pt-2 cursor-pointer">
+          <div className="flex items-center justify-between pt-2">
             <p className="text-sm text-gray-500">
-              Menampilkan <span className="font-medium text-gray-900">{meta.from || 0}</span> hingga <span className="font-medium text-gray-900">{meta.to || 0}</span> dari <span className="font-medium text-gray-900">{meta.total}</span> data
+              Menampilkan Halaman <span className="font-medium text-gray-900">{meta.current_page}</span> dari <span className="font-medium text-gray-900">{meta.last_page}</span> halaman
             </p>
             <div className="flex items-center gap-2">
               <Button
@@ -247,7 +249,7 @@ export default function KelolaMenuPage() {
                     className={cn(
                       "size-8 rounded-full text-xs font-medium transition-colors",
                       page === pageNum
-                        ? "bg-orange-500 text-white"
+                        ? "bg-[#1D5E84] hover:bg-[#154663] text-white"
                         : "text-gray-600 hover:bg-gray-100"
                     )}
                   >
