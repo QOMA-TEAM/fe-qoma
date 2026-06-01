@@ -1,18 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
-import api from "@/lib/axios"
-import { KeuanganSummaryResponse, KeuanganListResponse } from "@/types/keuangan"
+import { keuanganService } from "@/services/keuangan"
 
 export const useKeuanganSummary = (range: string = "7days", outletId?: string) => {
   return useQuery({
     queryKey: ["keuangan-summary", range, outletId],
-    queryFn: async () => {
-      const params = new URLSearchParams()
-      if (range) params.append("range", range)
-      if (outletId) params.append("outlet_id", outletId)
-
-      const { data } = await api.get<KeuanganSummaryResponse>(`/owner/keuangan?${params}`)
-      return data
-    },
+    queryFn: () => keuanganService.getSummary(range, outletId),
   })
 }
 
@@ -25,17 +17,6 @@ export const useKeuanganList = (
 ) => {
   return useQuery({
     queryKey: ["keuangan-list", page, range, tipe, outletId, per_page],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        range: range,
-        tipe: tipe,
-        per_page: per_page.toString(),
-      })
-      if (outletId) params.append("outlet_id", outletId)
-
-      const { data } = await api.get<KeuanganListResponse>(`/owner/keuangan/list?${params}`)
-      return data
-    },
+    queryFn: () => keuanganService.getList(page, range, tipe, outletId, per_page),
   })
 }
