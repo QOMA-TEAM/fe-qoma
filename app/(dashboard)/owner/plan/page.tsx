@@ -1,31 +1,17 @@
 "use client"
 
-import { useState } from "react"
-import { Bell, CreditCard, Check, AlertCircle, Settings, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { HeaderActions } from "@/components/dashboard/header-actions"
 import {
-  Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
+  Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Badge } from "@/components/ui/badge"
-import { UpgradePlanDialog } from "@/components/plan/upgrade-plan-dialog"
 import { useActiveSubscription, useAvailablePlans } from "@/hooks/use-subscription"
+import { ActivePlanCard } from "@/components/owner/plan/active-plan-card"
+import { AvailablePlanCards } from "@/components/owner/plan/available-plan-cards"
 
 export default function PlanPage() {
-  const [upgradeOpen, setUpgradeOpen] = useState(false)
-  const [selectedPlanId, setSelectedPlanId] = useState<string>("")
-  const { data: activeSub, isLoading: loadingSub } = useActiveSubscription()
-  const { data: availablePlans, isLoading: loadingPlans } = useAvailablePlans()
-
-  const formatRupiah = (number: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(number)
-  }
-
-  const isPending = activeSub?.status === 'pending'
+  const { isLoading: loadingSub } = useActiveSubscription()
+  const { isLoading: loadingPlans } = useAvailablePlans()
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50/40">
@@ -59,78 +45,11 @@ export default function PlanPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
-            {/* Active Plan Card */}
-            {activeSub && (
-              <div className="bg-white rounded-xl border border-gray-200 p-8 flex flex-col h-[380px] shadow-sm relative">
-                <div className="flex justify-between items-start mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900">{activeSub.plan.nama_plan}</h3>
-                  <Badge variant="outline" className={`rounded-full px-5 text-sm font-medium py-1 ${isPending ? 'border-yellow-400 text-yellow-600 bg-yellow-50' : 'border-emerald-400 text-emerald-600 bg-emerald-50'}`}>
-                    {isPending ? 'Pending' : 'Aktif'}
-                  </Badge>
-                </div>
-                
-                <div className="mb-4">
-                  <div className="text-[32px] leading-none font-bold text-gray-900 mb-2">{formatRupiah(activeSub.plan.harga)}</div>
-                  <div className="text-gray-400 text-[15px] font-medium">Per 30 Hari</div>
-                </div>
-
-                <div className="border-t border-gray-800 my-6 w-full" />
-
-                <ul className="space-y-4 mb-8 flex-1">
-                  <li className="flex items-center text-gray-500 font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></span>
-                    {activeSub.plan.batas_outlet === 'Unlimited' ? 'Unlimited Outlet' : `${activeSub.plan.batas_outlet} Outlet`}
-                  </li>
-                  <li className="flex items-center text-gray-500 font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></span>
-                    Telah digunakan: {activeSub.penggunaan_outlet.dipakai} Outlet
-                  </li>
-                </ul>
-              </div>
-            )}
-
-            {/* Available Plans (Upgrade Options) */}
-            {availablePlans && availablePlans.map((plan) => (
-              <div key={plan.id} className="bg-[#F9FAFB] rounded-xl border border-gray-200 p-8 flex flex-col h-[380px] shadow-sm relative">
-                <div className="flex justify-between items-start mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900">{plan.nama_plan}</h3>
-                </div>
-                
-                <div className="mb-4">
-                  <div className="text-[32px] leading-none font-bold text-gray-900 mb-2">{formatRupiah(plan.harga)}</div>
-                  <div className="text-gray-400 text-[15px] font-medium">Per 30 Hari</div>
-                </div>
-
-                <div className="border-t border-gray-800 my-6 w-full" />
-
-                <ul className="space-y-4 mb-8 flex-1">
-                  <li className="flex items-center text-gray-500 font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></span>
-                    {plan.batas_outlet === 'Unlimited' ? 'Unlimited Outlet' : `${plan.batas_outlet} Outlet`}
-                  </li>
-                </ul>
-
-                <button 
-                  onClick={() => {
-                    setSelectedPlanId(plan.id)
-                    setUpgradeOpen(true)
-                  }}
-                  disabled={isPending}
-                  className={`w-full mt-auto text-white font-semibold py-3 px-4 rounded-lg transition-colors cursor-pointer ${isPending ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#EA580C] hover:bg-[#c2410c]'}`}
-                >
-                  {isPending ? 'Menunggu Konfirmasi Upgrade' : 'Upgrade Plan'}
-                </button>
-              </div>
-            ))}
+            <ActivePlanCard />
+            <AvailablePlanCards />
           </div>
         )}
       </main>
-
-      <UpgradePlanDialog 
-        open={upgradeOpen} 
-        onOpenChange={setUpgradeOpen} 
-        planId={selectedPlanId} 
-      />
     </div>
   )
 }
