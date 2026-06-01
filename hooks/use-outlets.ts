@@ -1,31 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import api from "@/lib/axios"
-import { PaginatedResponse, Outlet } from "@/types/outlet"
+import { outletService } from "@/services/outlet"
 
 export const useOutlets = (page: number = 1, search: string = "") => {
   return useQuery({
     queryKey: ["outlets", page, search],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        ...(search && { search }),
-      })
-      const response = await api.get<PaginatedResponse<Outlet>>(`/owner/outlet?${params}`)
-      return response.data
-    }
+    queryFn: () => outletService.getOutlets(page, search)
   })
 }
 
 export const useAddOutlet = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ usahaId, data }: { usahaId: string; data: any }) => {
-      const response = await api.post(`/owner/usaha/${usahaId}/outlet`, data)
-      return response.data
-    },
+    mutationFn: ({ usahaId, data }: { usahaId: string; data: any }) => 
+      outletService.addOutlet(usahaId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["outlets"] })
     },
   })
 }
-
