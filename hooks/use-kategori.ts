@@ -1,29 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import api from "@/lib/axios"
-import { PaginatedKategoriResponse, KategoriMaster } from "@/types/kategori"
+import { kategoriService } from "@/services/kategori"
 
 export const useKategori = (page: number = 1, search: string = "", per_page: number = 10) => {
   return useQuery({
     queryKey: ["kategori", page, search, per_page],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        per_page: per_page.toString(),
-        ...(search && { search }),
-      })
-      const response = await api.get<PaginatedKategoriResponse>(`/owner/kategori?${params}`)
-      return response.data
-    },
+    queryFn: () => kategoriService.getKategori(page, search, per_page),
   })
 }
 
 export const useAddKategori = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (nama: string) => {
-      const { data } = await api.post("/owner/kategori", { nama })
-      return data
-    },
+    mutationFn: (nama: string) => kategoriService.addKategori(nama),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["kategori"] })
     },
@@ -33,10 +21,7 @@ export const useAddKategori = () => {
 export const useUpdateKategori = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ id, nama }: { id: string; nama: string }) => {
-      const { data } = await api.post(`/owner/kategori/${id}`, { nama, _method: 'PUT' })
-      return data
-    },
+    mutationFn: ({ id, nama }: { id: string; nama: string }) => kategoriService.updateKategori(id, nama),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["kategori"] })
     },
@@ -46,10 +31,7 @@ export const useUpdateKategori = () => {
 export const useDeleteKategori = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (id: string) => {
-      const { data } = await api.post(`/owner/kategori/${id}`, { _method: 'DELETE' })
-      return data
-    },
+    mutationFn: (id: string) => kategoriService.deleteKategori(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["kategori"] })
     },
