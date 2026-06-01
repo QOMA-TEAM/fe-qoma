@@ -5,7 +5,7 @@ import { HeaderActions } from "@/components/dashboard/header-actions"
 import {
   Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { MenuFormDialog } from "@/components/menu/menu-form-dialog"
+import { MenuFormDialog } from "@/components/owner/menu/menu-form-dialog"
 import { MenuControls } from "@/components/owner/menu/menu-controls"
 import { MenuTable } from "@/components/owner/menu/menu-table"
 

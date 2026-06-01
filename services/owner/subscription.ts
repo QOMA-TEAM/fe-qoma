@@ -3,7 +3,7 @@ import type {
   ActiveSubscriptionResponse, 
   AvailablePlansResponse, 
   UpgradePlanPayload 
-} from "@/types/subscription"
+} from "@/types/owner/subscription"
 
 export const subscriptionService = {
   getActive: async () => {

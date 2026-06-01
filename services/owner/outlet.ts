@@ -1,5 +1,5 @@
 import api from "@/lib/axios"
-import type { PaginatedResponse, Outlet } from "@/types/outlet"
+import type { PaginatedResponse, Outlet } from "@/types/owner/outlet"
 
 export const outletService = {
   getOutlets: async (page: number = 1, search: string = "") => {

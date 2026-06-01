@@ -5,7 +5,7 @@ import { HeaderActions } from "@/components/dashboard/header-actions"
 import {
   Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { useActiveSubscription, useAvailablePlans } from "@/hooks/use-subscription"
+import { useActiveSubscription, useAvailablePlans } from "@/hooks/owner/use-subscription"
 import { ActivePlanCard } from "@/components/owner/plan/active-plan-card"
 import { AvailablePlanCards } from "@/components/owner/plan/available-plan-cards"
 

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { subscriptionService } from "@/services/subscription"
-import type { UpgradePlanPayload } from "@/types/subscription"
+import { subscriptionService } from "@/services/owner/subscription"
+import type { UpgradePlanPayload } from "@/types/owner/subscription"
 
 export const useActiveSubscription = () => {
   return useQuery({

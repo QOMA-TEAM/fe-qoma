@@ -7,7 +7,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
-import { useKategori } from "@/hooks/use-kategori"
+import { useKategori } from "@/hooks/owner/use-kategori"
 
 interface MenuControlsProps {
   search: string

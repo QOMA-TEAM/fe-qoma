@@ -7,10 +7,10 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { DetailOutletDialog } from "@/components/outlet/detail-outlet-dialog"
-import { useOutlets } from "@/hooks/use-outlets"
+import { DetailOutletDialog } from "@/components/owner/outlet/detail-outlet-dialog"
+import { useOutlets } from "@/hooks/owner/use-outlets"
 import { useDebounce } from "@/hooks/use-debounce"
-import { Outlet } from "@/types/outlet"
+import { Outlet } from "@/types/owner/outlet"
 
 type SortKey = "id" | "nama_outlet" | "alamat" | "email"
 type SortDir = "asc" | "desc"

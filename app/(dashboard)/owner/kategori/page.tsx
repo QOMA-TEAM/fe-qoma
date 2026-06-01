@@ -5,7 +5,7 @@ import { HeaderActions } from "@/components/dashboard/header-actions"
 import {
   Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { KategoriFormDialog } from "@/components/kategori/kategori-form-dialog"
+import { KategoriFormDialog } from "@/components/owner/kategori/kategori-form-dialog"
 import { KategoriControls } from "@/components/owner/kategori/kategori-controls"
 import { KategoriTable } from "@/components/owner/kategori/kategori-table"
 

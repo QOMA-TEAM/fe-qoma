@@ -1,7 +1,7 @@
 "use client"
 
 import { Store, Coins, TrendingDown, CircleDollarSign, Loader2 } from "lucide-react"
-import { useKeuanganSummary } from "@/hooks/use-keuangan"
+import { useKeuanganSummary } from "@/hooks/owner/use-keuangan"
 import { formatRupiah } from "@/lib/utils"
 
 interface KeuanganSummaryCardsProps {

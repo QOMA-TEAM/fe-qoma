@@ -1,7 +1,7 @@
 "use client"
 
 import { Home, CircleDollarSign, TrendingDown } from "lucide-react"
-import { useDashboardSummary } from "@/hooks/use-dashboard"
+import { useDashboardSummary } from "@/hooks/owner/use-dashboard"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { formatRupiah } from "@/lib/utils"
 

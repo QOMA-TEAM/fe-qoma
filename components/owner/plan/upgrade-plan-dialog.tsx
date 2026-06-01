@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select"
 import { useState, useEffect } from "react"
 import { QrCode, CreditCard, Loader2 } from "lucide-react"
-import { useUpgradePlan } from "@/hooks/use-subscription"
+import { useUpgradePlan } from "@/hooks/owner/use-subscription"
 import { toast } from "sonner"
 
 interface UpgradePlanDialogProps {

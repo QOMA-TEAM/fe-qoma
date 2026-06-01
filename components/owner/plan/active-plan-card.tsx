@@ -1,7 +1,7 @@
 "use client"
 
 import { Badge } from "@/components/ui/badge"
-import { useActiveSubscription } from "@/hooks/use-subscription"
+import { useActiveSubscription } from "@/hooks/owner/use-subscription"
 import { formatRupiah } from "@/lib/utils"
 
 export function ActivePlanCard() {

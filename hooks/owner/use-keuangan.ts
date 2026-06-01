@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { keuanganService } from "@/services/keuangan"
+import { keuanganService } from "@/services/owner/keuangan"
 
 export const useKeuanganSummary = (range: string = "7days", outletId?: string) => {
   return useQuery({

@@ -1,7 +1,7 @@
 "use client"
 
 import { Loader2 } from "lucide-react"
-import { useActivityLog } from "@/hooks/use-dashboard"
+import { useActivityLog } from "@/hooks/owner/use-dashboard"
 
 export function OwnerActivityLog() {
   const { data: activityResponse, isLoading: activityLoading } = useActivityLog(1, 15)

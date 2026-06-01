@@ -1,5 +1,5 @@
 import api from "@/lib/axios"
-import type { PaginatedKategoriResponse } from "@/types/kategori"
+import type { PaginatedKategoriResponse } from "@/types/owner/kategori"
 
 export const kategoriService = {
   getKategori: async (page: number = 1, search: string = "", per_page: number = 10) => {

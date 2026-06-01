@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import type { Outlet } from "@/types/outlet"
+import type { Outlet } from "@/types/owner/outlet"
 
 interface DetailOutletDialogProps {
   outlet: Outlet | null

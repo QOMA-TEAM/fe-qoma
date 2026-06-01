@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select"
 import { ImageIcon, Loader2 } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
-import { useAddBahanBaku, useUpdateBahanBaku, useDeleteBahanBaku } from "@/hooks/use-bahan-baku"
+import { useAddBahanBaku, useUpdateBahanBaku, useDeleteBahanBaku } from "@/hooks/owner/use-bahan-baku"
 
 const satuanOptions = ["pcs", "kg", "gram", "liter", "porsi", "lusin", "botol", "sachet"]
 

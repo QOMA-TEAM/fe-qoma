@@ -5,7 +5,7 @@ import { HeaderActions } from "@/components/dashboard/header-actions"
 import {
   Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { TambahOutletDialog } from "@/components/outlet/tambah-outlet-dialog"
+import { TambahOutletDialog } from "@/components/owner/outlet/tambah-outlet-dialog"
 import { OutletControls } from "@/components/owner/outlet/outlet-controls"
 import { OutletTable } from "@/components/owner/outlet/outlet-table"
 

@@ -6,7 +6,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
-import { useOutlets } from "@/hooks/use-outlets"
+import { useOutlets } from "@/hooks/owner/use-outlets"
 
 const rangeLabels: Record<string, string> = {
   "1day": "Hari Ini",

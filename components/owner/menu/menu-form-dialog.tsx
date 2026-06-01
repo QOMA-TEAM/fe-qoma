@@ -19,9 +19,9 @@ import {
 import { ImageIcon, Search, X, Loader2 } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 
-import { useKategori } from "@/hooks/use-kategori"
-import { useBahanBaku } from "@/hooks/use-bahan-baku"
-import { useAddMenu, useUpdateMenu, useDeleteMenu } from "@/hooks/use-menu"
+import { useKategori } from "@/hooks/owner/use-kategori"
+import { useBahanBaku } from "@/hooks/owner/use-bahan-baku"
+import { useAddMenu, useUpdateMenu, useDeleteMenu } from "@/hooks/owner/use-menu"
 
 interface BahanBakuItem {
   bahan_master_id: string

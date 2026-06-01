@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { cn, formatRupiah } from "@/lib/utils"
-import { useKeuanganList } from "@/hooks/use-keuangan"
+import { useKeuanganList } from "@/hooks/owner/use-keuangan"
 
 interface KeuanganTableProps {
   page: number

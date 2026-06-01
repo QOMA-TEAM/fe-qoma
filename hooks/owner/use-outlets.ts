@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { outletService } from "@/services/outlet"
+import { outletService } from "@/services/owner/outlet"
 
 export const useOutlets = (page: number = 1, search: string = "") => {
   return useQuery({

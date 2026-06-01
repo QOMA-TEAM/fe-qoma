@@ -6,7 +6,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { useDashboardGraph } from "@/hooks/use-dashboard"
+import { useDashboardGraph } from "@/hooks/owner/use-dashboard"
 import { MetricChart, type MetricDataPoint } from "@/components/dashboard/metric-chart"
 import { cn, formatDateLabel } from "@/lib/utils"
 

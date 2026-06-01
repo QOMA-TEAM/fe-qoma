@@ -7,9 +7,9 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { MenuFormDialog } from "@/components/menu/menu-form-dialog"
-import { useMenu, useDeleteMenu } from "@/hooks/use-menu"
-import { MenuMaster } from "@/types/menu"
+import { MenuFormDialog } from "@/components/owner/menu/menu-form-dialog"
+import { useMenu, useDeleteMenu } from "@/hooks/owner/use-menu"
+import { MenuMaster } from "@/types/owner/menu"
 import { useDebounce } from "@/hooks/use-debounce"
 
 type SortKey = "id" | "harga"

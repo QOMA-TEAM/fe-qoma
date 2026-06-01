@@ -1,5 +1,5 @@
 import api from "@/lib/axios"
-import type { KeuanganSummaryResponse, KeuanganListResponse } from "@/types/keuangan"
+import type { KeuanganSummaryResponse, KeuanganListResponse } from "@/types/owner/keuangan"
 
 export const keuanganService = {
   getSummary: async (range: string = "7days", outletId?: string) => {

@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { useAvailablePlans, useActiveSubscription } from "@/hooks/use-subscription"
-import { UpgradePlanDialog } from "@/components/plan/upgrade-plan-dialog"
+import { useAvailablePlans, useActiveSubscription } from "@/hooks/owner/use-subscription"
+import { UpgradePlanDialog } from "@/components/owner/plan/upgrade-plan-dialog"
 import { formatRupiah } from "@/lib/utils"
 
 export function AvailablePlanCards() {

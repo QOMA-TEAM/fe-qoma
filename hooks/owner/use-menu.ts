@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { menuService } from "@/services/menu"
+import { menuService } from "@/services/owner/menu"
 
 export const useMenu = (
   page: number = 1,

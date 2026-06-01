@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { kategoriService } from "@/services/kategori"
+import { kategoriService } from "@/services/owner/kategori"
 
 export const useKategori = (page: number = 1, search: string = "", per_page: number = 10) => {
   return useQuery({

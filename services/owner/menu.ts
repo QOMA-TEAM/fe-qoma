@@ -1,5 +1,5 @@
 import api from "@/lib/axios"
-import type { PaginatedMenuResponse } from "@/types/menu"
+import type { PaginatedMenuResponse } from "@/types/owner/menu"
 
 export const menuService = {
   getMenu: async (
