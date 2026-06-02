@@ -90,7 +90,11 @@ export function DetailTenantDialog({ tenant, onClose }: DetailTenantDialogProps)
                                     <div className="space-y-2 text-sm">
                                         <div className="flex justify-between">
                                             <span className="text-gray-500">Plan</span>
-                                            <span className="text-gray-800 font-medium">{tenant.subscription.plan}</span>
+                                            <span className="text-gray-800 font-medium">
+                                                {typeof tenant.subscription.plan === 'string'
+                                                    ? tenant.subscription.plan
+                                                    : (tenant.subscription.plan as any)?.nama_plan ?? '-'}
+                                            </span>
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-gray-500">Status</span>

@@ -36,7 +36,8 @@ export const planService = {
     id: string,
     payload: UpdatePlanPayload,
   ): Promise<PlanDetailResponse> => {
-    const res = await api.put(`/super-admin/plans/${id}`, payload);
+    // Menggunakan POST dengan ?_method=PUT untuk menghindari bug fatal error PHP (request_parse_body) pada method PUT
+    const res = await api.post(`/super-admin/plans/${id}?_method=PUT`, payload);
     return { ...res.data, data: normalizePlan(res.data.data) };
   },
 

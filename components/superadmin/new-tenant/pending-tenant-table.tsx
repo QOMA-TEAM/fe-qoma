@@ -11,15 +11,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import { ChevronDown, ChevronUp, ChevronsUpDown, Search, Loader2, CheckCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Tenant } from "@/types/superadmin/tenant";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
+
+function formatDate(dateStr: string): string {
+  if (!dateStr) return "-";
+  try {
+    return format(new Date(dateStr), "d MMM yyyy", { locale: id });
+  } catch {
+    return dateStr;
+  }
+}
 
 type SortKey = "nama_usaha" | "email" | "status" | "created_at" | "outlets_count";
 type SortDir = "asc" | "desc";
@@ -27,14 +33,13 @@ type SortDir = "asc" | "desc";
 interface PendingTenantTableProps {
   tenants: Tenant[];
   loading: boolean;
-  onView: (tenant: Tenant) => void;
   onApprove: (tenant: Tenant) => void;
   onReject: (tenant: Tenant) => void;
 }
 
-export function PendingTenantTable({ tenants, loading, onView, onApprove, onReject }: PendingTenantTableProps) {
+export function PendingTenantTable({ tenants, loading, onApprove, onReject }: PendingTenantTableProps) {
   const [search, setSearch] = useState("");
-  const [sortKey, setSortKey] = useState<SortKey>("nama_usaha");
+  const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
   const handleColumnSort = (key: SortKey) => {
@@ -128,79 +133,35 @@ export function PendingTenantTable({ tenants, loading, onView, onApprove, onReje
     );
   };
 
-  const columns: { key: SortKey; label: string; className?: string }[] = [
-    { key: "nama_usaha", label: "Nama Perusahaan" },
-    { key: "email", label: "Email" },
-    { key: "status", label: "Status" },
-    { key: "created_at", label: "Created At" },
-    { key: "outlets_count", label: "Jumlah Outlet" },
+  const columns: { key: SortKey; label: string; className?: string; sortable?: boolean }[] = [
+    { key: "nama_usaha", label: "Nama Perusahaan", sortable: false },
+    { key: "email", label: "Email", sortable: false },
+    { key: "status", label: "Status", sortable: false },
+    { key: "created_at", label: "Created At", sortable: true },
+    { key: "outlets_count", label: "Jumlah Outlet", sortable: true },
   ];
 
   return (
     <>
       {/* Controls */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Pending Tenant
-          </h1>
+      <div className="flex items-center gap-2 flex-wrap sm:justify-between pt-2">
+        {/* Search */}
+        <div className="relative">
+          <Input
+            placeholder="Search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pr-9 h-9 w-44 text-sm border-gray-200 rounded-full"
+          />
 
-          <p className="text-sm text-orange-400 mt-0.5">
-            Daftar tenant yang menunggu persetujuan
-          </p>
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Sort By Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="gap-1.5 text-sm border-gray-200 text-gray-700 h-9 rounded-full px-4"
-              >
-                Sort By
-                <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
-              </Button>
-            </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" className="w-48">
-              {sortOptions.map((item) => (
-                <DropdownMenuItem
-                  key={item.key}
-                  onClick={() => handleColumnSort(item.key)}
-                  className={cn(
-                    "cursor-pointer",
-                    sortKey === item.key && "font-medium text-blue-600",
-                  )}
-                >
-                  {item.label}
-
-                  {sortKey === item.key && (
-                    <span className="ml-auto text-xs text-gray-400">
-                      {sortDir === "asc" ? "\u2191" : "\u2193"}
-                    </span>
-                  )}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Search */}
-          <div className="relative">
-            <Input
-              placeholder="Search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pr-9 h-9 w-44 text-sm border-gray-200 rounded-full"
-            />
-
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          </div>
-        </div>
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border border-gray-200 overflow-hidden bg-white">
+      <div className="rounded-xl border border-gray-200 overflow-hidden bg-white mt-4">
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-50/80 hover:bg-gray-50/80 border-gray-200">
@@ -211,12 +172,12 @@ export function PendingTenantTable({ tenants, loading, onView, onApprove, onReje
               {columns.map((col) => (
                 <TableHead
                   key={col.key}
-                  className={cn("cursor-pointer select-none", col.className)}
-                  onClick={() => handleColumnSort(col.key)}
+                  className={cn(col.sortable !== false && "cursor-pointer select-none", col.className)}
+                  onClick={() => col.sortable !== false && handleColumnSort(col.key)}
                 >
                   <div className="flex items-center text-gray-600 font-semibold text-sm">
                     {col.label}
-                    <SortIcon col={col.key} />
+                    {col.sortable !== false && <SortIcon col={col.key} />}
                   </div>
                 </TableHead>
               ))}
@@ -274,7 +235,7 @@ export function PendingTenantTable({ tenants, loading, onView, onApprove, onReje
                   <TableCell>{statusBadge(row.status)}</TableCell>
 
                   <TableCell className="text-gray-600 text-sm">
-                    {row.created_at}
+                    {formatDate(row.created_at)}
                   </TableCell>
 
                   <TableCell className="text-gray-600 text-sm">
@@ -297,14 +258,6 @@ export function PendingTenantTable({ tenants, loading, onView, onApprove, onReje
                         title="Approve"
                       >
                         <CheckCircle size={18} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-gray-500 hover:bg-gray-100 hover:text-gray-700 h-8 px-3 rounded-full text-xs font-semibold"
-                        onClick={() => onView(row)}
-                      >
-                        VIEW
                       </Button>
                       <Button
                         variant="ghost"

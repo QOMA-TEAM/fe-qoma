@@ -16,8 +16,8 @@ import { DetailTenantDialog } from "@/components/superadmin/tenant/detail-tenant
 import { RejectTenantDialog } from "@/components/superadmin/new-tenant/reject-tenant-dialog";
 import { useTenant } from "@/hooks/superadmin/use-tenant";
 import type { Tenant } from "@/types/superadmin/tenant";
-import { PlanBreadcrumb } from "@/components/superadmin/plan/breadcrumb";
 import { cn } from "@/lib/utils";
+import { HeaderActions } from "@/components/dashboard/header-actions";
 
 export default function NewTenantPage() {
   const [page, setPage] = useState(1);
@@ -40,21 +40,35 @@ export default function NewTenantPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50/50">
-      {/* Top Header */}
-      <SuperadminHeader username="Super Admin" notificationCount={3} />
+    <div className="flex flex-col min-h-screen bg-gray-50/40">
+      {/* Top Bar */}
+      <header className="flex h-16 shrink-0 items-center justify-between border-b bg-white px-6 shadow-sm">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <span className="text-sm text-muted-foreground">KELOLA</span>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage className="text-sm">Persetujuan Tenant</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <HeaderActions />
+      </header>
 
-      <main className="flex-1 px-6 py-6 max-w-screen-xl mx-auto w-full space-y-6">
-        {/* Breadcrumb */}
-        <PlanBreadcrumb />
-
+      <main className="flex-1 overflow-auto p-6 space-y-6">
+        {/* Title */}
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">Pending Tenant</h2>
+          <p className="text-sm text-gray-500 mt-0.5">Daftar tenant yang menunggu persetujuan</p>
+        </div>
 
         {/* Page Content */}
-        <div className="p-8 space-y-4">
+        <div className="space-y-4">
           <PendingTenantTable
             tenants={tenants}
             loading={loading}
-            onView={(tenant) => setSelectedTenant(tenant)}
             onApprove={handleApprove}
             onReject={(tenant) => setTenantToReject(tenant)}
           />
@@ -63,15 +77,7 @@ export default function NewTenantPage() {
           {meta && meta.total > 0 && (
             <div className="flex items-center justify-between pt-2">
               <p className="text-sm text-gray-500">
-                Menampilkan{" "}
-                <span className="font-medium text-gray-900">
-                  {meta.from || 0}
-                </span>{" "}
-                hingga{" "}
-                <span className="font-medium text-gray-900">{meta.to || 0}</span>{" "}
-                dari{" "}
-                <span className="font-medium text-gray-900">{meta.total}</span>{" "}
-                data
+                Menampilkan Halaman <span className="font-medium text-gray-900">{meta.current_page || 1}</span> dari <span className="font-medium text-gray-900">{meta.last_page || 1}</span> halaman
               </p>
               <div className="flex items-center gap-2">
                 <Button

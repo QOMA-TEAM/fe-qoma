@@ -49,7 +49,7 @@ export function PlanFormFields({
           placeholder="Nama Plan"
           value={values.nama_plan ?? ""}
           onChange={(e) => onChange("nama_plan", e.target.value)}
-          className={`h-10 border-gray-200 focus-visible:ring-blue-500 ${
+          className={`h-10 border-gray-200 focus-visible:ring-[#1D5E84] ${
             errors?.nama_plan ? "border-red-400" : ""
           }`}
         />
@@ -71,7 +71,7 @@ export function PlanFormFields({
             placeholder="0"
             value={values.harga === 0 ? "" : values.harga?.toString()}
             onChange={(e) => onChange("harga", e.target.value === "" ? 0 : Number(e.target.value))}
-            className={`h-10 border-gray-200 focus-visible:ring-blue-500 ${
+            className={`h-10 border-gray-200 focus-visible:ring-[#1D5E84] ${
               errors?.harga ? "border-red-400" : ""
             }`}
           />
@@ -87,7 +87,7 @@ export function PlanFormFields({
             onValueChange={(v) => onChange("tagihan", v)}
           >
             <SelectTrigger
-              className={`h-10 border-gray-200 focus:ring-blue-500 ${
+              className={`h-10 border-gray-200 focus:ring-[#1D5E84] ${
                 errors?.tagihan ? "border-red-400" : ""
               }`}
             >
@@ -123,7 +123,7 @@ export function PlanFormFields({
             placeholder="0"
             value={values.batas_outlet === 0 ? "" : values.batas_outlet?.toString()}
             onChange={(e) => onChange("batas_outlet", e.target.value === "" ? 0 : Number(e.target.value))}
-            className={`h-10 border-gray-200 focus-visible:ring-blue-500 ${
+            className={`h-10 border-gray-200 focus-visible:ring-[#1D5E84] ${
               errors?.batas_outlet ? "border-red-400" : ""
             }`}
           />
@@ -135,17 +135,17 @@ export function PlanFormFields({
         <div className="space-y-1.5">
           <Label className="text-sm font-medium text-gray-700">Status</Label>
           <Select
-            value={values.status ?? "active"}
+            value={values.status ?? "aktif"}
             onValueChange={(v) => onChange("status", v as PlanStatus)}
           >
-            <SelectTrigger className="h-10 border-gray-200 focus:ring-blue-500">
+            <SelectTrigger className="h-10 border-gray-200 focus:ring-[#1D5E84]">
               <SelectValue placeholder="Aktif" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="active" className="text-sm">
+              <SelectItem value="aktif" className="text-sm">
                 Aktif
               </SelectItem>
-              <SelectItem value="inactive" className="text-sm">
+              <SelectItem value="tidak aktif" className="text-sm">
                 Tidak Aktif
               </SelectItem>
             </SelectContent>
@@ -166,7 +166,7 @@ export function PlanFormFields({
           placeholder="Deskripsi Plan (opsional)"
           value={values.deskripsi ?? ""}
           onChange={(e) => onChange("deskripsi", e.target.value)}
-          className="resize-none min-h-[80px] border-gray-200 focus-visible:ring-blue-500"
+          className="resize-none min-h-[80px] border-gray-200 focus-visible:ring-[#1D5E84]"
         />
       </div>
     </div>

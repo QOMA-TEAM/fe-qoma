@@ -10,8 +10,14 @@ import {
 import { ModalTambahPlan } from "@/components/superadmin/plan/modal-tambah-plan";
 import { ModalEditPlan } from "@/components/superadmin/plan/modal-edit-plan";
 import { ModalHapusPlan } from "@/components/superadmin/plan/modal-hapus-plan";
-import { PlanBreadcrumb } from "@/components/superadmin/plan/breadcrumb";
-import { SuperadminHeader } from "@/components/superadmin/header";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { HeaderActions } from "@/components/dashboard/header-actions";
 import { usePlan } from "@/hooks/superadmin/use-plan";
 import { Plan } from "@/types/plan";
 
@@ -36,29 +42,38 @@ export default function ManagementPlanPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50/50">
-      {/* Top Header */}
-      <SuperadminHeader username="Super Admin" notificationCount={3} />
+    <div className="flex flex-col min-h-screen bg-gray-50/40">
+      {/* Top Bar */}
+      <header className="flex h-16 shrink-0 items-center justify-between border-b bg-white px-6 shadow-sm">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <span className="text-sm text-muted-foreground">KELOLA</span>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage className="text-sm">Plan</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <HeaderActions />
+      </header>
 
-      <main className="flex-1 px-6 py-6 max-w-screen-xl mx-auto w-full space-y-6">
-        {/* Breadcrumb */}
-        <PlanBreadcrumb />
-
+      <main className="flex-1 overflow-auto p-6 space-y-6">
         {/* Page Title + Action */}
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Management Plan</h2>
-            <p className="text-sm text-gray-400 mt-0.5">
-              Manejemen plan subscription
+            <h2 className="text-2xl font-bold text-gray-800">Manajemen Plan</h2>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Informasi detail plan subscription
             </p>
           </div>
 
           <Button
             onClick={() => setModalTambah(true)}
-            className="bg-blue-700 hover:bg-blue-800 text-white h-9 text-sm gap-1.5 flex-shrink-0"
+            className="h-9 rounded-lg bg-orange-600 hover:bg-orange-700 text-white gap-1.5 px-4 text-sm cursor-pointer flex-shrink-0"
           >
-            <Plus className="h-4 w-4" />
-            Tambah Plan
+            <Plus className="size-4" /> Tambah Plan
           </Button>
         </div>
 

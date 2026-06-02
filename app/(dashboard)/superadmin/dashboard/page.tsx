@@ -58,16 +58,16 @@ export default function DashboardPage() {
   }, [mrrFilter]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50/50">
+    <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
       {/* Header */}
       <SuperadminHeader username="Super Admin" notificationCount={3} />
 
       {/* Page Content */}
-      <main className="flex-1 px-6 py-6 space-y-6 max-w-screen-2xl mx-auto w-full">
+      <div className="p-8 space-y-8 max-w-screen-2xl mx-auto w-full">
         {/* Page Title */}
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Dashboard</h2>
-          <p className="text-sm text-gray-400 mt-0.5">
+          <h1 className="text-[28px] font-bold text-[#1E293B]">Dashboard</h1>
+          <p className="text-sm font-medium text-[#64748B] mt-1">
             Ringkasan aktivitas bisnis Anda
           </p>
         </div>
@@ -130,7 +130,7 @@ export default function DashboardPage() {
           onApprove={(id) => toast.success(`Usaha ${id} disetujui`)}
           onReject={(id) => toast.error(`Usaha ${id} ditolak`)}
         />
-      </main>
+      </div>
     </div>
   );
 }

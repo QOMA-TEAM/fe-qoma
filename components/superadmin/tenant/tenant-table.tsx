@@ -11,15 +11,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import { ChevronDown, ChevronUp, ChevronsUpDown, Search, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Tenant } from "@/types/superadmin/tenant";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
+
+function formatDate(dateStr: string): string {
+  if (!dateStr) return "-";
+  try {
+    return format(new Date(dateStr), "d MMM yyyy", { locale: id });
+  } catch {
+    return dateStr;
+  }
+}
 
 type SortKey = "nama_usaha" | "email" | "status" | "created_at" | "outlets_count";
 type SortDir = "asc" | "desc";
@@ -32,7 +38,7 @@ interface TenantTableProps {
 
 export function TenantTable({ tenants, loading, onView }: TenantTableProps) {
   const [search, setSearch] = useState("");
-  const [sortKey, setSortKey] = useState<SortKey>("nama_usaha");
+  const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
   const handleColumnSort = (key: SortKey) => {
@@ -126,75 +132,31 @@ export function TenantTable({ tenants, loading, onView }: TenantTableProps) {
     );
   };
 
-  const columns: { key: SortKey; label: string; className?: string }[] = [
-    { key: "nama_usaha", label: "Nama Perusahaan" },
-    { key: "email", label: "Email" },
-    { key: "status", label: "Status" },
-    { key: "created_at", label: "Created At" },
-    { key: "outlets_count", label: "Jumlah Outlet" },
+  const columns: { key: SortKey; label: string; className?: string; sortable?: boolean }[] = [
+    { key: "nama_usaha", label: "Nama Perusahaan", sortable: false },
+    { key: "email", label: "Email", sortable: false },
+    { key: "status", label: "Status", sortable: false },
+    { key: "created_at", label: "Created At", sortable: true },
+    { key: "outlets_count", label: "Jumlah Outlet", sortable: true },
   ];
 
   return (
     <>
       {/* Controls */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Detail Subscription
-          </h1>
+      <div className="flex items-center gap-2 flex-wrap sm:justify-between mb-4 pt-2">
+        {/* Search */}
+        <div className="relative">
+          <Input
+            placeholder="Search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pr-9 h-9 w-44 text-sm border-gray-200 rounded-full bg-white"
+          />
 
-          <p className="text-sm text-orange-400 mt-0.5">
-            Informasi Subscription
-          </p>
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Sort By Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="gap-1.5 text-sm border-gray-200 text-gray-700 h-9 rounded-full px-4"
-              >
-                Sort By
-                <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
-              </Button>
-            </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" className="w-48">
-              {sortOptions.map((item) => (
-                <DropdownMenuItem
-                  key={item.key}
-                  onClick={() => handleColumnSort(item.key)}
-                  className={cn(
-                    "cursor-pointer",
-                    sortKey === item.key && "font-medium text-blue-600",
-                  )}
-                >
-                  {item.label}
-
-                  {sortKey === item.key && (
-                    <span className="ml-auto text-xs text-gray-400">
-                      {sortDir === "asc" ? "\u2191" : "\u2193"}
-                    </span>
-                  )}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Search */}
-          <div className="relative">
-            <Input
-              placeholder="Search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pr-9 h-9 w-44 text-sm border-gray-200 rounded-full"
-            />
-
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          </div>
-        </div>
       </div>
 
       {/* Table */}
@@ -209,12 +171,12 @@ export function TenantTable({ tenants, loading, onView }: TenantTableProps) {
               {columns.map((col) => (
                 <TableHead
                   key={col.key}
-                  className={cn("cursor-pointer select-none", col.className)}
-                  onClick={() => handleColumnSort(col.key)}
+                  className={cn(col.sortable !== false && "cursor-pointer select-none", col.className)}
+                  onClick={() => col.sortable !== false && handleColumnSort(col.key)}
                 >
                   <div className="flex items-center text-gray-600 font-semibold text-sm">
                     {col.label}
-                    <SortIcon col={col.key} />
+                    {col.sortable !== false && <SortIcon col={col.key} />}
                   </div>
                 </TableHead>
               ))}
@@ -272,7 +234,7 @@ export function TenantTable({ tenants, loading, onView }: TenantTableProps) {
                   <TableCell>{statusBadge(row.status)}</TableCell>
 
                   <TableCell className="text-gray-600 text-sm">
-                    {row.created_at}
+                    {formatDate(row.created_at)}
                   </TableCell>
 
                   <TableCell className="text-gray-600 text-sm">

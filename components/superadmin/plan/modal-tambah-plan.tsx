@@ -114,7 +114,7 @@ export function ModalTambahPlan({
           <Button
             onClick={handleSubmit}
             disabled={submitting}
-            className="min-w-[80px] bg-blue-700 hover:bg-blue-800 text-white"
+            className="min-w-[80px] bg-[#1D5E84] hover:bg-[#154663] text-white"
           >
             {submitting ? (
               <>

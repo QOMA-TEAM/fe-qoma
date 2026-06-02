@@ -34,13 +34,12 @@ export function PlanCard({ plan, onEdit, onDelete }: PlanCardProps) {
         w-full max-w-[280px] border shadow-sm hover:shadow-md transition-all duration-200
         rounded-xl overflow-hidden
         ${isActive
-          ? "border-teal-300 bg-white"           // aktif: border teal
+          ? "border-[#1D5E84]/40 bg-white"           // aktif: border primary blue
           : "border-gray-200 bg-gray-50 opacity-75"  // tidak aktif: redup
         }
       `}
     >
-      {/* Strip warna atas sebagai indikator visual utama */}
-      <div className={`h-1.5 w-full ${isActive ? "bg-teal-400" : "bg-gray-300"}`} />
+
 
       <CardContent className="p-5 space-y-4">
         {/* Header: Nama Plan + Status Badge */}
@@ -57,13 +56,13 @@ export function PlanCard({ plan, onEdit, onDelete }: PlanCardProps) {
             className={`
               flex items-center gap-1 shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium
               ${isActive
-                ? "border-teal-400 text-teal-700 bg-teal-50"
+                ? "border-[#1D5E84]/20 text-[#1D5E84] bg-[#1D5E84]/10"
                 : "border-gray-300 text-gray-400 bg-gray-100"
               }
             `}
           >
             {isActive ? (
-              <CheckCircle2 className="h-3 w-3 text-teal-500" />
+              <CheckCircle2 className="h-3 w-3 text-[#1D5E84]" />
             ) : (
               <XCircle className="h-3 w-3 text-gray-400" />
             )}
@@ -88,7 +87,7 @@ export function PlanCard({ plan, onEdit, onDelete }: PlanCardProps) {
         <ul className="space-y-1.5">
           <li className="flex items-center gap-2 text-sm text-gray-600">
             <Store
-              className={`h-3.5 w-3.5 flex-shrink-0 ${isActive ? "text-teal-500" : "text-gray-300"
+              className={`h-3.5 w-3.5 flex-shrink-0 ${isActive ? "text-[#1D5E84]" : "text-gray-300"
                 }`}
             />
             <span className={isActive ? "text-gray-600" : "text-gray-400"}>
@@ -107,15 +106,15 @@ export function PlanCard({ plan, onEdit, onDelete }: PlanCardProps) {
           <Button
             size="sm"
             onClick={() => onEdit(plan)}
-            className="flex-1 h-8 text-xs bg-blue-700 hover:bg-blue-800 text-white rounded-md"
+            className="flex-1 h-8 text-xs bg-[#1D5E84] hover:bg-[#154663] text-white rounded-md transition-colors"
           >
             Edit
           </Button>
           <Button
-            size="sm"
             variant="destructive"
+            size="sm"
             onClick={() => onDelete(plan)}
-            className="flex-1 h-8 text-xs rounded-md"
+            className="flex-1 h-8 text-xs rounded-md transition-colors"
           >
             Hapus
           </Button>
@@ -130,7 +129,6 @@ export function PlanCard({ plan, onEdit, onDelete }: PlanCardProps) {
 export function PlanCardSkeleton() {
   return (
     <Card className="w-full max-w-[280px] border border-gray-200 rounded-xl overflow-hidden">
-      <div className="h-1.5 w-full bg-gray-100 animate-pulse" />
       <CardContent className="p-5 space-y-4">
         <div className="flex items-center justify-between">
           <div className="h-5 w-24 bg-gray-100 rounded animate-pulse" />

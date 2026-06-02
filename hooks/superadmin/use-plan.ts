@@ -39,7 +39,11 @@ export function usePlan() {
       await fetchPlans();
       return true;
     } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? "Gagal menambahkan plan");
+      const message =
+        err?.response?.data?.errors
+          ? Object.values(err.response.data.errors)[0]?.[0]
+          : err?.response?.data?.message;
+      toast.error(message ?? "Gagal menambahkan plan");
       return false;
     } finally {
       setSubmitting(false);
@@ -57,7 +61,12 @@ export function usePlan() {
       await fetchPlans();
       return true;
     } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? "Gagal memperbarui plan");
+      const message =
+        err?.response?.data?.errors
+          ? Object.values(err.response.data.errors)[0]?.[0]
+          : err?.response?.data?.message;
+      alert("DEBUG ERROR: " + JSON.stringify(err?.response?.data || err?.message));
+      toast.error(message ?? "Gagal memperbarui plan");
       return false;
     } finally {
       setSubmitting(false);

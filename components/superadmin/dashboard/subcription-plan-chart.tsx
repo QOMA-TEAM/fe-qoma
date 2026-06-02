@@ -10,13 +10,7 @@ import {
   YAxis,
   Cell,
 } from "recharts";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 import { SubscriptionByPlan } from "@/types/superadmin/dashboard";
 
 const COLORS = ["#1d4ed8", "#16a34a", "#38bdf8", "#f97316", "#8b5cf6"];
@@ -65,76 +59,76 @@ export function SubscriptionPlanChart({
   }));
 
   return (
-    <Card className="border border-gray-100 shadow-sm">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base font-semibold text-gray-800">
-          Distribusi Subscription
-        </CardTitle>
-        <CardDescription className="text-xs text-gray-400 mt-0.5">
-          Jumlah subscriber per plan
-        </CardDescription>
-      </CardHeader>
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#F1F5F9] flex flex-col h-[400px]">
+      <div className="mb-6">
+        <h4 className="text-[#1E293B] font-bold text-lg">Distribusi Subscription</h4>
+        <p className="text-[#64748B] text-sm font-medium mt-1">Jumlah subscriber per plan</p>
+      </div>
 
-      <CardContent className="pt-0">
+      <div className="flex-1 w-full relative">
         {isLoading ? (
-          <div className="h-48 flex items-center justify-center text-sm text-gray-400">
-            Memuat data...
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Loader2 className="w-6 h-6 animate-spin text-[#94A3B8]" />
           </div>
         ) : chartData.length === 0 ? (
-          <div className="h-48 flex items-center justify-center text-sm text-gray-400">
+          <div className="absolute inset-0 flex items-center justify-center text-sm text-[#94A3B8]">
             Tidak ada data
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart
-              data={chartData}
-              margin={{ top: 5, right: 0, left: -20, bottom: 5 }}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="#f0f0f0"
-                vertical={false}
-              />
-              <XAxis
-                dataKey="name"
-                tick={{ fontSize: 11, fill: "#9ca3af" }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                tick={{ fontSize: 11, fill: "#9ca3af" }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="total" radius={[4, 4, 0, 0]}>
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        )}
+          <div className="h-full flex flex-col">
+            <div className="flex-1 min-h-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={chartData}
+                  margin={{ top: 5, right: 0, left: -20, bottom: 5 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#f0f0f0"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 11, fill: "#9ca3af" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: "#9ca3af" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="total" radius={[4, 4, 0, 0]}>
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
 
-        {/* Legend */}
-        {chartData.length > 0 && (
-          <div className="flex flex-wrap gap-3 mt-2">
-            {chartData.map((plan) => (
-              <div
-                key={plan.name}
-                className="flex items-center gap-1.5 text-xs text-gray-500"
-              >
-                <div
-                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: plan.color }}
-                />
-                <span>{plan.name}</span>
-                <span className="text-gray-400">({plan.total})</span>
+            {/* Legend */}
+            {chartData.length > 0 && (
+              <div className="flex flex-wrap gap-3 mt-4 justify-center">
+                {chartData.map((plan) => (
+                  <div
+                    key={plan.name}
+                    className="flex items-center gap-1.5 text-xs text-gray-500"
+                  >
+                    <div
+                      className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: plan.color }}
+                    />
+                    <span>{plan.name}</span>
+                    <span className="text-gray-400">({plan.total})</span>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
