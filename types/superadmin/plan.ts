@@ -1,97 +1,80 @@
-// src/services/superadmin/plan.ts (atau sesuaikan dengan letak folder kamu)
-import axios from "axios";
+// types/superadmin/plan.ts
 
-// ==========================================
-// 1. INTERFACE UNTUK RESPONSE (Data dari Server)
-// ==========================================
+export type PlanStatus = "aktif" | "tidak aktif";
+export type PlanTagihan = "30 Hari" | "60 Hari" | "90 Hari" | "365 Hari";
 
-export interface SuperAdminPlan {
+export const TAGIHAN_TO_HARI: Record<PlanTagihan, number> = {
+  "30 Hari": 30,
+  "60 Hari": 60,
+  "90 Hari": 90,
+  "365 Hari": 365,
+};
+
+export const HARI_TO_TAGIHAN: Record<number, PlanTagihan> = {
+  30: "30 Hari",
+  60: "60 Hari",
+  90: "90 Hari",
+  365: "365 Hari",
+};
+
+export interface Plan {
   id: string;
   nama_plan: string;
   harga: number;
-  tagihan: string; // Misal: "Bulanan", "Tahunan", atau bisa disamakan dengan durasi_hari
-  batas_outlet: number | "Unlimited";
-  deskripsi: string | null;
-  status: "aktif" | "tidak aktif"; // Penambahan status
+  durasi_hari: number;
+  tagihan: PlanTagihan;
+  batas_outlet: number;
+  deskripsi?: string | null;
+  status: PlanStatus;
   subscriptions_count?: number;
   created_at?: string;
   updated_at?: string;
 }
 
-export interface SuperAdminPlanListResponse {
-  message: string;
-  data: SuperAdminPlan[];
-}
-
-export interface SuperAdminPlanDetailResponse {
-  message: string;
-  data: SuperAdminPlan;
-}
-
-// ==========================================
-// 2. INTERFACE UNTUK REQUEST (Kirim Data ke Server)
-// ==========================================
-
-// Tipe data saat Superadmin menekan tombol "Simpan" di form Create Plan baru
 export interface CreatePlanPayload {
   nama_plan: string;
   harga: number;
-  tagihan: string;
-  durasi_hari?: number;
-  batas_outlet: number | "Unlimited";
-  deskripsi: string | null;
-  status: "aktif" | "tidak aktif";
+  durasi_hari: number;
+  batas_outlet: number;
+  deskripsi?: string | null;
+  status: PlanStatus;
 }
 
-// Tipe data saat Superadmin melakukan Edit (semua field bersifat opsional / bisa diubah sebagian)
-export interface UpdatePlanPayload extends Partial<CreatePlanPayload> {}
+export type UpdatePlanPayload = Partial<CreatePlanPayload>;
 
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+export interface PlanListResponse {
+  message: string;
+  data: Plan[];
+}
 
-export const getPlans = async (): Promise<SuperAdminPlanListResponse> => {
-  const response =
-    await api.get<SuperAdminPlanListResponse>("/superadmin/plan");
-  return response.data;
-};
+export interface PlanDetailResponse {
+  message: string;
+  data: Plan;
+}
 
-export const getPlanById = async (
-  id: string,
-): Promise<SuperAdminPlanDetailResponse> => {
-  const response = await api.get<SuperAdminPlanDetailResponse>(
-    `/superadmin/plan/${id}`,
-  );
-  return response.data;
-};
+export interface PlanDeleteResponse {
+  message: string;
+}
 
-export const createPlan = async (
-  payload: CreatePlanPayload,
-): Promise<SuperAdminPlanDetailResponse> => {
-  const response = await api.post<SuperAdminPlanDetailResponse>(
-    "/superadmin/plan",
-    payload,
-  );
-  return response.data;
-};
+export function normalizePlan(raw: any): Plan {
+  const hari: number =
+    typeof raw.durasi_hari === "number"
+      ? raw.durasi_hari
+      : typeof raw.tagihan === "number"
+        ? raw.tagihan
+        : parseInt(String(raw.tagihan ?? raw.durasi_hari ?? "30"), 10) || 30;
 
-export const updatePlan = async (
-  id: string,
-  payload: UpdatePlanPayload,
-): Promise<SuperAdminPlanDetailResponse> => {
-  const response = await api.put<SuperAdminPlanDetailResponse>(
-    `/superadmin/plan/${id}`,
-    payload,
-  );
-  return response.data;
-};
+  const tagihan: PlanTagihan =
+    HARI_TO_TAGIHAN[hari] ??
+    (Object.entries(TAGIHAN_TO_HARI).find(
+      ([, v]) => v === hari,
+    )?.[0] as PlanTagihan) ??
+    "30 Hari";
 
-export const deletePlan = async (id: string): Promise<{ message: string }> => {
-  const response = await api.delete<{ message: string }>(
-    `/superadmin/plan/${id}`,
-  );
-  return response.data;
-};
+  return {
+    ...raw,
+    durasi_hari: hari,
+    tagihan,
+    status: raw.status ?? "aktif",
+  } as Plan;
+}

@@ -1,3 +1,4 @@
+// components/superadmin/plan/modal-tambah-plan.tsx
 "use client";
 
 import { useState } from "react";
@@ -11,8 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
-import { PlanFormFields } from "./plan-form-dialog";
-import { CreatePlanPayload } from "@/types/superadmin/plan";
+import { PlanFormFields, PlanFormValues, PlanFormErrors } from "./plan-form-dialog";
+import { CreatePlanPayload, TAGIHAN_TO_HARI } from "@/types/superadmin/plan";
 
 interface ModalTambahPlanProps {
   open: boolean;
@@ -21,21 +22,20 @@ interface ModalTambahPlanProps {
   submitting?: boolean;
 }
 
-const INITIAL: CreatePlanPayload = {
+const INITIAL: PlanFormValues = {
   nama_plan: "",
   harga: 0,
   batas_outlet: 1,
   tagihan: "30 Hari",
-  status: "active",
+  status: "aktif",           // ← sesuai PlanStatus backend
+  deskripsi: "",
 };
 
-type Errors = Partial<Record<keyof CreatePlanPayload, string>>;
-
-function validate(values: CreatePlanPayload): Errors {
-  const errors: Errors = {};
-  if (!values.nama_plan.trim()) errors.nama_plan = "Nama plan wajib diisi";
-  if (values.harga < 0) errors.harga = "Harga tidak boleh negatif";
-  if (values.batas_outlet < 1) errors.batas_outlet = "Minimal 1 outlet";
+function validate(values: Partial<PlanFormValues>): PlanFormErrors {
+  const errors: PlanFormErrors = {};
+  if (!values.nama_plan?.trim()) errors.nama_plan = "Nama plan wajib diisi";
+  if ((values.harga ?? 0) < 0) errors.harga = "Harga tidak boleh negatif";
+  if ((values.batas_outlet ?? 1) < 1) errors.batas_outlet = "Minimal 1 outlet";
   if (!values.tagihan) errors.tagihan = "Tagihan wajib dipilih";
   return errors;
 }
@@ -46,13 +46,10 @@ export function ModalTambahPlan({
   onSubmit,
   submitting,
 }: ModalTambahPlanProps) {
-  const [values, setValues] = useState<CreatePlanPayload>(INITIAL);
-  const [errors, setErrors] = useState<Errors>({});
+  const [values, setValues] = useState<PlanFormValues>(INITIAL);
+  const [errors, setErrors] = useState<PlanFormErrors>({});
 
-  const handleChange = (
-    field: keyof CreatePlanPayload,
-    value: string | number,
-  ) => {
+  const handleChange = (field: keyof PlanFormValues, value: string | number) => {
     setValues((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
@@ -63,15 +60,18 @@ export function ModalTambahPlan({
       setErrors(errs);
       return;
     }
-    
-    // Konversi "30 Hari" menjadi angka 30 untuk dikirim ke backend
-    const durasi = parseInt(values.tagihan || "30");
-    const payloadToSend = {
-      ...values,
-      durasi_hari: isNaN(durasi) ? 30 : durasi
+
+    // Konversi label tagihan → angka hari sebelum kirim ke backend
+    const payload: CreatePlanPayload = {
+      nama_plan: values.nama_plan,
+      harga: values.harga,
+      durasi_hari: TAGIHAN_TO_HARI[values.tagihan],  // "365 Hari" → 365
+      batas_outlet: values.batas_outlet,
+      deskripsi: values.deskripsi ?? null,
+      status: values.status,                          // "aktif" | "tidak aktif"
     };
 
-    const ok = await onSubmit(payloadToSend);
+    const ok = await onSubmit(payload);
     if (ok) {
       setValues(INITIAL);
       setErrors({});
@@ -97,11 +97,7 @@ export function ModalTambahPlan({
         <Separator />
 
         <div className="px-6 py-5">
-          <PlanFormFields
-            values={values}
-            onChange={handleChange}
-            errors={errors}
-          />
+          <PlanFormFields values={values} onChange={handleChange} errors={errors} />
         </div>
 
         <Separator />
@@ -118,7 +114,7 @@ export function ModalTambahPlan({
           <Button
             onClick={handleSubmit}
             disabled={submitting}
-            className="min-w-[80px] bg-blue-700 hover:bg-blue-800 text-white"
+            className="min-w-[80px] bg-[#1D5E84] hover:bg-[#154663] text-white"
           >
             {submitting ? (
               <>

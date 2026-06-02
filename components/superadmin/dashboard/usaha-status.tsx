@@ -1,13 +1,7 @@
 "use client";
 
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 import { UsahaByStatus } from "@/types/superadmin/dashboard";
 
 const STATUS_CONFIG: Record<
@@ -50,33 +44,29 @@ export function UsahaStatusChart({ status, isLoading }: UsahaStatusChartProps) {
   );
 
   return (
-    <Card className="border border-gray-100 shadow-sm">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base font-semibold text-gray-800">
-          Status Usaha
-        </CardTitle>
-        <CardDescription className="text-xs text-gray-400 mt-0.5">
-          Distribusi berdasarkan status
-        </CardDescription>
-      </CardHeader>
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#F1F5F9] flex flex-col h-[400px]">
+      <div className="mb-6">
+        <h4 className="text-[#1E293B] font-bold text-lg">Status Usaha</h4>
+        <p className="text-[#64748B] text-sm font-medium mt-1">Distribusi berdasarkan status</p>
+      </div>
 
-      <CardContent className="pt-0">
+      <div className="flex-1 w-full relative flex items-center justify-center">
         {isLoading ? (
-          <div className="h-48 flex items-center justify-center text-sm text-gray-400">
-            Memuat data...
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Loader2 className="w-6 h-6 animate-spin text-[#94A3B8]" />
           </div>
         ) : (
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col items-center gap-6 w-full">
             {/* Donut Chart */}
-            <div className="relative flex-shrink-0">
-              <ResponsiveContainer width={140} height={140}>
+            <div className="relative flex-shrink-0 w-[180px] h-[180px]">
+              <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={chartData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={42}
-                    outerRadius={62}
+                    innerRadius={60}
+                    outerRadius={80}
                     dataKey="value"
                     strokeWidth={0}
                   >
@@ -89,26 +79,26 @@ export function UsahaStatusChart({ status, isLoading }: UsahaStatusChartProps) {
               </ResponsiveContainer>
               {/* Center label */}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-xl font-bold text-gray-800">{total}</span>
-                <span className="text-[10px] text-gray-400">Total</span>
+                <span className="text-2xl font-bold text-gray-800">{total}</span>
+                <span className="text-xs text-gray-400">Total</span>
               </div>
             </div>
 
             {/* Legend */}
-            <div className="space-y-2 flex-1">
+            <div className="w-full grid grid-cols-2 gap-3 mt-4">
               {chartData.map((item) => (
                 <div
                   key={item.name}
-                  className="flex items-center justify-between gap-2"
+                  className="flex items-center justify-between gap-2 bg-gray-50/50 px-3 py-2 rounded-lg"
                 >
                   <div className="flex items-center gap-2">
                     <div
                       className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                       style={{ backgroundColor: item.color }}
                     />
-                    <span className="text-xs text-gray-600">{item.name}</span>
+                    <span className="text-xs font-medium text-gray-600">{item.name}</span>
                   </div>
-                  <span className="text-xs font-semibold text-gray-800">
+                  <span className="text-xs font-bold text-gray-800">
                     {item.value}
                   </span>
                 </div>
@@ -116,7 +106,7 @@ export function UsahaStatusChart({ status, isLoading }: UsahaStatusChartProps) {
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

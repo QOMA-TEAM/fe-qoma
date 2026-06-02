@@ -1,6 +1,6 @@
 "use client"
 
-import { OwnerSidebar } from "@/components/owner-sidebar"
+import { OwnerSidebar } from "@/components/owner/owner-sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
 export default function OwnerLayout({
