@@ -110,7 +110,8 @@ export function PendingTenantTable({ tenants, loading, onView, onApprove, onReje
 
   const statusBadge = (status: string) => {
     const map: Record<string, string> = {
-      approved: "bg-green-100 text-green-700",
+      active: "bg-green-100 text-green-700",
+      approved: "bg-green-100 text-green-700", // fallback
       pending: "bg-yellow-100 text-yellow-700",
       rejected: "bg-red-100 text-red-700",
       suspended: "bg-gray-100 text-gray-700",
@@ -281,7 +282,9 @@ export function PendingTenantTable({ tenants, loading, onView, onApprove, onReje
                   </TableCell>
 
                   <TableCell className="text-gray-600 text-sm">
-                    {typeof row.subscription?.plan === 'object' && row.subscription?.plan !== null ? row.subscription.plan.nama_plan : (row.subscription?.plan ?? "-")}
+                    {typeof row.subscription?.plan === 'string'
+                      ? row.subscription.plan
+                      : (row.subscription?.plan as any)?.nama_plan ?? "-"}
                   </TableCell>
 
                   <TableCell>
