@@ -2,7 +2,7 @@
 
 import { Building2, Users, DollarSign, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { DashboardRingkasan } from "@/types/dashboard";
+import { DashboardRingkasan } from "@/types/owner/dashboard";
 import { cn } from "@/lib/utils";
 
 function formatRupiah(value: number): string {

@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select"
 import { ImageIcon, Loader2 } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
-import { useAddBahanBaku, useUpdateBahanBaku, useDeleteBahanBaku } from "@/hooks/use-bahan-baku"
+import { useAddBahanBaku, useUpdateBahanBaku, useDeleteBahanBaku } from "@/hooks/owner/use-bahan-baku"
 
 const satuanOptions = ["pcs", "kg", "gram", "liter", "porsi", "lusin", "botol", "sachet"]
 
@@ -215,27 +215,6 @@ export function BahanBakuFormDialog({
 
           {/* Buttons */}
           <div className="flex items-center justify-center gap-4 pt-2">
-            {mode === "edit" && (
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={() => {
-                  if (window.confirm(`Hapus bahan baku ${initialData?.namaBahanBaku}?`)) {
-                    if (initialData?.id) {
-                      deleteMutation.mutate(initialData.id, {
-                        onSuccess: () => onOpenChange(false),
-                        onError: (err: any) => alert(err.response?.data?.message || "Gagal menghapus bahan baku")
-                      })
-                    }
-                  }
-                }}
-                disabled={isPending}
-                className="rounded-lg px-8 bg-red-600 hover:bg-red-700 text-white font-semibold cursor-pointer"
-              >
-                Hapus
-              </Button>
-            )}
-
             <Button disabled={isPending} type="submit" className="rounded-lg px-8 bg-[#1D5E84] hover:bg-[#154663] text-white font-semibold cursor-pointer">
               {isPending ? (
                 <>

@@ -4,7 +4,7 @@ import type {
   DashboardResponse,
   DashboardGraphResponse,
   PaginatedActivityLogResponse
-} from "@/types/dashboard"
+} from "@/types/owner/dashboard"
 
 export const useDashboardSummary = () => {
   return useQuery({

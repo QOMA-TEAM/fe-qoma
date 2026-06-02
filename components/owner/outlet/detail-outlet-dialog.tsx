@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import type { Outlet } from "@/types/outlet"
+import type { Outlet } from "@/types/owner/outlet"
 
 interface DetailOutletDialogProps {
   outlet: Outlet | null
@@ -101,7 +101,7 @@ export function DetailOutletDialog({ outlet, onClose }: DetailOutletDialogProps)
         <div className="flex justify-center mt-4">
           <Button
             onClick={onClose}
-            className="rounded-full px-10 bg-[#1D5E84] hover:bg-[#154663] text-white cursor-pointer"
+            className="rounded-lg px-10 bg-[#1D5E84] hover:bg-[#154663] text-white cursor-pointer"
           >
             Tutup
           </Button>
