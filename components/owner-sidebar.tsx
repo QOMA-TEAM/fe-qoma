@@ -39,9 +39,9 @@ const ownerNav = {
   ],
   kelola: [
     {
-      title: "Outlet",
-      url: "/owner/outlet",
-      icon: Store,
+      title: "Kategori",
+      url: "/owner/kategori",
+      icon: Tags,
     },
     {
       title: "Bahan Baku",
@@ -54,9 +54,9 @@ const ownerNav = {
       icon: UtensilsCrossed,
     },
     {
-      title: "Kategori",
-      url: "/owner/kategori",
-      icon: Tags,
+      title: "Outlet",
+      url: "/owner/outlet",
+      icon: Store,
     },
     {
       title: "Plan",

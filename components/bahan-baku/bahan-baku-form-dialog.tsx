@@ -27,7 +27,7 @@ interface BahanBakuFormData {
   gambarPreview: string | null
   namaBahanBaku: string
   satuan: string
-  hargaDefault: number
+  hargaDefault: number | string
 }
 
 interface BahanBakuFormDialogProps {
@@ -53,7 +53,7 @@ export function BahanBakuFormDialog({
   const addMutation = useAddBahanBaku()
   const updateMutation = useUpdateBahanBaku()
   const deleteMutation = useDeleteBahanBaku()
-  
+
   const isPending = addMutation.isPending || updateMutation.isPending || deleteMutation.isPending
 
   const [form, setForm] = useState<BahanBakuFormData>({
@@ -61,7 +61,7 @@ export function BahanBakuFormDialog({
     gambarPreview: null,
     namaBahanBaku: "",
     satuan: "",
-    hargaDefault: 0,
+    hargaDefault: "",
   })
 
   useEffect(() => {
@@ -74,7 +74,7 @@ export function BahanBakuFormDialog({
         hargaDefault: initialData.hargaDefault,
       })
     } else if (open && mode === "tambah") {
-      setForm({ gambar: null, gambarPreview: null, namaBahanBaku: "", satuan: "", hargaDefault: 0 })
+      setForm({ gambar: null, gambarPreview: null, namaBahanBaku: "", satuan: "", hargaDefault: "" })
     }
   }, [open, mode, initialData])
 
@@ -93,7 +93,7 @@ export function BahanBakuFormDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     const formData = new FormData()
     formData.append("nama", form.namaBahanBaku)
     formData.append("satuan", form.satuan)
@@ -207,7 +207,7 @@ export function BahanBakuFormDialog({
               min={0}
               placeholder="10000"
               value={form.hargaDefault}
-              onChange={(e) => setForm((p) => ({ ...p, hargaDefault: Number(e.target.value) }))}
+              onChange={(e) => setForm((p) => ({ ...p, hargaDefault: e.target.value === "" ? "" : Number(e.target.value) }))}
               className="rounded-lg border-gray-300"
               required
             />
@@ -230,20 +230,20 @@ export function BahanBakuFormDialog({
                   }
                 }}
                 disabled={isPending}
-                className="rounded-full px-8 bg-red-600 hover:bg-red-700 text-white font-semibold"
+                className="rounded-lg px-8 bg-red-600 hover:bg-red-700 text-white font-semibold cursor-pointer"
               >
                 Hapus
               </Button>
             )}
-            
-            <Button disabled={isPending} type="submit" className="rounded-full px-8 bg-[#1D5E84] hover:bg-[#154663] text-white font-semibold">
+
+            <Button disabled={isPending} type="submit" className="rounded-lg px-8 bg-[#1D5E84] hover:bg-[#154663] text-white font-semibold cursor-pointer">
               {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Menyimpan...
                 </>
               ) : (
-                "Submit"
+                "Update"
               )}
             </Button>
           </div>

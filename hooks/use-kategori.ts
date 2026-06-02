@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { api } from "@/lib/axios"
+import api from "@/lib/axios"
 import { PaginatedKategoriResponse, KategoriMaster } from "@/types/kategori"
 
-export const useKategori = (page: number = 1, search: string = "", per_page: number = 15) => {
+export const useKategori = (page: number = 1, search: string = "", per_page: number = 10) => {
   return useQuery({
     queryKey: ["kategori", page, search, per_page],
     queryFn: async () => {
@@ -34,7 +34,7 @@ export const useUpdateKategori = () => {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async ({ id, nama }: { id: string; nama: string }) => {
-      const { data } = await api.put(`/owner/kategori/${id}`, { nama })
+      const { data } = await api.post(`/owner/kategori/${id}`, { nama, _method: 'PUT' })
       return data
     },
     onSuccess: () => {
@@ -47,7 +47,7 @@ export const useDeleteKategori = () => {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (id: string) => {
-      const { data } = await api.delete(`/owner/kategori/${id}`)
+      const { data } = await api.post(`/owner/kategori/${id}`, { _method: 'DELETE' })
       return data
     },
     onSuccess: () => {

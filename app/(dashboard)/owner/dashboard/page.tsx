@@ -1,211 +1,254 @@
 "use client"
 
-import { Store, CircleDollarSign, TrendingDown, Settings, Bell } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { StatCard } from "@/components/dashboard/stat-card"
-import { ActivityLog, type ActivityItem } from "@/components/dashboard/activity-log"
-import { RevenueChart, type RevenueDataPoint } from "@/components/dashboard/revenue-chart"
-import { CustomersChart, type CustomersDataPoint } from "@/components/dashboard/customers-chart"
-import { OutletRevenueChart, type OutletRevenueDataPoint } from "@/components/dashboard/outlet-revenue-chart"
-
+import { useState } from "react"
+import { Home, CircleDollarSign, TrendingDown, ChevronDown, Loader2, Settings, Bell } from "lucide-react"
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
 import { useDashboardSummary, useDashboardGraph, useActivityLog } from "@/hooks/use-dashboard"
-import { Loader2 } from "lucide-react"
+import { useProfile } from "@/hooks/use-auth"
+import { MetricChart, type MetricDataPoint } from "@/components/dashboard/metric-chart"
+import { HeaderActions } from "@/components/dashboard/header-actions"
+import { cn } from "@/lib/utils"
 
-// ──────────────────────────────────────────────
+const formatRupiah = (number: number) => {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(number)
+}
 
 export default function OwnerDashboardPage() {
+  const [rangePendapatan, setRangePendapatan] = useState("30days")
+  const [rangeKerugian, setRangeKerugian] = useState("30days")
+
+  const { data: profile } = useProfile()
   const { data: summaryResponse, isLoading: summaryLoading } = useDashboardSummary()
-  const { data: graphResponse, isLoading: graphLoading } = useDashboardGraph("30days")
-  const { data: activityResponse, isLoading: activityLoading } = useActivityLog(1, 10)
+  const { data: graphPendapatanResponse, isLoading: graphPendapatanLoading } = useDashboardGraph(rangePendapatan)
+  const { data: graphKerugianResponse, isLoading: graphKerugianLoading } = useDashboardGraph(rangeKerugian)
+  const { data: activityResponse, isLoading: activityLoading } = useActivityLog(1, 15)
 
   const summary = summaryResponse?.data?.ringkasan
 
-  // Backend doesn't return root `grafik` if outlet_id is not specified. It returns `per_outlet` array.
-  // We need to aggregate it for the "Usaha" (all outlets) view.
-  let rawGrafik = graphResponse?.data?.grafik
-  
-  if (!rawGrafik && graphResponse?.data?.per_outlet) {
-    const aggregated: Record<string, number> = {}
-    graphResponse.data.per_outlet.forEach((outlet: any) => {
-      outlet.grafik?.forEach((g: any) => {
-        aggregated[g.tanggal] = (aggregated[g.tanggal] || 0) + Number(g.total_pendapatan)
-      })
-    })
-    rawGrafik = Object.keys(aggregated).sort().map(tanggal => ({
-      tanggal,
-      total_pendapatan: aggregated[tanggal],
-      total_pengeluaran: 0,
-      total_kerugian: 0,
-      total_keuntungan: 0,
-    }))
+  // Formatting dates (e.g., "2026-05-17" -> "May 17" or just "17 May")
+  const formatDateLabel = (dateStr: string) => {
+    const d = new Date(dateStr)
+    if (isNaN(d.getTime())) return dateStr
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   }
 
-  const graphData: RevenueDataPoint[] = rawGrafik?.map((g: any) => ({
-    month: g.tanggal.substring(5, 10), // e.g. "05-17" from "2026-05-17"
-    revenue: Number(g.total_pendapatan) || 0
-  })) || []
-
-  // Ambil data untuk tab "Outlet" dari outlet pertama jika ada
-  const outletGraphData: RevenueDataPoint[] = graphResponse?.data?.per_outlet?.[0]?.grafik?.map((g: any) => ({
-    month: g.tanggal.substring(5, 10),
-    revenue: Number(g.total_pendapatan) || 0
-  })) || graphData // fallback ke graphData jika kosong
-
-  const defaultGraphData: RevenueDataPoint[] = Array.from({ length: 30 }).map((_, i) => {
-    const d = new Date()
-    d.setDate(d.getDate() - (29 - i))
-    return {
-      month: d.toISOString().substring(5, 10),
-      revenue: 0
+  const getAggregatedData = (response: any, type: 'pendapatan' | 'kerugian'): MetricDataPoint[] => {
+    let rawGrafik = response?.data?.grafik
+    if (!rawGrafik && response?.data?.per_outlet) {
+      const agg: Record<string, number> = {}
+      response.data.per_outlet.forEach((outlet: any) => {
+        outlet.grafik?.forEach((g: any) => {
+          agg[g.tanggal] = (agg[g.tanggal] || 0) + Number(type === 'pendapatan' ? g.total_pendapatan : g.total_kerugian)
+        })
+      })
+      rawGrafik = Object.keys(agg).sort().map(tanggal => ({
+        tanggal,
+        total_pendapatan: type === 'pendapatan' ? agg[tanggal] : 0,
+        total_kerugian: type === 'kerugian' ? agg[tanggal] : 0,
+      }))
     }
-  })
 
-  const finalGraphData = graphData.length > 0 ? graphData : defaultGraphData
-  const finalOutletGraphData = outletGraphData.length > 0 ? outletGraphData : defaultGraphData
+    return rawGrafik?.map((g: any) => ({
+      label: formatDateLabel(g.tanggal),
+      value: Number(type === 'pendapatan' ? g.total_pendapatan : g.total_kerugian) || 0
+    })) || []
+  }
 
-  // Real data for Outlet Revenue Bar Chart
-  const realOutletRevenueData: OutletRevenueDataPoint[] = graphResponse?.data?.per_outlet?.map(outlet => ({
-    outlet: outlet.nama_outlet || "Unknown",
-    pendapatan: Number(outlet.total_pendapatan) || 0,
-    pengeluaran: Number(outlet.total_pengeluaran) || 0
-  })) || []
+  const pendapatanData = getAggregatedData(graphPendapatanResponse, 'pendapatan')
+  const kerugianData = getAggregatedData(graphKerugianResponse, 'kerugian')
 
-  const mappedActivities: ActivityItem[] = activityResponse?.data?.map((item, index) => ({
-    id: index + 1, // Use index as the visible circle number
-    title: item.aktivitas,
-    time: new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  })) || []
+  const activities = activityResponse?.data || []
+
+  const rangeLabels: Record<string, string> = {
+    "1day": "Hari Ini",
+    "7days": "7 Hari Terakhir",
+    "30days": "30 Hari Terakhir"
+  }
+
+  if (summaryLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-[#F8FAFC]">
+        <Loader2 className="w-8 h-8 animate-spin text-[#2C44B9]" />
+      </div>
+    )
+  }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50/40">
-      {/* ── Top Bar ── */}
+    <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
+      {/* Top Header Bar */}
       <header className="flex h-16 shrink-0 items-center justify-between border-b bg-white px-6 shadow-sm">
-        <h1 className="text-lg font-bold text-gray-800">
-          Welcome back, <span className="text-gray-900">Owner</span>
-        </h1>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            className="flex items-center justify-center size-9 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
-            aria-label="Settings"
-          >
-            <Settings className="size-4" />
-          </button>
-          <button
-            type="button"
-            className="relative flex items-center justify-center size-9 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
-            aria-label="Notifications"
-          >
-            <Bell className="size-4" />
-            <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-orange-500 ring-2 ring-white" />
-          </button>
-        </div>
+        <h2 className="text-[#1E293B] text-[15px] font-bold">
+          Welcome back, {profile?.username || 'Owner'}
+        </h2>
+        <HeaderActions />
       </header>
 
-      {/* ── Main Content ── */}
-      <main className="flex-1 overflow-auto p-6 space-y-6">
-        {/* Page heading */}
+      <div className="p-8 space-y-8">
+        {/* Header */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Dashboard</h2>
-          <p className="text-sm text-gray-500 mt-0.5">
-            Ringkasan aktivitas bisnis Anda
-          </p>
+          <h1 className="text-[28px] font-bold text-[#1E293B]">Dashboard</h1>
+          <p className="text-sm font-medium text-[#64748B] mt-1">Ringkasan aktivitas bisnis Anda</p>
         </div>
 
-        {/* ── Stat Cards ── */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {summaryLoading ? (
-             <div className="col-span-3 flex justify-center py-10"><Loader2 className="animate-spin text-blue-600 size-8" /></div>
-          ) : (
-            <>
-              <StatCard
-                icon={Store}
-                label="Total Outlet"
-                value={(summary?.total_outlet || 0).toString()}
-                gradient="bg-[#2A49B8]"
-              />
-              <StatCard
-                icon={CircleDollarSign}
-                label="Total Pendapatan"
-                value={`Rp ${Number(summary?.total_pendapatan || 0).toLocaleString("id-ID")}`}
-                gradient="bg-[#56A6FF]"
-              />
-              <StatCard
-                icon={TrendingDown}
-                label="Total Kerugian"
-                value={`Rp ${Number(summary?.total_kerugian || 0).toLocaleString("id-ID")}`}
-                gradient="bg-[#F29C38]"
-              />
-            </>
-          )}
+      {/* Top 3 Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Total Outlet */}
+        <div className="bg-[#2D45B8] text-white rounded-2xl p-6 shadow-md relative overflow-hidden h-[160px] flex flex-col justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-white/20 p-2.5 rounded-lg">
+              <Home className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-[15px] font-medium opacity-90">Total Outlet</span>
+          </div>
+          <h3 className="text-[36px] font-bold tracking-tight">{summary?.total_outlet || 0}</h3>
         </div>
 
-        {/* ── Charts + Activity Log ── */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
-          {/* Main Chart with Tabs */}
-          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-            <Tabs defaultValue="outlet">
-              <TabsList variant="line" className="mb-4">
-                <TabsTrigger value="outlet" className="text-sm">
-                  Outlet
-                </TabsTrigger>
-                <TabsTrigger value="user" className="text-sm">
-                  User
-                </TabsTrigger>
-              </TabsList>
+        {/* Total Pendapatan */}
+        <div className="bg-[#44A5E6] text-white rounded-2xl p-6 shadow-md relative overflow-hidden h-[160px] flex flex-col justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-white/20 p-2.5 rounded-lg">
+              <CircleDollarSign className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-[15px] font-medium opacity-90">Total Pendapatan</span>
+          </div>
+          <h3 className="text-[36px] font-bold tracking-tight truncate">
+            {formatRupiah(summary?.total_pendapatan || 0)}
+          </h3>
+        </div>
 
-              <TabsContent value="outlet">
-                {graphLoading ? (
-                  <div className="h-[300px] flex justify-center items-center"><Loader2 className="animate-spin text-blue-600 size-6" /></div>
-                ) : (
-                  <RevenueChart data={finalOutletGraphData} />
-                )}
-              </TabsContent>
+        {/* Total Kerugian */}
+        <div className="bg-[#F69C35] text-white rounded-2xl p-6 shadow-md relative overflow-hidden h-[160px] flex flex-col justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-white/20 p-2.5 rounded-lg">
+              <TrendingDown className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-[15px] font-medium opacity-90">Total Kerugian</span>
+          </div>
+          <h3 className="text-[36px] font-bold tracking-tight truncate">
+            {formatRupiah(summary?.total_kerugian || 0)}
+          </h3>
+        </div>
+      </div>
 
-              <TabsContent value="user">
-                {graphLoading ? (
-                  <div className="h-[300px] flex justify-center items-center"><Loader2 className="animate-spin text-blue-600 size-6" /></div>
-                ) : (
-                  <RevenueChart data={finalGraphData} />
-                )}
-              </TabsContent>
-            </Tabs>
+      {/* Bottom Grid: 2 Charts + Activity Log */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Side: 2 Charts */}
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Pendapatan Chart */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#F1F5F9] flex flex-col h-[400px]">
+            <div className="flex justify-between items-center mb-6">
+              <h4 className="text-[#1E293B] font-bold text-lg">Pendapatan</h4>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2 bg-white border-[#E2E8F0] shadow-sm rounded-lg text-[#334155] font-medium w-[140px] justify-between text-xs h-8">
+                    {rangeLabels[rangePendapatan]} <ChevronDown className="w-3 h-3 text-[#94A3B8]" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[140px]">
+                  {Object.entries(rangeLabels).map(([key, label]) => (
+                    <DropdownMenuItem 
+                      key={key} 
+                      onClick={() => setRangePendapatan(key)} 
+                      className={cn("cursor-pointer text-xs", rangePendapatan === key && "font-semibold text-[#2C44B9]")}
+                    >
+                      {label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div className="flex-1 w-full relative">
+              {graphPendapatanLoading ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Loader2 className="w-6 h-6 animate-spin text-[#94A3B8]" />
+                </div>
+              ) : (
+                <MetricChart data={pendapatanData} labelName="Pendapatan" color="#F97316" />
+              )}
+            </div>
           </div>
 
-          {/* Activity Log */}
-          {activityLoading ? (
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm flex justify-center items-center h-64">
-              <Loader2 className="animate-spin text-blue-600 size-6" />
+          {/* Kerugian Chart */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#F1F5F9] flex flex-col h-[400px]">
+            <div className="flex justify-between items-center mb-6">
+              <h4 className="text-[#1E293B] font-bold text-lg">Kerugian</h4>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2 bg-white border-[#E2E8F0] shadow-sm rounded-lg text-[#334155] font-medium w-[140px] justify-between text-xs h-8">
+                    {rangeLabels[rangeKerugian]} <ChevronDown className="w-3 h-3 text-[#94A3B8]" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[140px]">
+                  {Object.entries(rangeLabels).map(([key, label]) => (
+                    <DropdownMenuItem 
+                      key={key} 
+                      onClick={() => setRangeKerugian(key)} 
+                      className={cn("cursor-pointer text-xs", rangeKerugian === key && "font-semibold text-[#2C44B9]")}
+                    >
+                      {label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-          ) : (
-            <ActivityLog items={mappedActivities} />
-          )}
+            <div className="flex-1 w-full relative">
+              {graphKerugianLoading ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Loader2 className="w-6 h-6 animate-spin text-[#94A3B8]" />
+                </div>
+              ) : (
+                <MetricChart data={kerugianData} labelName="Kerugian" color="#F97316" />
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* ── Bottom Row: Outlet Revenue (Customers is hidden) ── */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {/* Customers Chart - HIDDEN TEMPORARILY AS NO BACKEND DATA EXISTS */}
-          <div className="hidden rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">Customers</h3>
-            {/* <CustomersChart data={[]} /> */}
+        {/* Right Side: Activity Log */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#F1F5F9] flex flex-col h-[400px]">
+          <div className="mb-6">
+            <h4 className="text-[#1E293B] font-bold text-lg">Activity Log</h4>
+            <p className="text-[#44A5E6] text-sm font-medium">History</p>
           </div>
-
-          {/* Outlet Revenue Bar Chart */}
-          <div className="col-span-1 lg:col-span-2 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-            <div className="mb-4">
-              <h3 className="text-lg font-bold text-gray-800">Pendapatan</h3>
-              <p className="text-sm text-gray-400">Pendapatan per outlet</p>
-            </div>
-            {graphLoading ? (
-               <div className="h-[300px] flex justify-center items-center"><Loader2 className="animate-spin text-blue-600 size-6" /></div>
-            ) : realOutletRevenueData.length === 0 ? (
-               <div className="h-[300px] flex justify-center items-center text-sm text-gray-400">Tidak ada data pendapatan outlet</div>
+          
+          <div className="flex-1 overflow-y-auto pr-2 pb-4">
+            {activityLoading ? (
+              <div className="flex justify-center py-10">
+                <Loader2 className="w-6 h-6 animate-spin text-[#94A3B8]" />
+              </div>
+            ) : activities.length === 0 ? (
+              <div className="text-center py-10 text-sm text-[#94A3B8]">Belum ada aktivitas.</div>
             ) : (
-               <OutletRevenueChart data={realOutletRevenueData} />
+              <div className="relative border-l-2 border-[#E2E8F0] ml-4 mt-2 space-y-6">
+                {activities.map((item, index) => {
+                  const date = new Date(item.created_at)
+                  const timeString = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+                  
+                  return (
+                    <div key={item.id} className="relative flex items-start pl-6">
+                      {/* Stepper Dot */}
+                      <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-white border-[3px] border-[#F69C35]" />
+                      
+                      <div className="flex flex-col">
+                        <span className="text-[#1E293B] font-bold text-sm leading-tight mb-1">{item.aktivitas}</span>
+                        <span className="text-[#44A5E6] text-xs font-semibold">{timeString}</span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             )}
           </div>
         </div>
-      </main>
+      </div>
+      </div>
     </div>
   )
 }

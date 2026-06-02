@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
-import { api } from "@/lib/axios"
-import type { 
-  DashboardResponse, 
-  DashboardGraphResponse, 
-  PaginatedActivityLogResponse 
+import api from "@/lib/axios"
+import type {
+  DashboardResponse,
+  DashboardGraphResponse,
+  PaginatedActivityLogResponse
 } from "@/types/dashboard"
 
 export const useDashboardSummary = () => {
@@ -24,7 +24,7 @@ export const useDashboardGraph = (range: string = "7days", outletId?: string) =>
       if (outletId && outletId !== "all") {
         params.append("outlet_id", outletId)
       }
-      
+
       const response = await api.get<DashboardGraphResponse>(`/owner/dashboard/graph?${params}`)
       return response.data
     }
@@ -35,7 +35,7 @@ export const useActivityLog = (page: number = 1, per_page: number = 10, outletId
   return useQuery({
     queryKey: ["activity-log", page, per_page, outletId],
     queryFn: async () => {
-      const params = new URLSearchParams({ 
+      const params = new URLSearchParams({
         page: page.toString(),
         per_page: per_page.toString()
       })
