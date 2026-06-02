@@ -32,8 +32,8 @@ export default function DashboardPage() {
       try {
         const res: DashboardStatsResponse = await dashboardService.getStats();
         setStats(res.data);
-      } catch (err) {
-        toast.error("Gagal memuat data dashboard");
+      } catch (err: any) {
+        toast.error(`Gagal memuat data dashboard: ${err?.message || err}`);
       } finally {
         setLoadingStats(false);
       }
@@ -48,8 +48,8 @@ export default function DashboardPage() {
       try {
         const res: MRRResponse = await dashboardService.getMRR(mrrFilter);
         setMrr(res.data);
-      } catch (err) {
-        toast.error("Gagal memuat data MRR");
+      } catch (err: any) {
+        toast.error(`Gagal memuat data MRR: ${err?.message || err}`);
       } finally {
         setLoadingMrr(false);
       }

@@ -1,8 +1,9 @@
+// hooks/superadmin/use-plan.ts
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { planService } from "@/hooks/superadmin/plan";
+import { planService } from "@/services/superadmin/planServices";
 import {
   CreatePlanPayload,
   Plan,

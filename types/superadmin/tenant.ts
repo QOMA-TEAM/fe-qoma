@@ -1,45 +1,79 @@
-// ─── Plan Types ──────────────────────────────────────────────────────────────
+// ─── Tenant / Usaha Types ────────────────────────────────────────────────────
 
-export type PlanStatus = "active" | "inactive";
-export type PlanTagihan = "30 Hari" | "60 Hari" | "90 Hari" | "365 Hari";
+export type TenantStatus = "pending" | "active" | "approved" | "rejected" | "suspended";
 
-export interface Plan {
+export interface TenantOwner {
+  id: string;
+  username: string;
+  nama_lengkap: string;
+  email: string;
+  is_active: boolean;
+}
+
+export interface TenantSubscriptionPlan {
   id: string;
   nama_plan: string;
-  harga: number;
-  batas_outlet: number;
-  tagihan: PlanTagihan;
-  status: PlanStatus;
-  deskripsi?: string;
+  harga: string | number;
+}
+
+export interface TenantSubscription {
+  plan: TenantSubscriptionPlan | string;
+  status: string;
+  start_date: string | null;
+  end_date: string | null;
+}
+
+export interface TenantOutlet {
+  id: string;
+  nama_outlet: string;
+  status_buka: boolean;
+}
+
+export interface Tenant {
+  id: string;
+  nama_usaha: string;
+  email: string;
+  alamat: string;
+  status: TenantStatus;
+  catatan_admin: string | null;
+  approved_at: string | null;
+  rejected_at: string | null;
+  outlets_count: number;
   created_at: string;
-  updated_at: string;
+  owner?: TenantOwner;
+  subscription?: TenantSubscription | null;
+  outlets?: TenantOutlet[];
 }
 
-// ─── API Payloads ─────────────────────────────────────────────────────────────
+// ─── Filters ──────────────────────────────────────────────────────────────────
 
-export interface CreatePlanPayload {
-  nama_plan: string;
-  harga: number;
-  batas_outlet: number;
-  tagihan: PlanTagihan;
-  status: PlanStatus;
-  deskripsi?: string;
+export interface TenantListFilters {
+  status?: TenantStatus;
+  exclude_status?: TenantStatus;
+  search?: string;
 }
-
-export interface UpdatePlanPayload extends Partial<CreatePlanPayload> {}
 
 // ─── API Responses ────────────────────────────────────────────────────────────
 
-export interface PlanListResponse {
+export interface TenantListResponse {
   message: string;
-  data: Plan[];
+  data: Tenant[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+    from: number;
+    to: number;
+  };
 }
 
-export interface PlanDetailResponse {
+export interface TenantDetailResponse {
   message: string;
-  data: Plan;
+  data: Tenant;
 }
 
-export interface PlanDeleteResponse {
+export interface TenantActionResponse {
   message: string;
+  data: Tenant;
 }

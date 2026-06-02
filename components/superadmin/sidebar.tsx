@@ -94,9 +94,9 @@ export function SuperadminSidebar({
                 <SidebarMenuButton
                   asChild
                   isActive={pathname === item.url}
-                  className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
+                  className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50 cursor-pointer"
                 >
-                  <Link href={item.url}>
+                  <Link href={item.url} className="cursor-pointer">
                     <item.icon className="size-4" />
                     <span>{item.title}</span>
                   </Link>
@@ -117,9 +117,9 @@ export function SuperadminSidebar({
                 <SidebarMenuButton
                   asChild
                   isActive={pathname === item.url}
-                  className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
+                  className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50 cursor-pointer"
                 >
-                  <Link href={item.url}>
+                  <Link href={item.url} className="cursor-pointer">
                     <item.icon className="size-4" />
                     <span>{item.title}</span>
                   </Link>
@@ -136,9 +136,9 @@ export function SuperadminSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="hover:bg-red-50 hover:text-red-600"
+              className="hover:bg-red-50 hover:text-red-600 cursor-pointer"
             >
-              <button type="button" className="w-full">
+              <button type="button" className="w-full cursor-pointer">
                 <Avatar className="size-7">
                   <AvatarImage src="/avatar-placeholder.png" alt="Owner" />
                   <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-semibold">

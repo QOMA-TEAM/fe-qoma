@@ -1,3 +1,4 @@
+// components/superadmin/plan/modal-hapus-plan.tsx
 "use client";
 
 import {
@@ -10,7 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2, Trash2 } from "lucide-react";
-import { Plan } from "@/types/plan";
+import { Plan } from "@/types/superadmin/plan";   // ← dari superadmin/plan, bukan /types/plan
 
 interface ModalHapusPlanProps {
   open: boolean;
@@ -37,7 +38,6 @@ export function ModalHapusPlan({
     <AlertDialog open={open} onOpenChange={(o) => !o && onClose()}>
       <AlertDialogContent className="sm:max-w-sm rounded-xl">
         <AlertDialogHeader className="items-center text-center gap-3">
-          {/* Icon */}
           <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto">
             <Trash2 className="h-6 w-6 text-red-500" />
           </div>

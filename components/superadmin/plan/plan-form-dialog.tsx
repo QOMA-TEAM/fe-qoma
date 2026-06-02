@@ -1,6 +1,7 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -150,6 +151,23 @@ export function PlanFormFields({
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      {/* Deskripsi */}
+      <div className="space-y-1.5">
+        <Label
+          htmlFor="deskripsi"
+          className="text-sm font-medium text-gray-700"
+        >
+          Deskripsi
+        </Label>
+        <Textarea
+          id="deskripsi"
+          placeholder="Deskripsi Plan (opsional)"
+          value={values.deskripsi ?? ""}
+          onChange={(e) => onChange("deskripsi", e.target.value)}
+          className="resize-none min-h-[80px] border-gray-200 focus-visible:ring-blue-500"
+        />
       </div>
     </div>
   );

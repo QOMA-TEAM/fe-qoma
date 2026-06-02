@@ -1,11 +1,12 @@
+// components/superadmin/plan/plan-card.tsx
 "use client";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Store } from "lucide-react";
-import { Plan } from "@/types/plan";
+import { CheckCircle2, Store, XCircle } from "lucide-react";
+import { Plan } from "@/types/superadmin/plan";
 
 function formatRupiah(value: number): string {
   return new Intl.NumberFormat("id-ID", {
@@ -25,46 +26,77 @@ interface PlanCardProps {
 }
 
 export function PlanCard({ plan, onEdit, onDelete }: PlanCardProps) {
-  const isActive = plan.status === "active";
+  const isActive = plan.status === "aktif";   // ← sesuai PlanStatus
 
   return (
-    <Card className="w-full max-w-[280px] border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 bg-white rounded-xl overflow-hidden">
+    <Card
+      className={`
+        w-full max-w-[280px] border shadow-sm hover:shadow-md transition-all duration-200
+        rounded-xl overflow-hidden
+        ${isActive
+          ? "border-teal-300 bg-white"           // aktif: border teal
+          : "border-gray-200 bg-gray-50 opacity-75"  // tidak aktif: redup
+        }
+      `}
+    >
+      {/* Strip warna atas sebagai indikator visual utama */}
+      <div className={`h-1.5 w-full ${isActive ? "bg-teal-400" : "bg-gray-300"}`} />
+
       <CardContent className="p-5 space-y-4">
         {/* Header: Nama Plan + Status Badge */}
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-800">
+        <div className="flex items-center justify-between gap-2">
+          <h3
+            className={`text-base font-semibold truncate ${isActive ? "text-gray-800" : "text-gray-400"
+              }`}
+          >
             {plan.nama_plan}
           </h3>
+
           <Badge
             variant="outline"
-            className={
-              isActive
-                ? "border-teal-400 text-teal-600 bg-teal-50 rounded-full px-3 text-xs font-medium"
-                : "border-gray-300 text-gray-500 bg-gray-50 rounded-full px-3 text-xs font-medium"
-            }
+            className={`
+              flex items-center gap-1 shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium
+              ${isActive
+                ? "border-teal-400 text-teal-700 bg-teal-50"
+                : "border-gray-300 text-gray-400 bg-gray-100"
+              }
+            `}
           >
+            {isActive ? (
+              <CheckCircle2 className="h-3 w-3 text-teal-500" />
+            ) : (
+              <XCircle className="h-3 w-3 text-gray-400" />
+            )}
             {isActive ? "Aktif" : "Tidak Aktif"}
           </Badge>
         </div>
 
         {/* Harga */}
         <div>
-          <p className="text-2xl font-bold text-gray-900 tracking-tight">
+          <p
+            className={`text-2xl font-bold tracking-tight ${isActive ? "text-gray-900" : "text-gray-400"
+              }`}
+          >
             {formatRupiah(plan.harga)}
           </p>
           <p className="text-xs text-gray-400 mt-0.5">Per {plan.tagihan}</p>
         </div>
 
-        <Separator className="bg-gray-100" />
+        <Separator className={isActive ? "bg-gray-100" : "bg-gray-200"} />
 
         {/* Features */}
         <ul className="space-y-1.5">
           <li className="flex items-center gap-2 text-sm text-gray-600">
-            <Store className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-            <span>{plan.batas_outlet} Outlet</span>
+            <Store
+              className={`h-3.5 w-3.5 flex-shrink-0 ${isActive ? "text-teal-500" : "text-gray-300"
+                }`}
+            />
+            <span className={isActive ? "text-gray-600" : "text-gray-400"}>
+              {plan.batas_outlet} Outlet
+            </span>
           </li>
           {plan.deskripsi && (
-            <li className="text-xs text-gray-400 leading-relaxed">
+            <li className="text-xs text-gray-400 leading-relaxed line-clamp-2">
               {plan.deskripsi}
             </li>
           )}
@@ -98,10 +130,11 @@ export function PlanCard({ plan, onEdit, onDelete }: PlanCardProps) {
 export function PlanCardSkeleton() {
   return (
     <Card className="w-full max-w-[280px] border border-gray-200 rounded-xl overflow-hidden">
+      <div className="h-1.5 w-full bg-gray-100 animate-pulse" />
       <CardContent className="p-5 space-y-4">
         <div className="flex items-center justify-between">
           <div className="h-5 w-24 bg-gray-100 rounded animate-pulse" />
-          <div className="h-5 w-14 bg-gray-100 rounded-full animate-pulse" />
+          <div className="h-5 w-16 bg-gray-100 rounded-full animate-pulse" />
         </div>
         <div className="space-y-1.5">
           <div className="h-8 w-32 bg-gray-100 rounded animate-pulse" />

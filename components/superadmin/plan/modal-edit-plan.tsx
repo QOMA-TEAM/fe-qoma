@@ -1,3 +1,4 @@
+// components/superadmin/plan/modal-edit-plan.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -11,12 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
-import { PlanFormFields } from "./plan-form-dialog";
-import {
-  CreatePlanPayload,
-  Plan,
-  UpdatePlanPayload,
-} from "@/types/superadmin/plan";
+import { PlanFormFields, PlanFormValues, PlanFormErrors } from "./plan-form-dialog";
+import { Plan, UpdatePlanPayload, TAGIHAN_TO_HARI } from "@/types/superadmin/plan";
 
 interface ModalEditPlanProps {
   open: boolean;
@@ -26,10 +23,8 @@ interface ModalEditPlanProps {
   submitting?: boolean;
 }
 
-type Errors = Partial<Record<keyof CreatePlanPayload, string>>;
-
-function validate(values: Partial<CreatePlanPayload>): Errors {
-  const errors: Errors = {};
+function validate(values: Partial<PlanFormValues>): PlanFormErrors {
+  const errors: PlanFormErrors = {};
   if (!values.nama_plan?.trim()) errors.nama_plan = "Nama plan wajib diisi";
   if ((values.harga ?? 0) < 0) errors.harga = "Harga tidak boleh negatif";
   if ((values.batas_outlet ?? 1) < 1) errors.batas_outlet = "Minimal 1 outlet";
@@ -44,28 +39,29 @@ export function ModalEditPlan({
   onSubmit,
   submitting,
 }: ModalEditPlanProps) {
-  const [values, setValues] = useState<Partial<CreatePlanPayload>>({});
-  const [errors, setErrors] = useState<Errors>({});
+  const [values, setValues] = useState<Partial<PlanFormValues>>({});
+  const [errors, setErrors] = useState<PlanFormErrors>({});
 
-  // Sync plan data ke form saat modal dibuka
+  /**
+   * Sync data plan ke form setiap kali modal dibuka dengan plan baru.
+   * plan.tagihan sudah di-normalisasi oleh normalizePlan() di service,
+   * sehingga nilainya pasti "30 Hari" | "60 Hari" | "90 Hari" | "365 Hari".
+   */
   useEffect(() => {
-    if (plan) {
+    if (plan && open) {
       setValues({
         nama_plan: plan.nama_plan,
         harga: plan.harga,
         batas_outlet: plan.batas_outlet,
-        tagihan: plan.tagihan,
-        status: plan.status,
+        tagihan: plan.tagihan,          // sudah berupa PlanTagihan yang valid
+        status: plan.status,            // "aktif" | "tidak aktif"
         deskripsi: plan.deskripsi ?? "",
       });
       setErrors({});
     }
-  }, [plan]);
+  }, [plan, open]);
 
-  const handleChange = (
-    field: keyof CreatePlanPayload,
-    value: string | number,
-  ) => {
+  const handleChange = (field: keyof PlanFormValues, value: string | number) => {
     setValues((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
@@ -77,15 +73,18 @@ export function ModalEditPlan({
       return;
     }
     if (!plan) return;
-    
-    // Konversi "30 Hari" menjadi angka 30 untuk dikirim ke backend
-    const durasi = parseInt(values.tagihan || "30");
-    const payloadToSend = {
-      ...values,
-      durasi_hari: isNaN(durasi) ? 30 : durasi
+
+    // Konversi label → angka hari sebelum kirim ke backend
+    const payload: UpdatePlanPayload = {
+      nama_plan: values.nama_plan,
+      harga: values.harga,
+      durasi_hari: TAGIHAN_TO_HARI[values.tagihan!],  // "365 Hari" → 365
+      batas_outlet: values.batas_outlet,
+      deskripsi: values.deskripsi ?? null,
+      status: values.status,
     };
 
-    const ok = await onSubmit(plan.id, payloadToSend);
+    const ok = await onSubmit(plan.id, payload);
     if (ok) {
       setErrors({});
       onClose();
@@ -109,11 +108,7 @@ export function ModalEditPlan({
         <Separator />
 
         <div className="px-6 py-5">
-          <PlanFormFields
-            values={values}
-            onChange={handleChange}
-            errors={errors}
-          />
+          <PlanFormFields values={values} onChange={handleChange} errors={errors} />
         </div>
 
         <Separator />

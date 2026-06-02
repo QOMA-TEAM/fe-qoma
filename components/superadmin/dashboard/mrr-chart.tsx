@@ -114,25 +114,6 @@ export function MRRChart({
             </CardDescription>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Variant Tabs */}
-            <Tabs
-              value={variant}
-              onValueChange={(v) => setVariant(v as ChartVariant)}
-            >
-              <TabsList className="h-8 bg-gray-100">
-                <TabsTrigger value="usaha" className="text-xs h-6 px-3">
-                  Usaha
-                </TabsTrigger>
-                <TabsTrigger value="tenant" className="text-xs h-6 px-3">
-                  Tenant
-                </TabsTrigger>
-                <TabsTrigger value="user" className="text-xs h-6 px-3">
-                  User
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-
             {/* Filter Select */}
             <Select
               value={filter}
@@ -153,7 +134,6 @@ export function MRRChart({
                 </SelectItem>
               </SelectContent>
             </Select>
-          </div>
         </div>
       </CardHeader>
 
@@ -215,6 +195,6 @@ export function MRRChart({
           </ResponsiveContainer>
         )}
       </CardContent>
-    </Card>
+    </Card >
   );
 }
