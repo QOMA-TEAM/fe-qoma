@@ -3,7 +3,7 @@
 import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutDashboard,
   Store,
@@ -75,6 +75,15 @@ const ownerNav = {
 
 export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
+  const router = useRouter()
+
+  const handleLogout = () => {
+    localStorage.removeItem("token")
+    localStorage.removeItem("role")
+    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax"
+    document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax"
+    router.push("/login")
+  }
 
   return (
     <Sidebar {...props}>
@@ -170,7 +179,7 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="hover:bg-red-50 hover:text-red-600">
-              <button type="button" className="w-full">
+              <button type="button" className="w-full" onClick={handleLogout}>
                 <Avatar className="size-7">
                   <AvatarImage src="/avatar-placeholder.png" alt="Owner" />
                   <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-semibold">
