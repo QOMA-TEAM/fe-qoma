@@ -1,14 +1,17 @@
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Loader2 } from "lucide-react"
 import Link from "next/link"
-import { OrderCard, type OrderData } from "@/components/outlet/sales/order-card"
-
-const dummyOrders: OrderData[] = [
-  { id: "A4104", nama: "Surikiti", meja: "04", status: "Unpaid" },
-  { id: "A4104", nama: "Surikiti", meja: "04", status: "Unpaid" },
-  { id: "A4104", nama: "Surikiti", meja: "04", status: "Unpaid" },
-]
+import { OrderCard } from "@/components/outlet/sales/order-card"
+import { usePesananList } from "@/hooks/outlet/use-pesanan"
 
 export function IncomingOrders() {
+  // Ambil semua pesanan (kecuali expired)
+  const { data: pesananResponse, isLoading, isError } = usePesananList();
+
+  // Filter yang belum lunas (pending atau confirmed) dan ambil 3 teratas
+  const activeOrders = pesananResponse?.data
+    ?.filter((o) => o.status === "pending" || o.status === "confirmed")
+    ?.slice(0, 3) || [];
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -21,11 +24,25 @@ export function IncomingOrders() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {dummyOrders.map((order, idx) => (
-          <OrderCard key={idx} order={order} />
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="flex justify-center items-center py-10">
+          <Loader2 className="w-8 h-8 animate-spin text-[#1a5f7a]" />
+        </div>
+      ) : isError ? (
+        <div className="text-center py-6 text-red-500 font-medium bg-red-50 rounded-xl">
+          Gagal memuat pesanan
+        </div>
+      ) : activeOrders.length === 0 ? (
+        <div className="text-center py-10 text-gray-500 font-medium bg-white rounded-xl shadow-sm border border-gray-100">
+          Belum ada pesanan masuk.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {activeOrders.map((order) => (
+            <OrderCard key={order.id} order={order} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
