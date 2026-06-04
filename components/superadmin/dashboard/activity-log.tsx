@@ -47,17 +47,13 @@ export function ActivityLog({ activities, isLoading, className }: ActivityLogPro
             {activities.map((activity) => (
               <div key={activity.id} className="relative flex items-start pl-6 group">
                 {/* Stepper Dot */}
-                <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-white border-[3px] border-[#F69C35] transition-transform group-hover:scale-125" />
+                <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-white border-[3px] border-[#F69C35]" />
 
                 <div className="flex flex-col">
-                  <span className="text-[#1E293B] font-bold text-sm leading-tight mb-1">
-                    {activity.aktivitas}
+                  <span className="text-[#1E293B] font-bold text-sm leading-tight mb-1 capitalize">
+                    {activity.aktivitas.replace(/_/g, ' ')}
                   </span>
-                  {activity.deskripsi && (
-                    <span className="text-[#64748B] text-xs mb-1">
-                      {activity.deskripsi}
-                    </span>
-                  )}
+
                   <span className="text-[#44A5E6] text-xs font-semibold">
                     {formatTime(activity.created_at)}
                   </span>
