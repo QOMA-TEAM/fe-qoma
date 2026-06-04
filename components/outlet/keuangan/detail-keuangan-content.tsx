@@ -1,0 +1,45 @@
+"use client"
+
+import { useState } from "react"
+import { useOutletKeuangan } from "@/hooks/outlet/use-keuangan"
+import { DetailKeuanganCards } from "./detail-keuangan-cards"
+import { DetailKeuanganFilter } from "./detail-keuangan-filter"
+import { DetailKeuanganTable } from "./detail-keuangan-table"
+
+export function DetailKeuanganContent() {
+  const [range, setRange] = useState("7days")
+  const [tipe, setTipe] = useState("semua")
+
+  const { data, isLoading } = useOutletKeuangan(range)
+
+  const cards = data?.data?.cards
+  const transaksi = data?.data?.transaksi ?? []
+
+  return (
+    <div className="flex flex-col gap-6 p-6">
+      {/* Page Header */}
+      <div>
+        <h1 className="text-xl font-bold text-gray-900">Detail Keuangan</h1>
+        <p className="text-sm text-gray-500 mt-0.5">Ringkasan laporan keuangan outlet Anda</p>
+      </div>
+
+      {/* Summary Cards */}
+      <DetailKeuanganCards cards={cards} isLoading={isLoading} />
+
+      {/* Transaksi Section */}
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <h2 className="text-base font-semibold text-gray-800">Riwayat Transaksi</h2>
+          <DetailKeuanganFilter
+            range={range}
+            setRange={(v) => setRange(v)}
+            tipe={tipe}
+            setTipe={(v) => setTipe(v)}
+          />
+        </div>
+
+        <DetailKeuanganTable transaksi={transaksi} isLoading={isLoading} tipe={tipe} />
+      </div>
+    </div>
+  )
+}

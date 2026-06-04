@@ -1,0 +1,88 @@
+"use client"
+
+import { Loader2, Store, Coins, TrendingDown, CircleDollarSign, AlertTriangle, TrendingUp } from "lucide-react"
+import { formatRupiah } from "@/lib/utils"
+import type { OutletKeuanganCards } from "@/types/outlet/keuangan"
+
+interface Props {
+  cards?: OutletKeuanganCards
+  isLoading: boolean
+}
+
+export function DetailKeuanganCards({ cards, isLoading }: Props) {
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-32">
+        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+      </div>
+    )
+  }
+
+  if (!cards) return null
+
+  return (
+    <div className="space-y-4">
+      {/* Status banner */}
+      <div className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium ${
+        cards.status === "untung"
+          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+          : "bg-rose-50 text-rose-700 border border-rose-200"
+      }`}>
+        {cards.status === "untung"
+          ? <TrendingUp className="w-4 h-4 shrink-0" />
+          : <AlertTriangle className="w-4 h-4 shrink-0" />}
+        {cards.pesan}
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-[#2A49B8] text-white p-6 rounded-2xl shadow-sm relative overflow-hidden">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="bg-white/20 p-2 rounded-lg">
+              <Store className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-sm font-medium opacity-90">Total Pendapatan</span>
+          </div>
+          <h3 className="text-2xl font-bold">{formatRupiah(cards.total_pendapatan)}</h3>
+          <Store className="absolute -bottom-6 -right-4 w-28 h-28 text-white/10" />
+        </div>
+
+        <div className="bg-[#29A364] text-white p-6 rounded-2xl shadow-sm relative overflow-hidden">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="bg-white/20 p-2 rounded-lg">
+              <Coins className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-sm font-medium opacity-90">Total Pengeluaran</span>
+          </div>
+          <h3 className="text-2xl font-bold">{formatRupiah(cards.total_pengeluaran)}</h3>
+          <Coins className="absolute -bottom-6 -right-4 w-28 h-28 text-white/10" />
+        </div>
+
+        <div className="bg-[#F29C38] text-white p-6 rounded-2xl shadow-sm relative overflow-hidden">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="bg-white/20 p-2 rounded-lg">
+              <TrendingDown className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-sm font-medium opacity-90">Total Kerugian</span>
+          </div>
+          <h3 className="text-2xl font-bold">{formatRupiah(cards.total_kerugian)}</h3>
+          <TrendingDown className="absolute -bottom-6 -right-4 w-28 h-28 text-white/10" />
+        </div>
+
+        <div className={`text-white p-6 rounded-2xl shadow-sm relative overflow-hidden ${
+          cards.status === "untung" ? "bg-[#5A9BE7]" : "bg-rose-500"
+        }`}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="bg-white/20 p-2 rounded-lg">
+              <CircleDollarSign className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-sm font-medium opacity-90">Total Keuntungan</span>
+          </div>
+          <h3 className="text-2xl font-bold">{formatRupiah(Math.abs(cards.total_keuntungan))}</h3>
+          <p className="text-xs opacity-75 mt-1">{cards.status === "untung" ? "Untung" : "Rugi"}</p>
+          <CircleDollarSign className="absolute -bottom-6 -right-4 w-28 h-28 text-white/10" />
+        </div>
+      </div>
+    </div>
+  )
+}
