@@ -11,11 +11,15 @@ export interface OrderData {
 interface OrderCardProps {
   order: OrderData;
   onDelete?: (id: string) => void;
+  onClick?: (order: OrderData) => void;
 }
 
-export function OrderCard({ order, onDelete }: OrderCardProps) {
+export function OrderCard({ order, onDelete, onClick }: OrderCardProps) {
   return (
-    <div className="flex h-[112px] rounded-[16px] overflow-hidden shadow-sm bg-[#1a5f7a]">
+    <div 
+      onClick={() => onClick?.(order)}
+      className="flex h-[112px] rounded-[16px] overflow-hidden shadow-sm bg-[#1a5f7a] cursor-pointer hover:ring-2 ring-offset-2 ring-[#1a5f7a] transition-all"
+    >
       {/* Left Icon Strip */}
       <div className="w-16 flex-shrink-0 flex items-center justify-center">
         <UtensilsCrossed className="w-6 h-6 text-white" />
@@ -51,7 +55,10 @@ export function OrderCard({ order, onDelete }: OrderCardProps) {
             </div>
           </div>
           <button
-            onClick={() => onDelete?.(order.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete?.(order.id);
+            }}
             className="p-2 text-[#1a5f7a]/60 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
           >
             <Trash2 className="w-[18px] h-[18px]" />
