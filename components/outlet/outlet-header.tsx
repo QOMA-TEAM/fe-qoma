@@ -15,14 +15,14 @@ import { useOutletDashboard, useToggleOutletStatus } from "@/hooks/outlet/use-da
 
 // Mirrors sidebar nav — maps each route to a readable label + section group
 const routeMap: Record<string, { label: string; group: string }> = {
-    "/outlet/dashboard":       { label: "Dashboard",       group: "Overview"  },
-    "/outlet/pesanan-datang":  { label: "Pesanan Datang",  group: "Sales"     },
-    "/outlet/bahan-baku":      { label: "Bahan Baku",      group: "Kelola"    },
-    "/outlet/menu":            { label: "Menu",             group: "Kelola"    },
-    "/outlet/stock-opname":    { label: "Stock Opname",    group: "Kelola"    },
-    "/outlet/meja":            { label: "Meja",             group: "Kelola"    },
+    "/outlet/dashboard": { label: "Dashboard", group: "Overview" },
+    "/outlet/pesanan-datang": { label: "Pesanan Datang", group: "Sales" },
+    "/outlet/bahan-baku": { label: "Bahan Baku", group: "Kelola" },
+    "/outlet/menu": { label: "Menu", group: "Kelola" },
+    "/outlet/stock-opname": { label: "Stock Opname", group: "Kelola" },
+    "/outlet/meja": { label: "Meja", group: "Kelola" },
     "/outlet/detail-keuangan": { label: "Detail Keuangan", group: "Financial" },
-    "/outlet/activity-log":    { label: "Activity Log",    group: "Financial" },
+    "/outlet/activity-log": { label: "Activity Log", group: "Financial" },
 };
 
 export function OutletHeader() {
@@ -36,7 +36,7 @@ export function OutletHeader() {
 
     return (
         <>
-            <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-white px-6 shadow-sm">
+            <header className="flex h-16 shrink-0 items-center justify-between border-b bg-white px-6 shadow-sm">
                 {/* Breadcrumb — grows to fill available space */}
                 <Breadcrumb className="flex-1">
                     <BreadcrumbList>
@@ -68,11 +68,10 @@ export function OutletHeader() {
                         type="button"
                         onClick={() => toggleStatus()}
                         disabled={isLoading || isPending}
-                        className={`flex items-center justify-center size-9 rounded-full border border-gray-200 transition-colors cursor-pointer ${
-                            isOpen
-                                ? "bg-green-50 text-green-600 hover:bg-green-100"
-                                : "bg-red-50 text-red-500 hover:bg-red-100"
-                        }`}
+                        className={`flex items-center justify-center size-9 rounded-full border border-gray-200 transition-colors cursor-pointer ${isOpen
+                            ? "bg-green-50 text-green-600 hover:bg-green-100"
+                            : "bg-red-50 text-red-500 hover:bg-red-100"
+                            }`}
                         title={isOpen ? "Outlet Sedang Buka (Klik untuk Tutup)" : "Outlet Sedang Tutup (Klik untuk Buka)"}
                         aria-label="Toggle outlet status"
                     >
