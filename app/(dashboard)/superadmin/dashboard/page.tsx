@@ -8,7 +8,7 @@ import { ActivityLog } from "@/components/superadmin/dashboard/activity-log";
 import { PendingApprovals } from "@/components/superadmin/dashboard/pending-approval";
 import { SubscriptionPlanChart } from "@/components/superadmin/dashboard/subcription-plan-chart";
 import { UsahaStatusChart } from "@/components/superadmin/dashboard/usaha-status";
-import { dashboardService } from "@/hooks/superadmin/use-dashboard";
+import { dashboardService } from "@/services/superadmin/dashboardServices";
 import {
   DashboardStatsResponse,
   MRRFilter,

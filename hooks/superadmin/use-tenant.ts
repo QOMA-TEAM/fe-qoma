@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { tenantService } from "@/hooks/superadmin/tenant";
+import { tenantService } from "@/services/superadmin/tenantServices";
 import type {
   Tenant,
   TenantListFilters,
