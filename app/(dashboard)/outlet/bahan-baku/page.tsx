@@ -1,5 +1,4 @@
 import { BahanBakuContent } from "@/components/outlet/bahan-baku/bahan-baku-content";
-import { HeaderActions } from "@/components/dashboard/header-actions";
 import {
   Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
@@ -20,7 +19,6 @@ export default function BahanBakuPage() {
             <BreadcrumbItem><BreadcrumbPage className="text-sm">Bahan Baku</BreadcrumbPage></BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <HeaderActions />
       </header>
       <main className="flex-1 overflow-auto">
         <BahanBakuContent />

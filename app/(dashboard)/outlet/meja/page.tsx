@@ -1,7 +1,5 @@
 import { Metadata } from "next";
 import { MejaContent } from "@/components/outlet/meja/meja-content";
-
-import { HeaderActions } from "@/components/dashboard/header-actions";
 import {
     Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
@@ -22,7 +20,6 @@ export default function MejaOutletPage() {
                         <BreadcrumbItem><BreadcrumbPage className="text-sm">Meja</BreadcrumbPage></BreadcrumbItem>
                     </BreadcrumbList>
                 </Breadcrumb>
-                <HeaderActions />
             </header>
             <main className="flex-1 overflow-auto">
                 <MejaContent />

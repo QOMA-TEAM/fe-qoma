@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import { MenuContent } from "@/components/outlet/menu/menu-content";
 
-import { HeaderActions } from "@/components/dashboard/header-actions";
 import {
   Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
@@ -22,7 +21,6 @@ export default function MenuOutletPage() {
             <BreadcrumbItem><BreadcrumbPage className="text-sm">Menu</BreadcrumbPage></BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <HeaderActions />
       </header>
       <main className="flex-1 overflow-auto">
         <MenuContent />
