@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle, Loader2 } from "lucide-react";
-import { subscriptionService } from "@/hooks/superadmin/new-tenant";
+import { subscriptionService } from "@/services/superadmin/newTenantServices";
 import type { SubscriptionDetailResponse } from "@/types/superadmin/new-tenant";
 
 interface Props {

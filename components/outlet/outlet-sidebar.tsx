@@ -9,10 +9,12 @@ import {
   Store,
   Beef,
   UtensilsCrossed,
-  Tags,
-  CircleDollarSign,
-  CreditCard,
+  FileBox, // for Stock Opname
+  WalletCards, // for Detail Keuangan
+  TrendingDown, // for Financial Loss
+  Activity, // for Activity Log
   LogOut,
+  FolderOpen
 } from "lucide-react"
 
 import {
@@ -29,51 +31,58 @@ import {
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-const ownerNav = {
+const outletNav = {
   overview: [
     {
       title: "Dashboard",
-      url: "/owner/dashboard",
+      url: "/outlet/dashboard",
       icon: LayoutDashboard,
+    },
+  ],
+  sales: [
+    {
+      title: "Pesanan Datang",
+      url: "/outlet/pesanan-datang",
+      icon: FolderOpen,
     },
   ],
   kelola: [
     {
-      title: "Kategori",
-      url: "/owner/kategori",
-      icon: Tags,
-    },
-    {
       title: "Bahan Baku",
-      url: "/owner/bahan-baku",
+      url: "/outlet/bahan-baku",
       icon: Beef,
     },
     {
       title: "Menu",
-      url: "/owner/menu",
+      url: "/outlet/menu",
       icon: UtensilsCrossed,
     },
     {
-      title: "Outlet",
-      url: "/owner/outlet",
-      icon: Store,
-    },
-    {
-      title: "Plan",
-      url: "/owner/plan",
-      icon: CreditCard,
+      title: "Stock Opname",
+      url: "/outlet/stock-opname",
+      icon: FileBox,
     },
   ],
-  keuangan: [
+  financial: [
     {
-      title: "Detail",
-      url: "/owner/keuangan",
-      icon: CircleDollarSign,
+      title: "Detail Keuangan",
+      url: "/outlet/detail-keuangan",
+      icon: WalletCards,
+    },
+    {
+      title: "Financial Loss",
+      url: "/outlet/financial-loss",
+      icon: TrendingDown,
+    },
+    {
+      title: "Activity Log",
+      url: "/outlet/activity-log",
+      icon: Activity,
     },
   ],
 }
 
-export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function OutletSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -90,7 +99,7 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
       <SidebarHeader className="p-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <Link href="/owner/dashboard" className="flex items-center gap-2">
+            <Link href="/outlet/dashboard" className="flex items-center gap-2">
               <Image
                 src="/logoqoma.svg"
                 alt="QOMA Logo"
@@ -110,7 +119,30 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
             Overview
           </SidebarGroupLabel>
           <SidebarMenu>
-            {ownerNav.overview.map((item) => (
+            {outletNav.overview.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === item.url}
+                  className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
+                >
+                  <Link href={item.url}>
+                    <item.icon className="size-4" />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+
+        {/* SALES */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-muted-foreground/70 uppercase">
+            Sales
+          </SidebarGroupLabel>
+          <SidebarMenu>
+            {outletNav.sales.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   asChild
@@ -133,7 +165,7 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
             Kelola
           </SidebarGroupLabel>
           <SidebarMenu>
-            {ownerNav.kelola.map((item) => (
+            {outletNav.kelola.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   asChild
@@ -150,13 +182,13 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* KEUANGAN */}
+        {/* FINANCIAL */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-muted-foreground/70 uppercase">
-            Keuangan
+            Financial
           </SidebarGroupLabel>
           <SidebarMenu>
-            {ownerNav.keuangan.map((item) => (
+            {outletNav.financial.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   asChild
@@ -181,9 +213,9 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
             <SidebarMenuButton asChild className="hover:bg-red-50 hover:text-red-600">
               <button type="button" className="w-full" onClick={handleLogout}>
                 <Avatar className="size-7">
-                  <AvatarImage src="/avatar-placeholder.png" alt="Owner" />
+                  <AvatarImage src="/avatar-placeholder.png" alt="Outlet" />
                   <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-semibold">
-                    OW
+                    OU
                   </AvatarFallback>
                 </Avatar>
                 <span>Logout</span>

@@ -1,5 +1,6 @@
-// components/superadmin/plan/modal-hapus-plan.tsx
 "use client";
+
+import { useState } from "react";
 
 import {
   AlertDialog,
@@ -11,28 +12,44 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2, Trash2 } from "lucide-react";
-import { Plan } from "@/types/superadmin/plan";   // ← dari superadmin/plan, bukan /types/plan
+import { Plan } from "@/types/superadmin/plan";
+import { PlanActionOptions } from "@/hooks/superadmin/use-plan";
 
 interface ModalHapusPlanProps {
   open: boolean;
-  plan: Plan | null;
+  planGroup: Plan[] | null;
   onClose: () => void;
-  onConfirm: (id: string) => Promise<boolean>;
+  onConfirm: (id: string, opts?: PlanActionOptions) => Promise<boolean>;
   submitting?: boolean;
 }
 
 export function ModalHapusPlan({
   open,
-  plan,
+  planGroup,
   onClose,
   onConfirm,
   submitting,
 }: ModalHapusPlanProps) {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const representative = planGroup?.[0];
+
   const handleConfirm = async () => {
-    if (!plan) return;
-    const ok = await onConfirm(plan.id);
-    if (ok) onClose();
+    if (!planGroup || planGroup.length === 0) return;
+    
+    setIsProcessing(true);
+    let allOk = true;
+    for (let i = 0; i < planGroup.length; i++) {
+      const p = planGroup[i];
+      const isLast = i === planGroup.length - 1;
+      const ok = await onConfirm(p.id, { showToast: isLast, skipFetch: !isLast });
+      if (!ok) allOk = false;
+    }
+    setIsProcessing(false);
+    
+    if (allOk) onClose();
   };
+
+  const isLoading = submitting || isProcessing;
 
   return (
     <AlertDialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -46,37 +63,34 @@ export function ModalHapusPlan({
             Hapus Plan
           </AlertDialogTitle>
           <AlertDialogDescription className="text-sm text-gray-500">
-            Yakin ingin menghapus plan{" "}
+            Yakin ingin menghapus seluruh variasi plan{" "}
             <span className="font-semibold text-gray-800">
-              &ldquo;{plan?.nama_plan}&rdquo;
+              &ldquo;{representative?.nama_plan}&rdquo;
             </span>
-            ? Tindakan ini tidak dapat dibatalkan dan akan mempengaruhi
-            subscription yang aktif.
+            ? Tindakan ini akan menghapus {planGroup?.length || 0} variasi tagihan secara permanen.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <AlertDialogFooter className="gap-2 sm:gap-2 flex-row justify-center mt-2">
           <Button
-            variant="outline"
             onClick={onClose}
-            disabled={submitting}
-            className="flex-1 border-gray-200 text-gray-700 hover:bg-gray-50"
+            disabled={isLoading}
+            className="flex-1 bg-[#C92A2A] hover:bg-[#A12121] text-white rounded-md cursor-pointer"
           >
             Batal
           </Button>
           <Button
-            variant="destructive"
             onClick={handleConfirm}
-            disabled={submitting}
-            className="flex-1"
+            disabled={isLoading}
+            className="flex-1 bg-[#C92A2A] hover:bg-[#A12121] text-white rounded-md cursor-pointer"
           >
-            {submitting ? (
+            {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
                 Menghapus...
               </>
             ) : (
-              "Hapus"
+              "Hapus Semua"
             )}
           </Button>
         </AlertDialogFooter>

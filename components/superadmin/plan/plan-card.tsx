@@ -21,11 +21,12 @@ function formatRupiah(value: number): string {
 
 interface PlanCardProps {
   plan: Plan;
+  allVariants?: Plan[];
   onEdit: (plan: Plan) => void;
-  onDelete: (plan: Plan) => void;
+  onDelete: (group: Plan[]) => void;
 }
 
-export function PlanCard({ plan, onEdit, onDelete }: PlanCardProps) {
+export function PlanCard({ plan, allVariants, onEdit, onDelete }: PlanCardProps) {
   const isActive = plan.status === "aktif";   // ← sesuai PlanStatus
 
   return (
@@ -72,13 +73,28 @@ export function PlanCard({ plan, onEdit, onDelete }: PlanCardProps) {
 
         {/* Harga */}
         <div>
-          <p
-            className={`text-2xl font-bold tracking-tight ${isActive ? "text-gray-900" : "text-gray-400"
-              }`}
-          >
-            {formatRupiah(plan.harga)}
-          </p>
-          <p className="text-xs text-gray-400 mt-0.5">Per {plan.tagihan}</p>
+          {allVariants && allVariants.length > 0 ? (
+            <>
+              <p className="text-xs text-gray-400 mb-0.5">Mulai dari</p>
+              <p className={`text-2xl font-bold tracking-tight ${isActive ? "text-gray-900" : "text-gray-400"}`}>
+                {formatRupiah(Math.min(...allVariants.map((v) => v.harga)))}
+              </p>
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {allVariants.map((v) => (
+                  <Badge key={v.id} variant="secondary" className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0 border-none font-semibold">
+                    {v.tagihan}
+                  </Badge>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <p className={`text-2xl font-bold tracking-tight ${isActive ? "text-gray-900" : "text-gray-400"}`}>
+                {formatRupiah(plan.harga)}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">Per {plan.tagihan}</p>
+            </>
+          )}
         </div>
 
         <Separator className={isActive ? "bg-gray-100" : "bg-gray-200"} />
@@ -111,10 +127,9 @@ export function PlanCard({ plan, onEdit, onDelete }: PlanCardProps) {
             Edit
           </Button>
           <Button
-            variant="destructive"
             size="sm"
-            onClick={() => onDelete(plan)}
-            className="flex-1 h-8 text-xs rounded-md transition-colors"
+            onClick={() => onDelete(allVariants || [plan])}
+            className="flex-1 h-8 text-xs bg-[#C92A2A] hover:bg-[#A12121] text-white rounded-md transition-colors"
           >
             Hapus
           </Button>

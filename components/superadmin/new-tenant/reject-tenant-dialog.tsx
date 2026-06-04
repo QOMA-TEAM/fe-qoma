@@ -56,7 +56,6 @@ export function RejectTenantDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base font-semibold text-red-600">
-            <XCircle size={18} />
             Tolak Tenant
           </DialogTitle>
           <DialogDescription className="text-xs text-gray-500">
@@ -84,13 +83,17 @@ export function RejectTenantDialog({
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={handleClose} disabled={loading}>
+          <Button
+            onClick={handleClose}
+            disabled={loading}
+            className="bg-[#C92A2A] hover:bg-[#A12121] text-white rounded-md cursor-pointer"
+          >
             Kembali
           </Button>
           <Button
-            variant="destructive"
             onClick={handleReject}
             disabled={loading || !alasan.trim()}
+            className="bg-[#C92A2A] hover:bg-[#A12121] text-white rounded-md cursor-pointer"
           >
             {loading ? (
               <>

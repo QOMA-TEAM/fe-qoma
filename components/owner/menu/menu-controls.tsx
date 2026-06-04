@@ -32,6 +32,15 @@ export function MenuControls({
     <div className="flex items-center gap-2 flex-wrap sm:justify-between">
       {/* Categories Dropdown & Search */}
       <div className="flex gap-2">
+        <div className="relative">
+          <Input 
+            placeholder="Search" 
+            value={search} 
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }} 
+            className="pr-9 h-9 w-44 text-sm border-gray-200 rounded-full bg-white" 
+          />
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="gap-1.5 text-sm border-gray-200 text-gray-700 h-9 rounded-full px-4 cursor-pointer">
@@ -56,15 +65,6 @@ export function MenuControls({
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-        <div className="relative">
-          <Input 
-            placeholder="Search" 
-            value={search} 
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }} 
-            className="pr-9 h-9 w-44 text-sm border-gray-200 rounded-full bg-white" 
-          />
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-        </div>
       </div>
       <Button onClick={onAddClick} className="h-9 rounded-lg bg-orange-600 hover:bg-orange-700 text-white gap-1.5 px-4 text-sm cursor-pointer">
         <Plus className="size-4" /> Tambah Menu

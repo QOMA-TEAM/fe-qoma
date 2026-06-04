@@ -13,6 +13,7 @@ const ROLE_REDIRECT: Record<string, string> = {
   super_admin: "/superadmin/dashboard",
   owner: "/owner/dashboard",
   kasir: "/kasir/dashboard",
+  outlet: "/outlet/dashboard",
 };
 
 export default function LoginPage() {
