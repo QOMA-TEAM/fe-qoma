@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { HeaderActions } from "@/components/dashboard/header-actions";
 import { usePlan } from "@/hooks/superadmin/use-plan";
-import { Plan } from "@/types/plan";
+import { Plan } from "@/types/superadmin/plan";
 
 export default function ManagementPlanPage() {
   const { plans, loading, submitting, createPlan, updatePlan, deletePlan } =
@@ -30,16 +30,26 @@ export default function ManagementPlanPage() {
   const [modalEdit, setModalEdit] = useState(false);
   const [modalHapus, setModalHapus] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [selectedPlanGroupForDelete, setSelectedPlanGroupForDelete] = useState<Plan[] | null>(null);
 
   const handleOpenEdit = (plan: Plan) => {
     setSelectedPlan(plan);
     setModalEdit(true);
   };
 
-  const handleOpenHapus = (plan: Plan) => {
-    setSelectedPlan(plan);
+  const handleOpenHapus = (group: Plan[]) => {
+    setSelectedPlanGroupForDelete(group);
     setModalHapus(true);
   };
+
+  const groupedPlans = useMemo(() => {
+    const map = new Map<string, Plan[]>();
+    plans.forEach((p) => {
+      if (!map.has(p.nama_plan)) map.set(p.nama_plan, []);
+      map.get(p.nama_plan)!.push(p);
+    });
+    return Array.from(map.values());
+  }, [plans]);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50/40">
@@ -71,7 +81,7 @@ export default function ManagementPlanPage() {
 
           <Button
             onClick={() => setModalTambah(true)}
-            className="h-9 rounded-lg bg-orange-600 hover:bg-orange-700 text-white gap-1.5 px-4 text-sm cursor-pointer flex-shrink-0"
+            className="h-9 rounded-lg bg-orange-600 hover:bg-orange-700 text-white gap-1.5 px-4 text-sm cursor-pointer shrink-0"
           >
             <Plus className="size-4" /> Tambah Plan
           </Button>
@@ -93,14 +103,18 @@ export default function ManagementPlanPage() {
               </p>
             </div>
           ) : (
-            plans.map((plan) => (
-              <PlanCard
-                key={plan.id}
-                plan={plan}
-                onEdit={handleOpenEdit}
-                onDelete={handleOpenHapus}
-              />
-            ))
+            groupedPlans.map((group) => {
+              const representative = group[0];
+              return (
+                <PlanCard
+                  key={representative.nama_plan}
+                  plan={representative}
+                  allVariants={group}
+                  onEdit={handleOpenEdit}
+                  onDelete={handleOpenHapus}
+                />
+              );
+            })
           )}
         </div>
       </main>
@@ -116,20 +130,23 @@ export default function ManagementPlanPage() {
       <ModalEditPlan
         open={modalEdit}
         plan={selectedPlan}
+        allPlans={plans}
         onClose={() => {
           setModalEdit(false);
           setSelectedPlan(null);
         }}
-        onSubmit={updatePlan}
+        onUpdate={updatePlan}
+        onCreate={createPlan}
+        onDelete={deletePlan}
         submitting={submitting}
       />
 
       <ModalHapusPlan
         open={modalHapus}
-        plan={selectedPlan}
+        planGroup={selectedPlanGroupForDelete}
         onClose={() => {
           setModalHapus(false);
-          setSelectedPlan(null);
+          setSelectedPlanGroupForDelete(null);
         }}
         onConfirm={deletePlan}
         submitting={submitting}

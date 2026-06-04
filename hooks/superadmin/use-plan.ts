@@ -10,6 +10,11 @@ import {
   UpdatePlanPayload,
 } from "@/types/superadmin/plan";
 
+export interface PlanActionOptions {
+  showToast?: boolean;
+  skipFetch?: boolean;
+}
+
 export function usePlan() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,17 +36,22 @@ export function usePlan() {
     fetchPlans();
   }, [fetchPlans]);
 
-  const createPlan = async (payload: CreatePlanPayload): Promise<boolean> => {
+  const createPlan = async (
+    payload: CreatePlanPayload,
+    opts?: PlanActionOptions
+  ): Promise<boolean> => {
     setSubmitting(true);
+    const showToast = opts?.showToast ?? true;
+    const skipFetch = opts?.skipFetch ?? false;
     try {
       await planService.create(payload);
-      toast.success("Plan berhasil ditambahkan");
-      await fetchPlans();
+      if (showToast) toast.success("Plan berhasil ditambahkan");
+      if (!skipFetch) await fetchPlans();
       return true;
     } catch (err: any) {
       const message =
         err?.response?.data?.errors
-          ? Object.values(err.response.data.errors)[0]?.[0]
+          ? Object.values<string[]>(err.response.data.errors)[0]?.[0]
           : err?.response?.data?.message;
       toast.error(message ?? "Gagal menambahkan plan");
       return false;
@@ -53,17 +63,20 @@ export function usePlan() {
   const updatePlan = async (
     id: string,
     payload: UpdatePlanPayload,
+    opts?: PlanActionOptions
   ): Promise<boolean> => {
     setSubmitting(true);
+    const showToast = opts?.showToast ?? true;
+    const skipFetch = opts?.skipFetch ?? false;
     try {
       await planService.update(id, payload);
-      toast.success("Plan berhasil diperbarui");
-      await fetchPlans();
+      if (showToast) toast.success("Plan berhasil diperbarui");
+      if (!skipFetch) await fetchPlans();
       return true;
     } catch (err: any) {
       const message =
         err?.response?.data?.errors
-          ? Object.values(err.response.data.errors)[0]?.[0]
+          ? Object.values<string[]>(err.response.data.errors)[0]?.[0]
           : err?.response?.data?.message;
       alert("DEBUG ERROR: " + JSON.stringify(err?.response?.data || err?.message));
       toast.error(message ?? "Gagal memperbarui plan");
@@ -73,12 +86,17 @@ export function usePlan() {
     }
   };
 
-  const deletePlan = async (id: string): Promise<boolean> => {
+  const deletePlan = async (
+    id: string,
+    opts?: PlanActionOptions
+  ): Promise<boolean> => {
     setSubmitting(true);
+    const showToast = opts?.showToast ?? true;
+    const skipFetch = opts?.skipFetch ?? false;
     try {
       await planService.delete(id);
-      toast.success("Plan berhasil dihapus");
-      await fetchPlans();
+      if (showToast) toast.success("Plan berhasil dihapus");
+      if (!skipFetch) await fetchPlans();
       return true;
     } catch (err: any) {
       toast.error(err?.response?.data?.message ?? "Gagal menghapus plan");

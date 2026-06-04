@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Store,
@@ -60,6 +60,15 @@ export function SuperadminSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+    document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+    router.push("/login");
+  };
 
   return (
     <Sidebar {...props}>
@@ -138,11 +147,11 @@ export function SuperadminSidebar({
               asChild
               className="hover:bg-red-50 hover:text-red-600 cursor-pointer"
             >
-              <button type="button" className="w-full cursor-pointer">
+              <button type="button" className="w-full cursor-pointer" onClick={handleLogout}>
                 <Avatar className="size-7">
-                  <AvatarImage src="/avatar-placeholder.png" alt="Owner" />
+                  <AvatarImage src="/avatar-placeholder.png" alt="Superadmin" />
                   <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-semibold">
-                    OW
+                    SA
                   </AvatarFallback>
                 </Avatar>
                 <span>Logout</span>

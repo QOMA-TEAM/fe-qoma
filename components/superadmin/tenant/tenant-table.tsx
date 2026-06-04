@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { ChevronDown, ChevronUp, ChevronsUpDown, Search, Loader2 } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronsUpDown, Search, Loader2, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Tenant } from "@/types/superadmin/tenant";
 import { format } from "date-fns";
@@ -185,7 +185,7 @@ export function TenantTable({ tenants, loading, onView }: TenantTableProps) {
                 Subscription
               </TableHead>
 
-              <TableHead className="text-gray-600 font-semibold text-sm">
+              <TableHead className="text-gray-600 font-semibold text-sm text-center">
                 Action
               </TableHead>
             </TableRow>
@@ -250,9 +250,10 @@ export function TenantTable({ tenants, loading, onView }: TenantTableProps) {
                   <TableCell>
                     <button
                       onClick={() => onView(row)}
-                      className="bg-green-100 hover:bg-green-200 text-green-700 text-xs font-bold h-7 px-5 rounded-full transition-colors"
+                      className="bg-[#3874BC] hover:bg-[#2c5b96] text-white flex items-center justify-center w-7 h-7 rounded-full mx-auto transition-colors cursor-pointer"
+                      title="View"
                     >
-                      VIEW
+                      <Eye className="w-3.5 h-3.5" />
                     </button>
                   </TableCell>
                 </TableRow>

@@ -14,29 +14,40 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
 import { PlanFormFields, PlanFormValues, PlanFormErrors } from "./plan-form-dialog";
 import { CreatePlanPayload, TAGIHAN_TO_HARI } from "@/types/superadmin/plan";
+import { PlanActionOptions } from "@/hooks/superadmin/use-plan";
 
 interface ModalTambahPlanProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (payload: CreatePlanPayload) => Promise<boolean>;
+  onSubmit: (payload: CreatePlanPayload, opts?: PlanActionOptions) => Promise<boolean>;
   submitting?: boolean;
 }
 
 const INITIAL: PlanFormValues = {
   nama_plan: "",
-  harga: 0,
   batas_outlet: 1,
-  tagihan: "30 Hari",
-  status: "aktif",           // ← sesuai PlanStatus backend
+  selectedTagihan: [],
+  hargaMap: {},
+  status: "aktif",
   deskripsi: "",
 };
 
 function validate(values: Partial<PlanFormValues>): PlanFormErrors {
   const errors: PlanFormErrors = {};
   if (!values.nama_plan?.trim()) errors.nama_plan = "Nama plan wajib diisi";
-  if ((values.harga ?? 0) < 0) errors.harga = "Harga tidak boleh negatif";
   if ((values.batas_outlet ?? 1) < 1) errors.batas_outlet = "Minimal 1 outlet";
-  if (!values.tagihan) errors.tagihan = "Tagihan wajib dipilih";
+  
+  if (!values.selectedTagihan || values.selectedTagihan.length === 0) {
+    errors.selectedTagihan = "Pilih minimal satu variasi tagihan";
+  } else {
+    values.selectedTagihan.forEach((tagihan) => {
+      const harga = values.hargaMap?.[tagihan];
+      if (harga === undefined || harga < 0 || harga === null) {
+        errors[`harga_${tagihan}`] = "Harga tidak valid";
+      }
+    });
+  }
+  
   return errors;
 }
 
@@ -48,10 +59,13 @@ export function ModalTambahPlan({
 }: ModalTambahPlanProps) {
   const [values, setValues] = useState<PlanFormValues>(INITIAL);
   const [errors, setErrors] = useState<PlanFormErrors>({});
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleChange = (field: keyof PlanFormValues, value: string | number) => {
+  const handleChange = (field: keyof PlanFormValues, value: any) => {
     setValues((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
+    if (errors[field as keyof PlanFormErrors]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
   };
 
   const handleSubmit = async () => {
@@ -61,18 +75,31 @@ export function ModalTambahPlan({
       return;
     }
 
-    // Konversi label tagihan → angka hari sebelum kirim ke backend
-    const payload: CreatePlanPayload = {
-      nama_plan: values.nama_plan,
-      harga: values.harga,
-      durasi_hari: TAGIHAN_TO_HARI[values.tagihan],  // "365 Hari" → 365
-      batas_outlet: values.batas_outlet,
-      deskripsi: values.deskripsi ?? null,
-      status: values.status,                          // "aktif" | "tidak aktif"
-    };
+    setIsProcessing(true);
+    let allSuccess = true;
 
-    const ok = await onSubmit(payload);
-    if (ok) {
+    // Loop for each selected variation and submit to backend sequentially
+    for (let i = 0; i < values.selectedTagihan.length; i++) {
+      const tagihan = values.selectedTagihan[i];
+      const isLast = i === values.selectedTagihan.length - 1;
+      const payload: CreatePlanPayload = {
+        nama_plan: values.nama_plan,
+        harga: values.hargaMap[tagihan] || 0,
+        durasi_hari: TAGIHAN_TO_HARI[tagihan],
+        batas_outlet: values.batas_outlet,
+        deskripsi: values.deskripsi ?? null,
+        status: values.status,
+      };
+
+      const ok = await onSubmit(payload, { showToast: isLast, skipFetch: !isLast });
+      if (!ok) {
+        allSuccess = false;
+      }
+    }
+
+    setIsProcessing(false);
+
+    if (allSuccess) {
       setValues(INITIAL);
       setErrors({});
       onClose();
@@ -85,12 +112,14 @@ export function ModalTambahPlan({
     onClose();
   };
 
+  const isLoading = submitting || isProcessing;
+
   return (
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
-      <DialogContent className="sm:max-w-md rounded-xl p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-3xl rounded-xl p-0 overflow-hidden">
         <DialogHeader className="px-6 pt-5 pb-4">
           <DialogTitle className="text-base font-semibold text-gray-900">
-            Tambah Plan
+            Tambah Plan Multi-Variasi
           </DialogTitle>
         </DialogHeader>
 
@@ -104,25 +133,24 @@ export function ModalTambahPlan({
 
         <DialogFooter className="px-6 py-4 gap-2 flex-row justify-end">
           <Button
-            variant="destructive"
             onClick={handleClose}
-            disabled={submitting}
-            className="min-w-[80px]"
+            disabled={isLoading}
+            className="min-w-[80px] bg-[#C92A2A] hover:bg-[#A12121] text-white rounded-md cursor-pointer"
           >
             Batal
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={submitting}
-            className="min-w-[80px] bg-[#1D5E84] hover:bg-[#154663] text-white"
+            disabled={isLoading}
+            className="min-w-[80px] bg-[#1D5E84] hover:bg-[#154663] text-white rounded-md cursor-pointer"
           >
-            {submitting ? (
+            {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
                 Menyimpan...
               </>
             ) : (
-              "Submit"
+              "Simpan Variasi Plan"
             )}
           </Button>
         </DialogFooter>
