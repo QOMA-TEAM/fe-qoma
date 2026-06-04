@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
 import { PlanFormFields, PlanFormValues, PlanFormErrors } from "./plan-form-dialog";
-import { Plan, UpdatePlanPayload, TAGIHAN_TO_HARI } from "@/types/superadmin/plan";
+import { Plan, UpdatePlanPayload, TAGIHAN_TO_HARI, PlanTagihan } from "@/types/superadmin/plan";
 
 interface ModalEditPlanProps {
   open: boolean;
@@ -62,8 +62,8 @@ export function ModalEditPlan({
   }, [plan, open]);
 
   const handleChange = (field: keyof PlanFormValues, value: string | number) => {
-    setValues((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
+    setValues((prev: Partial<PlanFormValues>) => ({ ...prev, [field]: value }));
+    if (errors[field]) setErrors((prev: PlanFormErrors) => ({ ...prev, [field]: undefined }));
   };
 
   const handleSubmit = async () => {
@@ -78,7 +78,7 @@ export function ModalEditPlan({
     const payload: UpdatePlanPayload = {
       nama_plan: values.nama_plan,
       harga: values.harga,
-      durasi_hari: TAGIHAN_TO_HARI[values.tagihan!],  // "365 Hari" → 365
+      durasi_hari: TAGIHAN_TO_HARI[values.tagihan as PlanTagihan],  // "365 Hari" → 365
       batas_outlet: values.batas_outlet,
       deskripsi: values.deskripsi ?? null,
       status: values.status,

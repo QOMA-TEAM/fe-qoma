@@ -23,10 +23,21 @@ const TAGIHAN_OPTIONS: PlanTagihan[] = [
   "365 Hari",
 ];
 
+export interface PlanFormValues {
+  nama_plan: string;
+  harga: number;
+  tagihan: PlanTagihan;
+  batas_outlet: number;
+  deskripsi?: string | null;
+  status: PlanStatus;
+}
+
+export type PlanFormErrors = Partial<Record<keyof PlanFormValues, string>>;
+
 interface PlanFormFieldsProps {
-  values: Partial<CreatePlanPayload>;
-  onChange: (field: keyof CreatePlanPayload, value: string | number) => void;
-  errors?: Partial<Record<keyof CreatePlanPayload, string>>;
+  values: Partial<PlanFormValues>;
+  onChange: (field: keyof PlanFormValues, value: string | number) => void;
+  errors?: PlanFormErrors;
 }
 
 export function PlanFormFields({
