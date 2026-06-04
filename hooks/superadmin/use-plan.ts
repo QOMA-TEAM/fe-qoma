@@ -1,8 +1,8 @@
-// hooks/superadmin/use-plan.ts
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { toast } from "sonner";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { planService } from "@/services/superadmin/planServices";
 import {
   CreatePlanPayload,
@@ -16,37 +16,55 @@ export interface PlanActionOptions {
 }
 
 export function usePlan() {
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
-  const fetchPlans = useCallback(async () => {
-    setLoading(true);
-    try {
+  // 1. Fetch data menggunakan React Query
+  const {
+    data: plans = [],
+    isLoading: loading,
+    refetch,
+  } = useQuery({
+    queryKey: ["superadmin-plans"],
+    queryFn: async () => {
       const res = await planService.getAll();
-      setPlans(res.data);
-    } catch {
-      toast.error("Gagal memuat data plan");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      return res.data;
+    },
+  });
 
-  useEffect(() => {
-    fetchPlans();
-  }, [fetchPlans]);
+  // 2. Mutations (tidak auto-invalidate agar bisa dikontrol via opsi 'skipFetch' di loop)
+  const createMutation = useMutation({
+    mutationFn: (payload: CreatePlanPayload) => planService.create(payload),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: UpdatePlanPayload }) =>
+      planService.update(id, payload),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => planService.delete(id),
+  });
+
+  const submitting =
+    createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
+
+  // Expose fetchPlans for manual re-fetching (dipanggil setelah bulk hapus/edit)
+  const fetchPlans = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   const createPlan = async (
     payload: CreatePlanPayload,
     opts?: PlanActionOptions
   ): Promise<boolean> => {
-    setSubmitting(true);
     const showToast = opts?.showToast ?? true;
     const skipFetch = opts?.skipFetch ?? false;
     try {
-      await planService.create(payload);
+      await createMutation.mutateAsync(payload);
       if (showToast) toast.success("Plan berhasil ditambahkan");
-      if (!skipFetch) await fetchPlans();
+      if (!skipFetch) {
+        await queryClient.invalidateQueries({ queryKey: ["superadmin-plans"] });
+      }
       return true;
     } catch (err: any) {
       const message =
@@ -55,8 +73,6 @@ export function usePlan() {
           : err?.response?.data?.message;
       toast.error(message ?? "Gagal menambahkan plan");
       return false;
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -65,13 +81,14 @@ export function usePlan() {
     payload: UpdatePlanPayload,
     opts?: PlanActionOptions
   ): Promise<boolean> => {
-    setSubmitting(true);
     const showToast = opts?.showToast ?? true;
     const skipFetch = opts?.skipFetch ?? false;
     try {
-      await planService.update(id, payload);
+      await updateMutation.mutateAsync({ id, payload });
       if (showToast) toast.success("Plan berhasil diperbarui");
-      if (!skipFetch) await fetchPlans();
+      if (!skipFetch) {
+        await queryClient.invalidateQueries({ queryKey: ["superadmin-plans"] });
+      }
       return true;
     } catch (err: any) {
       const message =
@@ -81,8 +98,6 @@ export function usePlan() {
       alert("DEBUG ERROR: " + JSON.stringify(err?.response?.data || err?.message));
       toast.error(message ?? "Gagal memperbarui plan");
       return false;
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -90,19 +105,18 @@ export function usePlan() {
     id: string,
     opts?: PlanActionOptions
   ): Promise<boolean> => {
-    setSubmitting(true);
     const showToast = opts?.showToast ?? true;
     const skipFetch = opts?.skipFetch ?? false;
     try {
-      await planService.delete(id);
+      await deleteMutation.mutateAsync(id);
       if (showToast) toast.success("Plan berhasil dihapus");
-      if (!skipFetch) await fetchPlans();
+      if (!skipFetch) {
+        await queryClient.invalidateQueries({ queryKey: ["superadmin-plans"] });
+      }
       return true;
     } catch (err: any) {
       toast.error(err?.response?.data?.message ?? "Gagal menghapus plan");
       return false;
-    } finally {
-      setSubmitting(false);
     }
   };
 

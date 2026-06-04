@@ -8,7 +8,10 @@ import { ActivityLog } from "@/components/superadmin/dashboard/activity-log";
 import { PendingApprovals } from "@/components/superadmin/dashboard/pending-approval";
 import { SubscriptionPlanChart } from "@/components/superadmin/dashboard/subcription-plan-chart";
 import { UsahaStatusChart } from "@/components/superadmin/dashboard/usaha-status";
-import { dashboardService } from "@/services/superadmin/dashboardServices";
+import {
+  useDashboardStats,
+  useDashboardMRR,
+} from "@/hooks/superadmin/use-dashboard";
 import {
   DashboardStatsResponse,
   MRRFilter,
@@ -17,45 +20,32 @@ import {
 import { toast } from "sonner";
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<DashboardStatsResponse["data"] | null>(
-    null,
-  );
-  const [mrr, setMrr] = useState<MRRResponse["data"] | null>(null);
   const [mrrFilter, setMrrFilter] = useState<MRRFilter>("monthly");
-  const [loadingStats, setLoadingStats] = useState(true);
-  const [loadingMrr, setLoadingMrr] = useState(true);
 
-  // ─── Fetch Stats ────────────────────────────────────────────────────────────
-  useEffect(() => {
-    const fetch = async () => {
-      setLoadingStats(true);
-      try {
-        const res: DashboardStatsResponse = await dashboardService.getStats();
-        setStats(res.data);
-      } catch (err: any) {
-        toast.error(`Gagal memuat data dashboard: ${err?.message || err}`);
-      } finally {
-        setLoadingStats(false);
-      }
-    };
-    fetch();
-  }, []);
+  const {
+    data: stats,
+    isLoading: loadingStats,
+    error: statsError,
+  } = useDashboardStats();
 
-  // ─── Fetch MRR ──────────────────────────────────────────────────────────────
+  const {
+    data: mrr,
+    isLoading: loadingMrr,
+    error: mrrError,
+  } = useDashboardMRR(mrrFilter);
+
+  // Optional: Handle errors implicitly by toasting them when they change
   useEffect(() => {
-    const fetch = async () => {
-      setLoadingMrr(true);
-      try {
-        const res: MRRResponse = await dashboardService.getMRR(mrrFilter);
-        setMrr(res.data);
-      } catch (err: any) {
-        toast.error(`Gagal memuat data MRR: ${err?.message || err}`);
-      } finally {
-        setLoadingMrr(false);
-      }
-    };
-    fetch();
-  }, [mrrFilter]);
+    if (statsError) {
+      toast.error(`Gagal memuat data dashboard: ${statsError.message || statsError}`);
+    }
+  }, [statsError]);
+
+  useEffect(() => {
+    if (mrrError) {
+      toast.error(`Gagal memuat data MRR: ${mrrError.message || mrrError}`);
+    }
+  }, [mrrError]);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
