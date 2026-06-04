@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { User, Table2, Minus, Plus, Delete, Loader2, CheckCircle2 } from "lucide-react";
+import { User, Table2, Minus, Plus, Delete, Loader2, CheckCircle2, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { usePesananDetail, useKonfirmasiPesanan, useBayarPesanan, useTambahItem, useUpdateQtyItem } from "@/hooks/outlet/use-pesanan";
+import { usePesananDetail, useKonfirmasiPesanan, useBayarPesanan, useTambahItem, useUpdateQtyItem, useHapusItem } from "@/hooks/outlet/use-pesanan";
 import { useOutletMenuList } from "@/hooks/outlet/use-menu-outlet";
 import type { PesananDetail } from "@/services/outlet/pesanan-service";
 
@@ -27,17 +27,23 @@ function QtyInput({
 
   const handleBlur = () => {
     const newQty = parseInt(val, 10);
-    if (!isNaN(newQty) && newQty >= 0 && newQty !== item.qty) {
-      updateQty({ id: orderId, detailId: item.id, qty: newQty });
+    if (!isNaN(newQty) && newQty >= 1 && newQty !== item.qty) {
+      updateQty({ 
+        id: orderId, 
+        detailId: item.id, 
+        qty: newQty,
+        currentQty: item.qty,
+        harga: item.harga 
+      });
     } else {
-      setVal(item.qty.toString()); // revert jika tidak valid
+      setVal(item.qty.toString()); // revert jika tidak valid (termasuk jika 0)
     }
   };
 
   return (
     <input
       type="number"
-      min="0"
+      min="1"
       value={val}
       onChange={(e) => setVal(e.target.value)}
       onBlur={handleBlur}
@@ -72,6 +78,7 @@ export function CheckoutModal({
   const { mutate: payOrder, isPending: isPayingOrder } = useBayarPesanan();
   const { mutate: tambahItem, isPending: isAddingItem } = useTambahItem();
   const { mutate: updateQty, isPending: isUpdatingQty } = useUpdateQtyItem();
+  const { mutate: hapusItem, isPending: isDeletingItem } = useHapusItem();
 
   // Reset state when opened/closed
   useEffect(() => {
@@ -121,7 +128,7 @@ export function CheckoutModal({
     );
   };
 
-  const handleTambahItem = (menuId: string) => {
+  const handleTambahItem = (menuId: string, menuNama: string, menuHarga: number) => {
     if (!orderId || !order) return;
     
     // Cek apakah menu sudah ada di keranjang
@@ -129,11 +136,27 @@ export function CheckoutModal({
     
     if (existingItem) {
       // Jika sudah ada, tambah qty saja
-      updateQty({ id: orderId, detailId: existingItem.id, qty: existingItem.qty + 1 });
+      updateQty({ 
+        id: orderId, 
+        detailId: existingItem.id, 
+        qty: existingItem.qty + 1,
+        currentQty: existingItem.qty,
+        harga: menuHarga 
+      });
     } else {
       // Jika belum ada, tambah item baru
-      tambahItem({ id: orderId, items: [{ menu_id: menuId, qty: 1 }] });
+      tambahItem({ 
+        id: orderId, 
+        items: [{ menu_id: menuId, qty: 1 }],
+        menuNama,
+        menuHarga 
+      });
     }
+  };
+
+  const handleHapusItem = (detailId: string) => {
+    if (!orderId) return;
+    hapusItem({ id: orderId, detailId });
   };
 
   const totalBelanja = order?.total_harga || 0;
@@ -218,13 +241,21 @@ export function CheckoutModal({
                         <div className="col-span-5 text-sm font-bold text-gray-800 line-clamp-2 leading-tight">
                           {item.nama}
                         </div>
-                        <div className="col-span-3 flex items-center justify-center gap-2">
+                        <div className="col-span-3 flex items-center justify-center gap-1">
                           <QtyInput 
                             item={item} 
                             orderId={orderId!} 
                             updateQty={updateQty} 
                             isUpdating={isUpdatingQty} 
                           />
+                          <button
+                            onClick={() => handleHapusItem(item.id)}
+                            disabled={isDeletingItem}
+                            title="Hapus Menu"
+                            className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
                         </div>
                         <div className="col-span-4 text-sm font-bold text-gray-800 text-center whitespace-nowrap">
                           {formatRp(item.subtotal)}
@@ -430,7 +461,7 @@ export function CheckoutModal({
                               {formatRp(menu.harga)}
                             </p>
                             <button 
-                              onClick={() => handleTambahItem(menu.id)}
+                              onClick={() => handleTambahItem(menu.id, menu.nama, menu.harga)}
                               disabled={!menu.is_available || isAddingItem || isUpdatingQty}
                               className="mt-2 text-[10px] font-bold text-[#3874BC] border border-[#3874BC] rounded-md px-4 py-1 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >

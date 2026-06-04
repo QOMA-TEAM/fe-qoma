@@ -88,4 +88,9 @@ export const pesananService = {
     const response = await axiosInstance.patch(`/outlet/pesanan/${id}/item/${detailId}/qty`, { qty });
     return response.data;
   },
+
+  hapusItem: async (id: string, detailId: string): Promise<PesananResponse> => {
+    const response = await axiosInstance.delete(`/outlet/pesanan/${id}/item/${detailId}`);
+    return response.data;
+  },
 };
