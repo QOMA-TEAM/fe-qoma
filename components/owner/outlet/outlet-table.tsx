@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { ChevronDown, ChevronUp, ChevronsUpDown, Loader2 } from "lucide-react"
+import { ChevronDown, ChevronUp, ChevronsUpDown, Loader2, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -116,8 +116,8 @@ export function OutletTable({ search }: OutletTableProps) {
                 <TableCell className="text-gray-600 text-sm">{row.alamat || "-"}</TableCell>
                 <TableCell className="text-gray-600 text-sm">{row.email || "-"}</TableCell>
                 <TableCell className="text-center">
-                  <button onClick={() => setDetailOutlet(row)} className="bg-green-100 hover:bg-green-200 text-green-700 text-xs font-bold h-7 px-5 rounded-full transition-colors cursor-pointer">
-                    VIEW
+                  <button onClick={() => setDetailOutlet(row)} className="bg-[#3874BC] hover:bg-[#2c5b96] text-white flex items-center justify-center w-7 h-7 rounded-full mx-auto transition-colors cursor-pointer">
+                    <Eye className="w-3.5 h-3.5" />
                   </button>
                 </TableCell>
               </TableRow>

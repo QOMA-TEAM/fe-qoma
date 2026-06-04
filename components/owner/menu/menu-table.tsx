@@ -116,7 +116,7 @@ export function MenuTable({ search, selectedCategoryId }: MenuTableProps) {
                     <div className="flex items-center justify-center gap-2">
                       <button 
                         onClick={() => setEditItem(row)} 
-                        className="flex items-center justify-center size-7 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md transition-colors cursor-pointer"
+                        className="flex items-center justify-center size-7 bg-[#3874BC] hover:bg-[#2c5b96] text-white rounded-md transition-colors cursor-pointer"
                         title="Edit"
                       >
                         <Pencil className="size-4" />
@@ -127,7 +127,7 @@ export function MenuTable({ search, selectedCategoryId }: MenuTableProps) {
                             deleteMenu(row.id)
                           }
                         }} 
-                        className="flex items-center justify-center size-7 bg-red-50 hover:bg-red-100 text-red-600 rounded-md transition-colors cursor-pointer"
+                        className="flex items-center justify-center size-7 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors cursor-pointer"
                         title="Hapus"
                       >
                         <Trash2 className="size-4" />
