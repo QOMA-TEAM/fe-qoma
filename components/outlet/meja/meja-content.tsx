@@ -25,7 +25,7 @@ import type { Meja } from "@/services/outlet/meja-service"
 export function MejaContent() {
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
-  
+
   // Dialog States
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [mejaForEdit, setMejaForEdit] = useState<Meja | null>(null)
@@ -46,22 +46,15 @@ export function MejaContent() {
           <h1 className="text-2xl font-bold text-gray-800">Kelola Meja</h1>
           <p className="text-sm text-gray-500 mt-0.5">Informasi detail meja dan QR Code</p>
         </div>
-        
+
         {/* Tambah Meja Button positioned on the right using color #FB6300 */}
-        <div className="flex justify-end sm:block">
-          <Button
-            onClick={() => setIsCreateOpen(true)}
-            className="bg-[#FB6300] hover:bg-[#e55a00] text-white font-medium px-5 h-10 rounded-full shadow-sm flex items-center gap-2 cursor-pointer transition-colors"
-          >
-            <Plus className="size-4" />
-            Tambah Meja
-          </Button>
-        </div>
+
       </div>
+
 
       <div className="flex flex-col gap-4">
         {/* Search Control */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap sm:justify-between pt-2">
           <div className="relative">
             <Input
               placeholder="Cari meja..."
@@ -73,6 +66,15 @@ export function MejaContent() {
               className="pr-9 h-9 w-52 text-sm border-gray-200 rounded-full bg-white"
             />
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          </div>
+          <div className="flex justify-end sm:block">
+            <Button
+              onClick={() => setIsCreateOpen(true)}
+              className="bg-orange-600 hover:bg-orange-700 text-white font-medium px-5 h-10 rounded-md shadow-sm flex items-center gap-2 cursor-pointer transition-colors"
+            >
+              <Plus className="size-4" />
+              Tambah Meja
+            </Button>
           </div>
         </div>
 
@@ -125,7 +127,7 @@ export function MejaContent() {
                     <TableCell className="text-center py-4 text-gray-600">
                       {meta ? (meta.current_page - 1) * meta.per_page + index + 1 : index + 1}
                     </TableCell>
-                    
+
                     <TableCell className="py-4 text-gray-800 text-sm font-semibold">
                       {row.nomor_meja}
                     </TableCell>
@@ -149,7 +151,7 @@ export function MejaContent() {
                     <TableCell className="text-center py-4">
                       <div className="flex items-center justify-center gap-2">
                         {/* View QR Code */}
-                        <button 
+                        <button
                           onClick={() => setMejaForQr(row)}
                           className="flex items-center justify-center size-7 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md transition-colors cursor-pointer border border-blue-200 shadow-sm"
                           title="Tampilkan QR Code"
@@ -157,7 +159,7 @@ export function MejaContent() {
                           <QrCode className="size-4" />
                         </button>
                         {/* Edit Meja */}
-                        <button 
+                        <button
                           onClick={() => setMejaForEdit(row)}
                           className="flex items-center justify-center size-7 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-md transition-colors cursor-pointer border border-gray-200 shadow-sm"
                           title="Edit Meja"
@@ -165,7 +167,7 @@ export function MejaContent() {
                           <Pencil className="size-4" />
                         </button>
                         {/* Delete Meja */}
-                        <button 
+                        <button
                           onClick={() => setMejaForDelete(row)}
                           className="flex items-center justify-center size-7 bg-red-50 hover:bg-red-100 text-red-600 rounded-md transition-colors cursor-pointer border border-red-100 shadow-sm"
                           title="Hapus Meja"
