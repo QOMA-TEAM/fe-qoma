@@ -1,13 +1,13 @@
 "use client";
 
-import { useOutletDashboard } from "@/hooks/outlet/use-dashboard";
+import { useOutletDashboard, useToggleOutletStatus } from "@/hooks/outlet/use-dashboard";
 import { HeaderActions } from "@/components/dashboard/header-actions";
 import { IncomingOrders } from "@/components/outlet/dashboard/incoming-orders";
 import { OutletStatCards } from "@/components/outlet/dashboard/stat-cards";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { CustomersChart } from "@/components/dashboard/customers-chart";
 import { NotificationFeed } from "@/components/outlet/dashboard/notification-feed";
-import { Loader2 } from "lucide-react";
+import { Loader2, Store } from "lucide-react";
 
 // Placeholder data for charts that are not yet provided by the API
 const dummyCustomersData = [
@@ -28,6 +28,7 @@ const dummyRevenueData = [
 
 export function OutletDashboardContent() {
   const { data: response, isLoading, isError } = useOutletDashboard();
+  const { mutate: toggleStatus, isPending } = useToggleOutletStatus();
 
   if (isLoading) {
     return (
@@ -54,7 +55,22 @@ export function OutletDashboardContent() {
         <h2 className="text-[#1E293B] text-[15px] font-bold">
           Welcome back, {outlet.nama_outlet || "Outlet"}
         </h2>
-        <HeaderActions />
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => toggleStatus()}
+            disabled={isLoading || isPending}
+            className={`flex items-center justify-center size-9 rounded-full border border-gray-200 transition-colors cursor-pointer ${outlet.status_buka
+                ? "bg-green-50 text-green-600 hover:bg-green-100"
+                : "bg-red-50 text-red-500 hover:bg-red-100"
+              }`}
+            title={outlet.status_buka ? "Outlet Sedang Buka (Klik untuk Tutup)" : "Outlet Sedang Tutup (Klik untuk Buka)"}
+            aria-label="Toggle outlet status"
+          >
+            {isPending ? <Loader2 className="size-4 animate-spin" /> : <Store className="size-4" />}
+          </button>
+          <HeaderActions />
+        </div>
       </header>
 
       <main className="flex-1 overflow-auto p-8 space-y-8">

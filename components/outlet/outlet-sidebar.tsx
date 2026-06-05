@@ -14,7 +14,9 @@ import {
   TrendingDown, // for Financial Loss
   Activity, // for Activity Log
   LogOut,
-  FolderOpen
+  FolderOpen,
+  Home,
+  HandPlatter
 } from "lucide-react"
 
 import {
@@ -62,17 +64,17 @@ const outletNav = {
       url: "/outlet/stock-opname",
       icon: FileBox,
     },
+    {
+      title: "Meja",
+      url: "/outlet/meja",
+      icon: HandPlatter,
+    },
   ],
   financial: [
     {
       title: "Detail Keuangan",
       url: "/outlet/detail-keuangan",
       icon: WalletCards,
-    },
-    {
-      title: "Financial Loss",
-      url: "/outlet/financial-loss",
-      icon: TrendingDown,
     },
     {
       title: "Activity Log",
