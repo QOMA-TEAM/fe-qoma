@@ -22,20 +22,20 @@ export function OutletStatCards({ keuangan }: OutletStatCardsProps) {
       <h3 className="text-lg font-bold text-gray-900">For Your Information</h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard
-          icon={CircleDollarSign}
-          label="Profits"
-          value={keuangan ? formatRp(keuangan.total_keuntungan || 0) : "Rp 0"}
-          gradient="bg-emerald-500"
-        />
-        <StatCard
           icon={ClipboardList}
-          label="Gross Revenue"
+          label="Total Pendapatan"
           value={keuangan ? formatRp(keuangan.total_pendapatan || 0) : "Rp 0"}
           gradient="bg-blue-500"
         />
         <StatCard
+          icon={CircleDollarSign}
+          label="Keuntungan"
+          value={keuangan ? formatRp(keuangan.total_keuntungan || 0) : "Rp 0"}
+          gradient="bg-emerald-500"
+        />
+        <StatCard
           icon={TrendingDown}
-          label="Losses"
+          label="Pengeluaran"
           value={keuangan ? formatRp(keuangan.total_pengeluaran || 0) : "Rp 0"}
           gradient="bg-red-500"
         />
