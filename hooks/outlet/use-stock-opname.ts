@@ -3,84 +3,84 @@ import { stockOpnameService } from "@/services/outlet/stock-opname-service";
 import { toast } from "sonner";
 
 export const STOCK_OPNAME_QUERY_KEY = "stock-opname-list";
-export const STOCK_OPNAME_DETAIL_KEY = "stock-opname-detail";
+export const STOCK_OPNAME_DRAFT_KEY = "stock-opname-draft";
 
-export function useStockOpnameList(page: number = 1) {
+export function useStockOpnameList(page: number = 1, status?: string) {
   return useQuery({
-    queryKey: [STOCK_OPNAME_QUERY_KEY, page],
-    queryFn: () => stockOpnameService.getList({ page }),
+    queryKey: [STOCK_OPNAME_QUERY_KEY, page, status],
+    queryFn: () => stockOpnameService.getList({ page, status }),
     placeholderData: (previousData) => previousData,
   });
 }
 
-export function useStockOpnameDetail(id: string) {
+export function useStockOpnameDraftList() {
   return useQuery({
-    queryKey: [STOCK_OPNAME_DETAIL_KEY, id],
-    queryFn: () => stockOpnameService.getDetail(id),
-    enabled: !!id,
+    queryKey: [STOCK_OPNAME_DRAFT_KEY],
+    queryFn: () => stockOpnameService.getDraftList(),
   });
 }
 
-export function useCreateStockOpname() {
+export function useCreateDraftOpname() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: stockOpnameService.create,
+    mutationFn: stockOpnameService.createDraft,
     onSuccess: (data) => {
-      toast.success(data.message || "Stock Opname berhasil dibuat!");
+      toast.success(data.message || "Draft Stock Opname berhasil dibuat!");
       queryClient.invalidateQueries({ queryKey: [STOCK_OPNAME_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [STOCK_OPNAME_DRAFT_KEY] });
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Gagal membuat Stock Opname");
+      toast.error(error.response?.data?.message || "Gagal membuat Draft");
     },
   });
 }
 
-export function useUpdateStockOpnameStatus() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, status }: { id: string; status: string }) =>
-      stockOpnameService.updateStatus(id, status),
-    onSuccess: (data, variables) => {
-      toast.success(data.message || "Status berhasil diupdate!");
-      queryClient.invalidateQueries({ queryKey: [STOCK_OPNAME_DETAIL_KEY, variables.id] });
-      queryClient.invalidateQueries({ queryKey: [STOCK_OPNAME_QUERY_KEY] });
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Gagal mengupdate status");
-    },
-  });
-}
-
-export function useAddStockOpnameItem() {
+export function useUpdateDraftOpname() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: FormData }) =>
-      stockOpnameService.addItem(id, data),
-    onSuccess: (data, variables) => {
-      toast.success(data.message || "Barang berhasil ditambahkan!");
-      queryClient.invalidateQueries({ queryKey: [STOCK_OPNAME_DETAIL_KEY, variables.id] });
+      stockOpnameService.updateDraft(id, data),
+    onSuccess: (data) => {
+      toast.success(data.message || "Draft berhasil diupdate!");
+      queryClient.invalidateQueries({ queryKey: [STOCK_OPNAME_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [STOCK_OPNAME_DRAFT_KEY] });
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Gagal menambahkan barang");
+      toast.error(error.response?.data?.message || "Gagal mengupdate Draft");
     },
   });
 }
 
-export function useDeleteStockOpnameItem() {
+export function useDeleteDraftOpname() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, itemId }: { id: string; itemId: string }) =>
-      stockOpnameService.deleteItem(id, itemId),
-    onSuccess: (data, variables) => {
-      toast.success(data.message || "Barang berhasil dihapus!");
-      queryClient.invalidateQueries({ queryKey: [STOCK_OPNAME_DETAIL_KEY, variables.id] });
+    mutationFn: stockOpnameService.deleteDraft,
+    onSuccess: (data) => {
+      toast.success(data.message || "Draft berhasil dihapus!");
+      queryClient.invalidateQueries({ queryKey: [STOCK_OPNAME_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [STOCK_OPNAME_DRAFT_KEY] });
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Gagal menghapus barang");
+      toast.error(error.response?.data?.message || "Gagal menghapus Draft");
+    },
+  });
+}
+
+export function useFinalizeDraftOpname() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: stockOpnameService.finalizeDraft,
+    onSuccess: (data) => {
+      toast.success(data.message || "Stock opname berhasil difinalisasi!");
+      queryClient.invalidateQueries({ queryKey: [STOCK_OPNAME_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [STOCK_OPNAME_DRAFT_KEY] });
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Gagal memfinalisasi Draft");
     },
   });
 }
