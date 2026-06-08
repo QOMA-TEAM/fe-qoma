@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
 import { outletKeuanganService } from "@/services/outlet/keuangan"
 
-export const useOutletKeuangan = (range: string = "7days") => {
+export const useOutletKeuangan = (range: string = "7days", page: number = 1) => {
   return useQuery({
-    queryKey: ["outlet-keuangan", range],
-    queryFn: () => outletKeuanganService.get(range),
+    queryKey: ["outlet-keuangan", range, page],
+    queryFn: () => outletKeuanganService.get(range, page),
   })
 }

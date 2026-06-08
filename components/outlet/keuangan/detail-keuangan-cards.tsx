@@ -75,7 +75,7 @@ export function DetailKeuanganCards({ cards, isLoading }: Props) {
             </div>
             <span className="text-sm font-medium opacity-90">Total Keuntungan</span>
           </div>
-          <h3 className="text-2xl font-bold">{formatRupiah(Math.abs(totalKeuntungan))}</h3>
+          <h3 className="text-2xl font-bold">{formatRupiah(Math.max(0, totalKeuntungan))}</h3>
           <CircleDollarSign className="absolute -bottom-6 -right-4 w-28 h-28 text-white/10" />
         </div>
       </div>

@@ -36,6 +36,14 @@ export interface OutletKeuanganResponse {
   data: {
     cards: OutletKeuanganCards
     grafik: OutletKeuanganGrafik[]
-    transaksi: OutletKeuanganTransaksi[]
+    transaksi: {
+      data: OutletKeuanganTransaksi[]
+      meta: {
+        current_page: number
+        per_page: number
+        total: number
+        last_page: number
+      }
+    }
   }
 }

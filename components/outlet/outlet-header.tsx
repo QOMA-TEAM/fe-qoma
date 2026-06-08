@@ -68,14 +68,17 @@ export function OutletHeader() {
                         type="button"
                         onClick={() => toggleStatus()}
                         disabled={isLoading || isPending}
-                        className={`flex items-center justify-center size-9 rounded-full border border-gray-200 transition-colors cursor-pointer ${isOpen
-                            ? "bg-green-50 text-green-600 hover:bg-green-100"
-                            : "bg-red-50 text-red-500 hover:bg-red-100"
+                        className={`flex items-center justify-center size-9 rounded-full border border-gray-200 transition-colors cursor-pointer ${
+                            isLoading
+                                ? "bg-gray-50 text-gray-400"
+                                : isOpen
+                                    ? "bg-green-50 text-green-600 hover:bg-green-100"
+                                    : "bg-red-50 text-red-500 hover:bg-red-100"
                             }`}
                         title={isOpen ? "Outlet Sedang Buka (Klik untuk Tutup)" : "Outlet Sedang Tutup (Klik untuk Buka)"}
                         aria-label="Toggle outlet status"
                     >
-                        {isPending ? <Loader2 className="size-4 animate-spin" /> : <Store className="size-4" />}
+                        {isLoading || isPending ? <Loader2 className="size-4 animate-spin" /> : <Store className="size-4" />}
                     </button>
 
                     <button

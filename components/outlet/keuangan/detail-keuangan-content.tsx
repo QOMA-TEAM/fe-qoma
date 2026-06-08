@@ -9,11 +9,17 @@ import { DetailKeuanganTable } from "./detail-keuangan-table"
 export function DetailKeuanganContent() {
   const [range, setRange] = useState("7days")
   const [tipe, setTipe] = useState("semua")
+  const [page, setPage] = useState(1)
 
-  const { data, isLoading } = useOutletKeuangan(range)
+  // Reset page when filter changes
+  const handleRangeChange = (v: string) => { setRange(v); setPage(1); }
+  const handleTipeChange = (v: string) => { setTipe(v); setPage(1); }
+
+  const { data, isLoading } = useOutletKeuangan(range, page)
 
   const cards = data?.data?.cards
-  const transaksi = data?.data?.transaksi ?? []
+  const transaksi = data?.data?.transaksi?.data ?? []
+  const meta = data?.data?.transaksi?.meta
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -32,13 +38,20 @@ export function DetailKeuanganContent() {
           <h2 className="text-base font-semibold text-gray-800">Riwayat Transaksi</h2>
           <DetailKeuanganFilter
             range={range}
-            setRange={(v) => setRange(v)}
+            setRange={handleRangeChange}
             tipe={tipe}
-            setTipe={(v) => setTipe(v)}
+            setTipe={handleTipeChange}
           />
         </div>
 
-        <DetailKeuanganTable transaksi={transaksi} isLoading={isLoading} tipe={tipe} />
+        <DetailKeuanganTable 
+          transaksi={transaksi} 
+          meta={meta}
+          page={page}
+          setPage={setPage}
+          isLoading={isLoading} 
+          tipe={tipe} 
+        />
       </div>
     </div>
   )

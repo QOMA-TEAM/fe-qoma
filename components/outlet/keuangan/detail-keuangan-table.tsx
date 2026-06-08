@@ -12,22 +12,28 @@ import type { OutletKeuanganTransaksi } from "@/types/outlet/keuangan"
 
 interface Props {
   transaksi: OutletKeuanganTransaksi[]
+  meta?: {
+    current_page: number
+    per_page: number
+    total: number
+    last_page: number
+  }
+  page: number
+  setPage: (page: number) => void
   isLoading: boolean
   tipe: string
 }
 
-const PER_PAGE = 15
-
-export function DetailKeuanganTable({ transaksi, isLoading, tipe }: Props) {
-  const [page, setPage] = useState(1)
-
+export function DetailKeuanganTable({ transaksi, meta, page, setPage, isLoading, tipe }: Props) {
+  // If `tipe` is not "semua", the backend is still returning all types for the page, 
+  // so client-side filtering might mess up pagination totals unless we do server-side filtering too.
+  // Assuming for now that we filter locally on the fetched page.
   const filtered = tipe === "semua"
     ? transaksi
     : transaksi.filter((t) => t.tipe === tipe)
 
-  const lastPage = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
-  const currentPage = Math.min(page, lastPage)
-  const paged = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE)
+  const lastPage = meta ? meta.last_page : 1
+  const currentPage = meta ? meta.current_page : 1
 
   return (
     <>
@@ -50,14 +56,14 @@ export function DetailKeuanganTable({ transaksi, isLoading, tipe }: Props) {
                   <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
                 </TableCell>
               </TableRow>
-            ) : paged.length === 0 ? (
+            ) : filtered.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center text-gray-400 py-12 text-sm">
                   Tidak ada transaksi ditemukan.
                 </TableCell>
               </TableRow>
             ) : (
-              paged.map((row, idx) => (
+              filtered.map((row, idx) => (
                 <TableRow key={`${row.id}-${idx}`} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
                   <TableCell className="text-gray-600 text-sm whitespace-nowrap">{row.tanggal}</TableCell>
                   <TableCell className="text-gray-500 text-sm whitespace-nowrap">{row.waktu}</TableCell>
@@ -92,7 +98,7 @@ export function DetailKeuanganTable({ transaksi, isLoading, tipe }: Props) {
         </Table>
       </div>
 
-      {filtered.length > 0 && (
+      {meta && meta.total > 0 && (
         <div className="flex items-center justify-between pt-2">
           <p className="text-sm text-gray-500">
             Menampilkan Halaman{" "}
@@ -103,7 +109,7 @@ export function DetailKeuanganTable({ transaksi, isLoading, tipe }: Props) {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              onClick={() => setPage(Math.max(1, page - 1))}
               disabled={currentPage === 1}
               className="h-8 rounded-full px-4 text-xs font-medium cursor-pointer"
             >
@@ -128,7 +134,7 @@ export function DetailKeuanganTable({ transaksi, isLoading, tipe }: Props) {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setPage((p) => Math.min(lastPage, p + 1))}
+              onClick={() => setPage(Math.min(lastPage, page + 1))}
               disabled={currentPage === lastPage}
               className="h-8 rounded-full px-4 text-xs font-medium cursor-pointer"
             >
