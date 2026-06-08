@@ -42,21 +42,21 @@ export function OutletHeader() {
                     <BreadcrumbList>
                         {route ? (
                             <>
-                                <BreadcrumbItem className="text-[#1E293B]">
-                                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                <BreadcrumbItem>
+                                    <span className="text-sm text-muted-foreground uppercase">
                                         {route.group}
                                     </span>
                                 </BreadcrumbItem>
                                 <BreadcrumbSeparator />
                                 <BreadcrumbItem>
-                                    <BreadcrumbPage className="text-sm font-bold">
+                                    <BreadcrumbPage className="text-sm">
                                         {route.label}
                                     </BreadcrumbPage>
                                 </BreadcrumbItem>
                             </>
                         ) : (
                             <BreadcrumbItem>
-                                <BreadcrumbPage className="text-sm font-bold">Outlet</BreadcrumbPage>
+                                <BreadcrumbPage className="text-sm">Outlet</BreadcrumbPage>
                             </BreadcrumbItem>
                         )}
                     </BreadcrumbList>
