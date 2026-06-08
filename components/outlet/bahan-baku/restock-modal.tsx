@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useBahanBakuList, useRestockBahanBaku } from "@/hooks/outlet/use-bahan-baku";
+import { useBahanMasterList, useRestockBahanBaku } from "@/hooks/outlet/use-bahan-baku";
 import { useDebounce } from "@/hooks/use-debounce";
 
 
@@ -21,7 +21,7 @@ export function RestockModal({ open, onOpenChange }: RestockModalProps) {
 
   // For simplicity, we just fetch page 1 in the modal. 
   // If there are many items, the user can search.
-  const { data: response, isLoading } = useBahanBakuList(1, debouncedSearch);
+  const { data: response, isLoading } = useBahanMasterList(1, debouncedSearch);
   const items = response?.data || [];
 
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
@@ -36,7 +36,7 @@ export function RestockModal({ open, onOpenChange }: RestockModalProps) {
 
   const pengeluaran = useMemo(() => {
     const qty = parseFloat(jumlah || "0");
-    const harga = selectedItem ? parseFloat(selectedItem.bahan_master.harga_default?.toString() || "0") : 0;
+    const harga = selectedItem ? parseFloat(selectedItem.harga_default?.toString() || "0") : 0;
     return qty * harga;
   }, [jumlah, selectedItem]);
 
@@ -55,7 +55,7 @@ export function RestockModal({ open, onOpenChange }: RestockModalProps) {
 
     restock(
       {
-        bahan_master_id: selectedItem.bahan_master.id,
+        bahan_master_id: selectedItem.id,
         jumlah: parseFloat(jumlah),
         tanggal_kadaluarsa: tanggal || null,
       },
@@ -85,7 +85,7 @@ export function RestockModal({ open, onOpenChange }: RestockModalProps) {
           {/* LEFT COLUMN: FORM */}
           <div className="bg-[#F8F9FA] rounded-xl p-6 flex flex-col space-y-5">
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              {selectedItem ? selectedItem.bahan_master.nama : "Pilih Bahan Baku"}
+              {selectedItem ? selectedItem.nama : "Pilih Bahan Baku"}
             </h3>
 
             <div className="space-y-1.5">
@@ -112,6 +112,7 @@ export function RestockModal({ open, onOpenChange }: RestockModalProps) {
                   value={tanggal}
                   onChange={(e) => setTanggal(e.target.value)}
                   className="h-11 w-full bg-white border-0 focus-visible:ring-1 focus-visible:ring-blue-500 rounded-lg shadow-sm block"
+                  required
                 />
               </div>
             </div>
@@ -129,7 +130,7 @@ export function RestockModal({ open, onOpenChange }: RestockModalProps) {
             <div className="pt-4 mt-auto">
               <Button
                 onClick={handleSubmit}
-                disabled={!selectedItem || !jumlah || isPending}
+                disabled={!selectedItem || !jumlah || !tanggal || isPending}
                 className="w-full h-12 bg-[#205284] hover:bg-[#1a4269] text-white font-semibold rounded-lg text-base"
               >
                 {isPending ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Submit"}
@@ -177,10 +178,10 @@ export function RestockModal({ open, onOpenChange }: RestockModalProps) {
                         }`}
                       >
                         <div className="w-full aspect-square bg-gray-100 flex items-center justify-center p-1 cursor-pointer">
-                          {item.bahan_master.gambar ? (
+                          {item.gambar ? (
                             <img
-                              src={item.bahan_master.gambar.startsWith('http') ? item.bahan_master.gambar : `http://localhost:8000/storage/${item.bahan_master.gambar}`}
-                              alt={item.bahan_master.nama}
+                              src={item.gambar.startsWith('http') ? item.gambar : `${(process.env.NEXT_PUBLIC_API_URL as string).replace("/api", "/storage")}/${item.gambar.replace(/^\//, '')}`}
+                              alt={item.nama}
                               className="w-full h-full object-cover rounded-lg"
                             />
                           ) : (
@@ -191,7 +192,7 @@ export function RestockModal({ open, onOpenChange }: RestockModalProps) {
                         </div>
                         <div className="w-full p-2 text-center border-t border-gray-100 bg-white/50 h-11 flex items-center justify-center">
                           <span className={`text-[11px] leading-tight font-medium line-clamp-2 ${isSelected ? "text-emerald-700" : "text-gray-700"}`}>
-                            {item.bahan_master.nama}
+                            {item.nama}
                           </span>
                         </div>
                       </button>

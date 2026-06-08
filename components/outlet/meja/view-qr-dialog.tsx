@@ -139,7 +139,7 @@ export function ViewQrDialog({ meja, onClose }: ViewQrDialogProps) {
           <Button
             type="button"
             onClick={handlePrint}
-            className="flex-1 rounded-lg h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm cursor-pointer flex items-center justify-center gap-2"
+            className="flex-1 rounded-lg h-11 bg-[#3874BC] hover:bg-[#2c5b96] text-white font-medium shadow-sm cursor-pointer flex items-center justify-center gap-2"
           >
             <Printer className="size-4" /> Cetak / Print
           </Button>

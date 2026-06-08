@@ -131,11 +131,11 @@ export function DetailBahanBakuDialog({ bahan, onClose }: DetailBahanBakuDialogP
               <div className="pt-2 border-t border-gray-100">
                 <div className="flex justify-between items-center mb-1.5">
                   <span className="text-xs text-gray-500">Tgl Masuk</span>
-                  <span className="text-gray-800 font-medium text-xs text-right">{formatDate(bahan.tanggal_masuk)}</span>
+                  <span className="text-gray-800 font-medium text-xs text-right">{formatDate(bahan.batch_terdekat_expired?.tanggal_masuk || null)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-gray-500">Kadaluarsa</span>
-                  <span className="text-gray-800 font-medium text-xs text-right">{formatDate(bahan.tanggal_kadaluarsa)}</span>
+                  <span className="text-gray-800 font-medium text-xs text-right">{formatDate(bahan.batch_terdekat_expired?.expired_date || null)}</span>
                 </div>
               </div>
             </div>

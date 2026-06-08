@@ -12,6 +12,16 @@ export function useBahanBakuList(page: number = 1, search: string = "") {
   });
 }
 
+export const BAHAN_MASTER_QUERY_KEY = "bahan-master-list";
+
+export function useBahanMasterList(page: number = 1, search: string = "") {
+  return useQuery({
+    queryKey: [BAHAN_MASTER_QUERY_KEY, page, search],
+    queryFn: () => bahanBakuService.getMasterList({ page, search }),
+    placeholderData: (previousData) => previousData,
+  });
+}
+
 export function useRestockBahanBaku() {
   const queryClient = useQueryClient();
 

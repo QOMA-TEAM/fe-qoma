@@ -68,25 +68,7 @@ export function EditMejaDialog({ meja, onClose }: EditMejaDialogProps) {
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Status Meja</label>
-            <div className="relative">
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full h-11 px-3 bg-white border border-gray-200 text-gray-900 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium appearance-none cursor-pointer"
-                disabled={isPending}
-              >
-                <option value="Tersedia">Tersedia</option>
-                <option value="Terisi">Terisi</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                </svg>
-              </div>
-            </div>
-          </div>
+
 
           <div className="flex items-center justify-end gap-3 pt-2">
             <Button

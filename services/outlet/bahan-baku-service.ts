@@ -12,8 +12,20 @@ export interface BahanOutlet {
   id: string;
   stok: number;
   stok_minimum: number;
-  tanggal_masuk: string | null;
-  tanggal_kadaluarsa: string | null;
+  batch_terdekat_expired: {
+    sisa: number;
+    expired_date: string | null;
+    tanggal_masuk: string | null;
+  } | null;
+  batch_aktif: {
+    id: string;
+    jumlah_awal: number;
+    sisa: number;
+    expired_date: string | null;
+    tanggal_masuk: string | null;
+    mendekati_expired: boolean;
+    sudah_expired: boolean;
+  }[];
   is_menipis: boolean;
   is_mendekati_expired: boolean;
   is_sudah_expired: boolean;
@@ -30,7 +42,25 @@ export interface BahanOutletResponse {
   };
 }
 
+export interface BahanMasterResponse {
+  data: BahanMaster[];
+  meta: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+  };
+}
+
 export const bahanBakuService = {
+  getMasterList: async (params?: {
+    page?: number;
+    search?: string;
+  }): Promise<BahanMasterResponse> => {
+    const response = await axiosInstance.get("/outlet/bahan-master", { params });
+    return response.data;
+  },
+
   getList: async (params?: {
     page?: number;
     search?: string;

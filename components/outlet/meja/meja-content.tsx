@@ -85,7 +85,6 @@ export function MejaContent() {
               <TableRow className="bg-gray-50/80 hover:bg-gray-50/80 border-gray-200">
                 <TableHead className="w-16 text-center text-gray-600 font-semibold text-sm">No</TableHead>
                 <TableHead className="text-gray-600 font-semibold text-sm">Nomor Meja</TableHead>
-                <TableHead className="w-32 text-center text-gray-600 font-semibold text-sm">Status</TableHead>
                 <TableHead className="w-40 text-center text-gray-600 font-semibold text-sm">Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -133,27 +132,11 @@ export function MejaContent() {
                     </TableCell>
 
                     <TableCell className="text-center py-4">
-                      {row.status === "Tersedia" ? (
-                        <Badge className="bg-green-50 text-green-700 hover:bg-green-50 border border-green-200 font-medium rounded-full">
-                          Tersedia
-                        </Badge>
-                      ) : row.status === "Terisi" ? (
-                        <Badge className="bg-amber-50 text-amber-700 hover:bg-amber-50 border border-amber-200 font-medium rounded-full">
-                          Terisi
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-gray-50 text-gray-600 hover:bg-gray-50 border border-gray-200 font-medium rounded-full">
-                          {row.status}
-                        </Badge>
-                      )}
-                    </TableCell>
-
-                    <TableCell className="text-center py-4">
                       <div className="flex items-center justify-center gap-2">
                         {/* View QR Code */}
                         <button
                           onClick={() => setMejaForQr(row)}
-                          className="flex items-center justify-center size-7 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md transition-colors cursor-pointer border border-blue-200 shadow-sm"
+                          className="flex items-center justify-center size-7 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md transition-colors cursor-pointer shadow-sm"
                           title="Tampilkan QR Code"
                         >
                           <QrCode className="size-4" />
@@ -161,7 +144,7 @@ export function MejaContent() {
                         {/* Edit Meja */}
                         <button
                           onClick={() => setMejaForEdit(row)}
-                          className="flex items-center justify-center size-7 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-md transition-colors cursor-pointer border border-gray-200 shadow-sm"
+                          className="flex items-center justify-center size-7 bg-[#3874BC] hover:bg-[#2c5b96] text-white rounded-md transition-colors cursor-pointer shadow-sm"
                           title="Edit Meja"
                         >
                           <Pencil className="size-4" />
@@ -169,7 +152,7 @@ export function MejaContent() {
                         {/* Delete Meja */}
                         <button
                           onClick={() => setMejaForDelete(row)}
-                          className="flex items-center justify-center size-7 bg-red-50 hover:bg-red-100 text-red-600 rounded-md transition-colors cursor-pointer border border-red-100 shadow-sm"
+                          className="flex items-center justify-center size-7 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors cursor-pointer shadow-sm"
                           title="Hapus Meja"
                         >
                           <Trash2 className="size-4" />

@@ -58,8 +58,8 @@ export function BahanBakuContent() {
       else if (sortKey === "nama") { av = a.bahan_master?.nama || ""; bv = b.bahan_master?.nama || ""; }
       else if (sortKey === "stok") { av = a.stok; bv = b.stok; }
       else if (sortKey === "satuan") { av = a.bahan_master?.satuan || ""; bv = b.bahan_master?.satuan || ""; }
-      else if (sortKey === "tanggal_masuk") { av = a.tanggal_masuk || ""; bv = b.tanggal_masuk || ""; }
-      else if (sortKey === "tanggal_kadaluarsa") { av = a.tanggal_kadaluarsa || ""; bv = b.tanggal_kadaluarsa || ""; }
+      else if (sortKey === "tanggal_masuk") { av = a.batch_terdekat_expired?.tanggal_masuk || ""; bv = b.batch_terdekat_expired?.tanggal_masuk || ""; }
+      else if (sortKey === "tanggal_kadaluarsa") { av = a.batch_terdekat_expired?.expired_date || ""; bv = b.batch_terdekat_expired?.expired_date || ""; }
 
       if (av === null) av = "";
       if (bv === null) bv = "";
@@ -177,14 +177,14 @@ export function BahanBakuContent() {
                     {row.bahan_master?.satuan || "-"}
                   </TableCell>
                   <TableCell className="text-gray-600 text-sm text-center py-3">
-                    {formatDate(row.tanggal_masuk)}
+                    {formatDate(row.batch_terdekat_expired?.tanggal_masuk || null)}
                   </TableCell>
                   <TableCell className="text-gray-600 text-sm text-center py-3">
                     <span className={cn(
                       row.is_sudah_expired ? "text-red-600 font-bold" : 
                       row.is_mendekati_expired ? "text-orange-500 font-semibold" : ""
                     )}>
-                      {formatDate(row.tanggal_kadaluarsa)}
+                      {formatDate(row.batch_terdekat_expired?.expired_date || null)}
                     </span>
                   </TableCell>
                   <TableCell className="text-center py-3">
