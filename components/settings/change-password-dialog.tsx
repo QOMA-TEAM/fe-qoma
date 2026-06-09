@@ -17,9 +17,10 @@ import api from "@/lib/axios"
 interface ChangePasswordDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  children?: React.ReactNode
 }
 
-export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialogProps) {
+export function ChangePasswordDialog({ open, onOpenChange, children }: ChangePasswordDialogProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
@@ -101,59 +102,67 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
             <Loader2 className="size-5 animate-spin text-gray-400 mt-2" />
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-            {error && (
-              <div className="p-3 text-sm font-medium text-red-600 bg-red-50 rounded-lg border border-red-200">
-                {error}
+          <div className="space-y-6 pt-4">
+            {children}
+            
+            {children && <div className="border-t border-gray-200" />}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {children && <h3 className="font-semibold text-gray-900 text-sm">Ubah Password</h3>}
+              
+              {error && (
+                <div className="p-3 text-sm font-medium text-red-600 bg-red-50 rounded-lg border border-red-200">
+                  {error}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="password_lama">Password Lama</Label>
+                <Input
+                  id="password_lama"
+                  type="password"
+                  value={formData.password_lama}
+                  onChange={handleChange}
+                  required
+                  placeholder="Masukkan password lama"
+                />
               </div>
-            )}
 
-            <div className="space-y-2">
-              <Label htmlFor="password_lama">Password Lama</Label>
-              <Input
-                id="password_lama"
-                type="password"
-                value={formData.password_lama}
-                onChange={handleChange}
-                required
-                placeholder="Masukkan password lama"
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="password_baru">Password Baru</Label>
+                <Input
+                  id="password_baru"
+                  type="password"
+                  value={formData.password_baru}
+                  onChange={handleChange}
+                  required
+                  placeholder="Minimal 6 karakter"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password_baru">Password Baru</Label>
-              <Input
-                id="password_baru"
-                type="password"
-                value={formData.password_baru}
-                onChange={handleChange}
-                required
-                placeholder="Minimal 6 karakter"
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="password_baru_confirmation">Konfirmasi Password Baru</Label>
+                <Input
+                  id="password_baru_confirmation"
+                  type="password"
+                  value={formData.password_baru_confirmation}
+                  onChange={handleChange}
+                  required
+                  placeholder="Ketik ulang password baru"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password_baru_confirmation">Konfirmasi Password Baru</Label>
-              <Input
-                id="password_baru_confirmation"
-                type="password"
-                value={formData.password_baru_confirmation}
-                onChange={handleChange}
-                required
-                placeholder="Ketik ulang password baru"
-              />
-            </div>
-
-            <div className="pt-4 flex justify-end gap-3">
-              <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading}>
-                Batal
-              </Button>
-              <Button type="submit" disabled={isLoading} className="bg-[#1D5E84] hover:bg-[#154663] text-white">
-                {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                Simpan Password
-              </Button>
-            </div>
-          </form>
+              <div className="pt-4 flex justify-end gap-3">
+                <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading}>
+                  Batal
+                </Button>
+                <Button type="submit" disabled={isLoading} className="bg-[#1D5E84] hover:bg-[#154663] text-white">
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                  Simpan Password
+                </Button>
+              </div>
+            </form>
+          </div>
         )}
       </DialogContent>
     </Dialog>

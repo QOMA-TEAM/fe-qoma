@@ -18,14 +18,38 @@ export function useToggleOutletStatus() {
 
   return useMutation({
     mutationFn: outletDashboardService.toggleStatus,
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: OUTLET_DASHBOARD_QUERY_KEY });
+      const previousData = queryClient.getQueryData(OUTLET_DASHBOARD_QUERY_KEY);
+
+      queryClient.setQueryData(OUTLET_DASHBOARD_QUERY_KEY, (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            outlet: {
+              ...old.data.outlet,
+              status_buka: !old.data.outlet.status_buka,
+            },
+          },
+        };
+      });
+
+      return { previousData };
+    },
     onSuccess: (data) => {
       toast.success(data.message);
-      // Invalidate query agar komponen dashboard me-refresh profil/status terbaru
-      queryClient.invalidateQueries({ queryKey: OUTLET_DASHBOARD_QUERY_KEY });
     },
-    onError: (error: any) => {
+    onError: (error: any, variables, context: any) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(OUTLET_DASHBOARD_QUERY_KEY, context.previousData);
+      }
       const msg = error.response?.data?.message || "Gagal mengubah status outlet";
       toast.error(msg);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: OUTLET_DASHBOARD_QUERY_KEY });
     },
   });
 }
