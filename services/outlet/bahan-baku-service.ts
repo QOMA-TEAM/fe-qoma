@@ -64,6 +64,7 @@ export const bahanBakuService = {
   getList: async (params?: {
     page?: number;
     search?: string;
+    satuan?: string;
     sort_by?: string;
     sort_dir?: string;
   }): Promise<BahanOutletResponse> => {

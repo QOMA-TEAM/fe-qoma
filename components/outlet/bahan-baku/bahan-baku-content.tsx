@@ -23,8 +23,17 @@ import { RestockModal } from "@/components/outlet/bahan-baku/restock-modal";
 import { DetailBahanBakuDialog } from "@/components/outlet/bahan-baku/detail-bahan-baku-dialog";
 import type { BahanOutlet } from "@/services/outlet/bahan-baku-service";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 export function BahanBakuContent() {
   const [search, setSearch] = useState("");
+  const [satuan, setSatuan] = useState("all");
   const [page, setPage] = useState(1);
   const [sortKey, setSortKey] = useState<SortKey>("id");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
@@ -35,9 +44,9 @@ export function BahanBakuContent() {
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, satuan]);
 
-  const { data: response, isLoading, isError } = useBahanBakuList(page, debouncedSearch);
+  const { data: response, isLoading, isError } = useBahanBakuList(page, debouncedSearch, satuan);
   const bahanList = response?.data || [];
   const meta = response?.meta;
 
@@ -93,14 +102,32 @@ export function BahanBakuContent() {
       </div>
 
       <div className="flex items-center gap-2 flex-wrap sm:justify-between pt-2">
-        <div className="relative">
-          <Input 
-            placeholder="Search" 
-            value={search} 
-            onChange={(e) => setSearch(e.target.value)} 
-            className="pr-9 h-9 w-44 text-sm border-gray-200 rounded-full" 
-          />
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Input 
+              placeholder="Search" 
+              value={search} 
+              onChange={(e) => setSearch(e.target.value)} 
+              className="pr-9 h-9 w-44 text-sm border-gray-200 rounded-full" 
+            />
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          </div>
+          <Select value={satuan} onValueChange={setSatuan}>
+            <SelectTrigger className="h-9 w-36 text-sm border-gray-200 rounded-full">
+              <SelectValue placeholder="Satuan" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Satuan</SelectItem>
+              <SelectItem value="kg">Kilogram (kg)</SelectItem>
+              <SelectItem value="gram">Gram</SelectItem>
+              <SelectItem value="liter">Liter</SelectItem>
+              <SelectItem value="pcs">Pcs</SelectItem>
+              <SelectItem value="porsi">Porsi</SelectItem>
+              <SelectItem value="lusin">Lusin</SelectItem>
+              <SelectItem value="botol">Botol</SelectItem>
+              <SelectItem value="sachet">Sachet</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <Button 
           onClick={() => setRestockOpen(true)}
