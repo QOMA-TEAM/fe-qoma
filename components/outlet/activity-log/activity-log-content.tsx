@@ -50,29 +50,28 @@ export function ActivityLogContent() {
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-100 hover:bg-gray-100 border-gray-200">
-              <TableHead className="w-40 text-gray-600 font-semibold text-sm">Waktu</TableHead>
-              <TableHead className="text-gray-600 font-semibold text-sm">User</TableHead>
+              <TableHead className="w-48 text-gray-600 font-semibold text-sm">Waktu</TableHead>
+              <TableHead className="w-48 text-gray-600 font-semibold text-sm">User</TableHead>
               <TableHead className="w-36 text-gray-600 font-semibold text-sm text-center">Aktivitas</TableHead>
               <TableHead className="text-gray-600 font-semibold text-sm">Deskripsi</TableHead>
-              <TableHead className="text-gray-600 font-semibold text-sm">IP Address</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-48 text-center">
+                <TableCell colSpan={4} className="h-48 text-center">
                   <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
                 </TableCell>
               </TableRow>
             ) : isError ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-48 text-center">
+                <TableCell colSpan={4} className="h-48 text-center">
                   <div className="text-red-500 font-medium text-sm">Gagal memuat data activity log.</div>
                 </TableCell>
               </TableRow>
             ) : logs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-gray-400 py-12 text-sm">Tidak ada aktivitas ditemukan.</TableCell>
+                <TableCell colSpan={4} className="text-center text-gray-400 py-12 text-sm">Tidak ada aktivitas ditemukan.</TableCell>
               </TableRow>
             ) : (
               logs.map((row) => (
@@ -80,10 +79,9 @@ export function ActivityLogContent() {
                   <TableCell className="text-gray-600 text-sm whitespace-nowrap">{row.created_at}</TableCell>
                   <TableCell className="text-gray-800 text-sm">{row.user?.nama_lengkap || row.user?.username || "-"}</TableCell>
                   <TableCell className="text-center">
-                    <span className="text-sm text-gray-800 capitalize font-medium">{row.aktivitas}</span>
+                    <span className="text-sm text-gray-800 capitalize font-medium">{row.aktivitas.replace(/_/g, " ")}</span>
                   </TableCell>
-                  <TableCell className="text-gray-600 text-sm max-w-[250px] truncate" title={row.deskripsi}>{row.deskripsi}</TableCell>
-                  <TableCell className="text-gray-500 text-sm font-mono max-w-[120px] truncate" title={row.ip_address}>{row.ip_address}</TableCell>
+                  <TableCell className="text-gray-600 text-sm" title={row.deskripsi}>{row.deskripsi}</TableCell>
                 </TableRow>
               ))
             )}
