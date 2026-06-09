@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { useGetApprovalBahan, useApproveBahan, useRejectBahan } from "@/hooks/owner/use-approval-bahan"
-import { ApprovalBahan } from "@/services/owner/approval-bahan"
-import { ApprovalActionModal } from "./approval-action-modal"
+import { useGetApprovalMenu, useApproveMenu, useRejectMenu } from "@/hooks/owner/use-approval-menu"
+import { ApprovalMenu } from "@/services/owner/approval-menu"
+import { ApprovalMenuActionModal } from "./approval-menu-action-modal"
 import { formatRupiah } from "@/lib/utils"
 import {
   Table,
@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { CheckCircle2, XCircle, Clock, Search, ChevronLeft, ChevronRight, Store, Check, X } from "lucide-react"
+import { CheckCircle2, XCircle, Clock, ChevronLeft, ChevronRight, Store, Check, X } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -25,24 +25,24 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 
-export function ApprovalBahanContent() {
+export function ApprovalMenuContent() {
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState<string>("all")
   
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedApproval, setSelectedApproval] = useState<ApprovalBahan | null>(null)
+  const [selectedApproval, setSelectedApproval] = useState<ApprovalMenu | null>(null)
   const [actionType, setActionType] = useState<"approve" | "reject" | null>(null)
 
-  const { data: response, isLoading } = useGetApprovalBahan(
+  const { data: response, isLoading } = useGetApprovalMenu(
     page,
     statusFilter !== "all" ? statusFilter : undefined
   )
 
-  const { mutate: approve, isPending: isApproving } = useApproveBahan()
-  const { mutate: reject, isPending: isRejecting } = useRejectBahan()
+  const { mutate: approve, isPending: isApproving } = useApproveMenu()
+  const { mutate: reject, isPending: isRejecting } = useRejectMenu()
 
-  const handleOpenAction = (approval: ApprovalBahan, action: "approve" | "reject") => {
+  const handleOpenAction = (approval: ApprovalMenu, action: "approve" | "reject") => {
     setSelectedApproval(approval)
     setActionType(action)
     setIsModalOpen(true)
@@ -106,7 +106,7 @@ export function ApprovalBahanContent() {
 
   return (
     <>
-      {/* Filters (Mimicking the Controls part of Bahan Baku) */}
+      {/* Filters (Mimicking the Controls part of Menu) */}
       <div className="flex flex-col sm:flex-row items-center gap-4 mb-4">
         <div className="w-full sm:w-64">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -129,11 +129,11 @@ export function ApprovalBahanContent() {
           <TableHeader>
             <TableRow className="bg-gray-50/80 hover:bg-gray-50/80 border-gray-200">
               <TableHead className="text-gray-600 font-semibold text-sm">Tanggal Pengajuan</TableHead>
-              <TableHead className="text-gray-600 font-semibold text-sm">Outlet & Bahan</TableHead>
+              <TableHead className="text-gray-600 font-semibold text-sm">Outlet & Menu</TableHead>
               <TableHead className="text-gray-600 font-semibold text-sm">Perubahan Harga</TableHead>
               <TableHead className="text-gray-600 font-semibold text-sm">Alasan</TableHead>
               <TableHead className="text-gray-600 font-semibold text-sm">Status</TableHead>
-              <TableHead className="text-gray-600 font-semibold text-sm text-right w-32">Action</TableHead>
+              <TableHead className="text-gray-600 font-semibold text-sm text-center w-12">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -146,7 +146,7 @@ export function ApprovalBahanContent() {
             ) : response?.data?.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center text-gray-400 py-12 text-sm">
-                  Tidak ada data pengajuan bahan baku.
+                  Tidak ada data pengajuan menu.
                 </TableCell>
               </TableRow>
             ) : (
@@ -162,7 +162,7 @@ export function ApprovalBahanContent() {
                   <TableCell>
                     <div className="flex flex-col gap-1">
                       <span className="text-gray-800 text-sm font-medium">
-                        {item.bahan_outlet?.bahan_master?.nama || "Bahan Tidak Diketahui"}
+                        {item.menu_outlet?.menu?.nama || "Menu Tidak Diketahui"}
                       </span>
                       <span className="text-xs text-gray-500 flex items-center gap-1">
                         <Store className="w-3 h-3" />
@@ -186,7 +186,7 @@ export function ApprovalBahanContent() {
                     </p>
                   </TableCell>
                   <TableCell>{renderStatusBadge(item.status)}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="">
                     {item.status === "pending" ? (
                       <div className="flex items-center justify-end gap-2">
                         <button
@@ -259,7 +259,7 @@ export function ApprovalBahanContent() {
         </div>
       )}
 
-      <ApprovalActionModal
+      <ApprovalMenuActionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleConfirmAction}

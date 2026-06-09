@@ -14,6 +14,7 @@ import {
   CreditCard,
   LogOut,
   ClipboardCheck,
+  FileCheck,
 } from "lucide-react"
 
 import {
@@ -50,11 +51,6 @@ const ownerNav = {
       icon: Beef,
     },
     {
-      title: "Approval Bahan",
-      url: "/owner/approval-bahan",
-      icon: ClipboardCheck,
-    },
-    {
       title: "Menu",
       url: "/owner/menu",
       icon: UtensilsCrossed,
@@ -68,6 +64,17 @@ const ownerNav = {
       title: "Plan",
       url: "/owner/plan",
       icon: CreditCard,
+    },
+  ],approval: [
+    {
+      title: "Approve Bahan Baku",
+      url: "/owner/approval-bahan",
+      icon: ClipboardCheck,
+    },
+      {
+      title: "Approval Menu",
+      url: "/owner/approval-menu",
+      icon: FileCheck,
     },
   ],
   keuangan: [
@@ -155,6 +162,30 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
             ))}
           </SidebarMenu>
         </SidebarGroup>
+
+        {/* APPROVAL */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-muted-foreground/70 uppercase">
+            Approval
+          </SidebarGroupLabel>
+          <SidebarMenu>
+            {ownerNav.approval.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === item.url}
+                  className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
+                >
+                  <Link href={item.url}>
+                    <item.icon className="size-4" />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+
 
         {/* KEUANGAN */}
         <SidebarGroup>
