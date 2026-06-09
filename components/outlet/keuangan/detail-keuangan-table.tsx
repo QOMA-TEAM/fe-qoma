@@ -9,6 +9,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { cn, formatRupiah } from "@/lib/utils"
 import type { OutletKeuanganTransaksi } from "@/types/outlet/keuangan"
+import { format } from "date-fns"
+import { id } from "date-fns/locale"
 
 interface Props {
   transaksi: OutletKeuanganTransaksi[]
@@ -65,8 +67,12 @@ export function DetailKeuanganTable({ transaksi, meta, page, setPage, isLoading,
             ) : (
               filtered.map((row, idx) => (
                 <TableRow key={`${row.id}-${idx}`} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
-                  <TableCell className="text-gray-600 text-sm whitespace-nowrap">{row.tanggal}</TableCell>
-                  <TableCell className="text-gray-500 text-sm whitespace-nowrap">{row.waktu}</TableCell>
+                  <TableCell className="text-gray-600 text-sm whitespace-nowrap">
+                    {row.tanggal ? format(new Date(row.tanggal), "dd MMM yyyy", { locale: id }) : "-"}
+                  </TableCell>
+                  <TableCell className="text-gray-500 text-sm whitespace-nowrap">
+                    {row.waktu || "-"}
+                  </TableCell>
                   <TableCell className="text-gray-500 text-sm font-mono max-w-[120px] truncate" title={row.id}>
                     {row.id}
                   </TableCell>
