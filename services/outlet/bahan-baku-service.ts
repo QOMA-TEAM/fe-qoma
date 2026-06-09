@@ -75,6 +75,7 @@ export const bahanBakuService = {
     bahan_master_id: string;
     jumlah: number;
     tanggal_kadaluarsa: string | null;
+    total_pengeluaran?: number;
   }) => {
     const response = await axiosInstance.post("/outlet/bahan-baku", data);
     return response.data;

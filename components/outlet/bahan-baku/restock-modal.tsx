@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogHeader } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -34,20 +34,17 @@ export function RestockModal({ open, onOpenChange }: RestockModalProps) {
     return items.find((item) => item.id === selectedItemId) || null;
   }, [items, selectedItemId]);
 
-  const pengeluaran = useMemo(() => {
-    const qty = parseFloat(jumlah || "0");
-    const harga = selectedItem ? parseFloat(selectedItem.harga_default?.toString() || "0") : 0;
-    return qty * harga;
-  }, [jumlah, selectedItem]);
+  const [pengeluaran, setPengeluaran] = useState("");
 
-  const formatRupiah = (angka: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(angka);
-  };
+  const [isPengeluaranTouched, setIsPengeluaranTouched] = useState(false);
+
+  useEffect(() => {
+    if (!isPengeluaranTouched) {
+      const qty = parseFloat(jumlah || "0");
+      const harga = selectedItem ? parseFloat(selectedItem.harga_default?.toString() || "0") : 0;
+      setPengeluaran((qty * harga).toString());
+    }
+  }, [jumlah, selectedItem, isPengeluaranTouched]);
 
   const handleSubmit = () => {
     if (!selectedItem) return;
@@ -58,6 +55,7 @@ export function RestockModal({ open, onOpenChange }: RestockModalProps) {
         bahan_master_id: selectedItem.id,
         jumlah: parseFloat(jumlah),
         tanggal_kadaluarsa: tanggal || null,
+        total_pengeluaran: pengeluaran ? parseFloat(pengeluaran) : undefined,
       },
       {
         onSuccess: () => {
@@ -66,6 +64,8 @@ export function RestockModal({ open, onOpenChange }: RestockModalProps) {
           setSelectedItemId(null);
           setJumlah("");
           setTanggal("");
+          setPengeluaran("");
+          setIsPengeluaranTouched(false);
         },
       }
     );
@@ -118,12 +118,17 @@ export function RestockModal({ open, onOpenChange }: RestockModalProps) {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-700">Pengeluaran</label>
+              <label className="text-sm font-medium text-gray-700">Pengeluaran (Rp)</label>
               <Input
-                type="text"
-                value={formatRupiah(pengeluaran)}
-                readOnly
-                className="h-11 bg-white border-0 text-gray-500 rounded-lg shadow-sm pointer-events-none"
+                type="number"
+                min="0"
+                value={pengeluaran}
+                onChange={(e) => {
+                  setPengeluaran(e.target.value);
+                  setIsPengeluaranTouched(true);
+                }}
+                placeholder="0"
+                className="h-11 bg-white border-0 focus-visible:ring-1 focus-visible:ring-blue-500 rounded-lg shadow-sm"
               />
             </div>
 

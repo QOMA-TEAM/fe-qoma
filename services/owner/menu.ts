@@ -28,7 +28,7 @@ export const menuService = {
   },
 
   updateMenu: async (id: string, data: FormData) => {
-    const response = await api.post(`/owner/menu/${id}?_method=PUT`, data, {
+    const response = await api.post(`/owner/menu/${id}`, data, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
