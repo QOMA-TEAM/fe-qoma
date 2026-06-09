@@ -13,6 +13,7 @@ import {
   CircleDollarSign,
   CreditCard,
   LogOut,
+  ClipboardCheck,
 } from "lucide-react"
 
 import {
@@ -47,6 +48,11 @@ const ownerNav = {
       title: "Bahan Baku",
       url: "/owner/bahan-baku",
       icon: Beef,
+    },
+    {
+      title: "Approval Bahan",
+      url: "/owner/approval-bahan",
+      icon: ClipboardCheck,
     },
     {
       title: "Menu",
