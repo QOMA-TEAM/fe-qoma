@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -15,7 +16,10 @@ import {
   LogOut,
   ClipboardCheck,
   FileCheck,
+  Settings,
 } from "lucide-react"
+
+import { ChangePasswordDialog } from "@/components/settings/change-password-dialog"
 
 import {
   Sidebar,
@@ -89,6 +93,7 @@ const ownerNav = {
 export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const router = useRouter()
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
   const handleLogout = () => {
     localStorage.removeItem("token")
@@ -211,12 +216,20 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         </SidebarGroup>
       </SidebarContent>
 
-      {/* FOOTER: Logout */}
+      {/* FOOTER: Logout & Settings */}
       <SidebarFooter className="p-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="hover:bg-red-50 hover:text-red-600">
-              <button type="button" className="w-full" onClick={handleLogout}>
+            <SidebarMenuButton asChild className="hover:bg-slate-100 hover:text-slate-900 cursor-pointer">
+              <button type="button" className="w-full cursor-pointer" onClick={() => setIsSettingsOpen(true)}>
+                <Settings className="size-4" />
+                <span>Setting</span>
+              </button>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild className="hover:bg-red-50 hover:text-red-600 cursor-pointer">
+              <button type="button" className="w-full cursor-pointer" onClick={handleLogout}>
                 <Avatar className="size-7">
                   <AvatarImage src="/avatar-placeholder.png" alt="Owner" />
                   <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-semibold">
@@ -232,6 +245,8 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
       </SidebarFooter>
 
       <SidebarRail />
+      
+      <ChangePasswordDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
     </Sidebar>
   )
 }

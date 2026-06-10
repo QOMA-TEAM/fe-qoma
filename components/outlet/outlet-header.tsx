@@ -1,7 +1,6 @@
 "use client";
 
-import { Loader2, Settings, Bell } from "lucide-react";
-import { useState } from "react";
+import { Loader2, Bell } from "lucide-react";
 import { usePathname } from "next/navigation";
 import {
     Breadcrumb,
@@ -10,10 +9,6 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { ChangePasswordDialog } from "@/components/settings/change-password-dialog";
-import { useOutletDashboard, useToggleOutletStatus } from "@/hooks/outlet/use-dashboard";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 
 // Mirrors sidebar nav — maps each route to a readable label + section group
 const routeMap: Record<string, { label: string; group: string }> = {
@@ -28,11 +23,6 @@ const routeMap: Record<string, { label: string; group: string }> = {
 };
 
 export function OutletHeader() {
-    const { data: dashboardData, isLoading } = useOutletDashboard();
-    const { mutate: toggleStatus, isPending } = useToggleOutletStatus();
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-
-    const isOpen = dashboardData?.data?.outlet?.status_buka ?? false;
     const pathname = usePathname();
     const route = routeMap[pathname];
 
@@ -66,14 +56,6 @@ export function OutletHeader() {
 
                 {/* Action buttons */}
                 <div className="flex items-center gap-2">
-                    <button
-                        type="button"
-                        onClick={() => setIsSettingsOpen(true)}
-                        className="flex items-center justify-center size-9 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-100 transition-colors cursor-pointer"
-                        aria-label="Settings"
-                    >
-                        <Settings className="size-4" />
-                    </button>
 
                     <button
                         type="button"
@@ -85,25 +67,6 @@ export function OutletHeader() {
                     </button>
                 </div>
             </header>
-
-            <ChangePasswordDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-                <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                        <Label className="text-base font-semibold">Status Outlet</Label>
-                        <p className="text-sm text-gray-500">
-                            {isOpen ? "Outlet saat ini sedang Buka" : "Outlet saat ini sedang Tutup"}
-                        </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <Switch
-                            checked={isOpen}
-                            onCheckedChange={() => toggleStatus()}
-                            aria-label="Toggle outlet status"
-                            className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-red-500"
-                        />
-                    </div>
-                </div>
-            </ChangePasswordDialog>
         </>
     );
 }

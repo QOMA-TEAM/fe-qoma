@@ -1,8 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { Bell, Settings } from "lucide-react";
+import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,7 +10,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { ChangePasswordDialog } from "@/components/settings/change-password-dialog";
 import { HeaderActions } from "@/components/dashboard/header-actions";
 
 interface SuperadminHeader {
@@ -24,7 +22,6 @@ export function SuperadminHeader({
   notificationCount = 3,
 }: SuperadminHeader) {
   const pathname = usePathname();
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const getPageTitle = () => {
     if (pathname === "/superadmin/dashboard") {
@@ -53,11 +50,6 @@ export function SuperadminHeader({
 
       {/* Right: Actions */}
       <HeaderActions />
-
-      <ChangePasswordDialog 
-        open={isSettingsOpen} 
-        onOpenChange={setIsSettingsOpen} 
-      />
     </header>
   );
 }

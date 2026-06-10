@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -13,7 +14,10 @@ import {
   CircleDollarSign,
   CreditCard,
   LogOut,
+  Settings,
 } from "lucide-react";
+
+import { ChangePasswordDialog } from "@/components/settings/change-password-dialog";
 
 import {
   Sidebar,
@@ -61,6 +65,7 @@ export function SuperadminSidebar({
 }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const router = useRouter();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -139,9 +144,17 @@ export function SuperadminSidebar({
         </SidebarGroup>
       </SidebarContent>
 
-      {/* FOOTER: Logout */}
+      {/* FOOTER: Logout & Settings */}
       <SidebarFooter className="p-4">
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild className="hover:bg-slate-100 hover:text-slate-900 cursor-pointer">
+              <button type="button" className="w-full cursor-pointer" onClick={() => setIsSettingsOpen(true)}>
+                <Settings className="size-4" />
+                <span>Setting</span>
+              </button>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
@@ -163,6 +176,11 @@ export function SuperadminSidebar({
       </SidebarFooter>
 
       <SidebarRail />
+      
+      <ChangePasswordDialog 
+        open={isSettingsOpen} 
+        onOpenChange={setIsSettingsOpen} 
+      />
     </Sidebar>
   );
 }
