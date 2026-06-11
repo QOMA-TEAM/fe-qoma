@@ -3,7 +3,8 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { ChevronRight, ShoppingCart } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { ChevronRight, ShoppingCart, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Clock, MapPin } from "lucide-react";
 
@@ -14,6 +15,7 @@ import { CheckoutModal, OrderItem } from "@/components/user/CheckoutModal";
 import { OrderPendingPage } from "@/components/user/OrderPendingModal";
 import { OrderConfirmedModal } from "@/components/user/OrderConfirmedModal";
 import { OrderCompletedModal } from "@/components/user/OrderCompletedModal";
+import { useValidasiMeja } from "@/hooks/public/use-menu";
 
 // ── Types ─────────────────────────────────────────────────────────────
 type AppView =
@@ -159,12 +161,19 @@ function CategoryCard({
 }
 
 // ── Main Page ─────────────────────────────────────────────────────────
-export default function MainPage() {
+// ── Main Page Content ─────────────────────────────────────────────────────────
+function MainPageContent() {
+  const searchParams = useSearchParams();
+  const outletId = searchParams.get("outlet_id");
+  const mejaId = searchParams.get("meja_id");
+
+  const { data: validasiData, isLoading: isValidating, error: validasiError } = useValidasiMeja(outletId, mejaId);
+
   // ── View / Navigation State ──
   const [view, setView] = useState<AppView>("main");
 
   // ── Modal States ──
-  const [showWelcome, setShowWelcome] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(false);
   const [showOutletInfo, setShowOutletInfo] = useState(false);
   const [showCategorySheet, setShowCategorySheet] = useState(false);
   const [activeCategoryName, setActiveCategoryName] = useState("");
@@ -185,6 +194,22 @@ export default function MainPage() {
   const ppn = Math.round(subtotal * PPN_RATE);
   const grandTotal = subtotal + ppn + BIAYA_LAINNYA;
   const cartItemCount = orderItems.reduce((acc, item) => acc + item.qty, 0);
+
+  // ── Dynamic values from Validasi ──
+  const outletName = validasiData?.outlet.nama_outlet || OUTLET_INFO.name;
+  const tableNumber = validasiData?.meja.nomor_meja || TABLE_NUMBER;
+  const dynamicOutletInfo = {
+    ...OUTLET_INFO,
+    name: validasiData?.outlet.nama_outlet || OUTLET_INFO.name,
+    address: validasiData?.outlet.alamat || OUTLET_INFO.address,
+  };
+
+  useEffect(() => {
+    // Show welcome modal once validation succeeds
+    if (validasiData && !isValidating) {
+      setShowWelcome(true);
+    }
+  }, [validasiData, isValidating]);
 
   // ── Handlers: Category & Menu ──
   const handleOpenCategory = (name: string) => {
@@ -285,7 +310,7 @@ export default function MainPage() {
         <CheckoutModal
           orderItems={orderItems}
           recommendedItems={MOCK_MENU}
-          tableNumber={TABLE_NUMBER}
+          tableNumber={tableNumber}
           ppn={ppn}
           biayaLainnya={BIAYA_LAINNYA}
           onBack={() => setView("main")}
@@ -314,7 +339,7 @@ export default function MainPage() {
   if (view === "order-pending") {
     return (
       <OrderPendingPage
-        tableNumber={TABLE_NUMBER}
+        tableNumber={tableNumber}
         orderId={orderId}
         onCancel={handleCancelOrder}
         onConfirmed={handleOrderConfirmed}
@@ -326,7 +351,7 @@ export default function MainPage() {
     return (
       <OrderConfirmedModal
         open={true}
-        tableNumber={TABLE_NUMBER}
+        tableNumber={tableNumber}
         orderId={orderId}
         onDone={handleConfirmedDone}
       />
@@ -336,7 +361,7 @@ export default function MainPage() {
   if (view === "order-completed") {
     return (
       <OrderCompletedModal
-        tableNumber={TABLE_NUMBER}
+        tableNumber={tableNumber}
         orderId={orderId}
         customerName={customerName}
         phoneNumber={phoneNumber}
@@ -349,6 +374,38 @@ export default function MainPage() {
     );
   }
 
+  // ── Render: Loading or Error ──────────────────────────────────────
+  if (!outletId || !mejaId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 text-center px-4">
+        <div>
+          <h2 className="text-xl font-bold text-gray-800 mb-2">QR Code Tidak Valid</h2>
+          <p className="text-sm text-gray-500">Pastikan Anda men-scan QR code dari meja yang benar.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isValidating) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-center px-4 gap-4">
+        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+        <p className="text-sm text-gray-500 font-medium">Memvalidasi meja Anda...</p>
+      </div>
+    );
+  }
+
+  if (validasiError || !validasiData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 text-center px-4">
+        <div>
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Gagal Memvalidasi Meja</h2>
+          <p className="text-sm text-gray-500">{(validasiError as any)?.response?.data?.message || "Terjadi kesalahan. Silakan coba scan ulang."}</p>
+        </div>
+      </div>
+    );
+  }
+
   // ── Render: Main View ─────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gray-100">
@@ -358,7 +415,7 @@ export default function MainPage() {
       <OutletInfoSheet
         open={showOutletInfo}
         onClose={() => setShowOutletInfo(false)}
-        outlet={OUTLET_INFO}
+        outlet={dynamicOutletInfo}
       />
 
       {/* Removed CategoryMenuSheet */}
@@ -393,7 +450,7 @@ export default function MainPage() {
               </div>
               <div>
                 <p className="font-bold text-gray-900 text-sm leading-none">
-                  Pizza Mizna
+                  {outletName}
                 </p>
                 <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
                   <Clock className="w-3 h-3" />
@@ -404,7 +461,7 @@ export default function MainPage() {
 
             {/* Table Number (hidden on xs) */}
             <div className="hidden sm:block bg-orange-100 text-orange-600 text-sm font-medium px-4 py-1.5 rounded-full">
-              Table Number : {TABLE_NUMBER}
+              Table Number : {tableNumber}
             </div>
 
             {/* Right actions */}
@@ -437,7 +494,7 @@ export default function MainPage() {
 
           {/* Table Number mobile */}
           <div className="sm:hidden bg-orange-100 text-orange-600 text-center text-xs font-medium py-1.5 rounded-xl mb-2">
-            Table Number : {TABLE_NUMBER}
+            Table Number : {tableNumber}
           </div>
         </div>
       </header>
@@ -457,7 +514,7 @@ export default function MainPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/50" />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4">
           <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold drop-shadow-lg">
-            Pizza Mizna
+            {outletName}
           </h1>
           <p className="mt-2 text-sm sm:text-base text-white/80">
             The OG Pizza of our cafe — Semarang
@@ -560,5 +617,19 @@ export default function MainPage() {
         </div>
       )}
     </div>
+  );
+}
+
+import { Suspense } from "react";
+
+export default function MainPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+      </div>
+    }>
+      <MainPageContent />
+    </Suspense>
   );
 }
