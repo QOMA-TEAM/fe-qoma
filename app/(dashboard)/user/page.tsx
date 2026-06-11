@@ -16,6 +16,8 @@ import { OrderPendingPage } from "@/components/user/OrderPendingModal";
 import { OrderConfirmedModal } from "@/components/user/OrderConfirmedModal";
 import { OrderCompletedModal } from "@/components/user/OrderCompletedModal";
 import { useValidasiMeja, usePublicMenus } from "@/hooks/public/use-menu";
+import { useSubmitOrder } from "@/hooks/public/use-order";
+import { OrderPayload } from "@/services/public/order";
 import type { PublicMenuItem, KategoriInfo } from "@/types/public/menu";
 
 // ── Types ─────────────────────────────────────────────────────────────
@@ -198,6 +200,7 @@ function MainPageContent() {
 
   const { data: validasiData, isLoading: isValidating, error: validasiError } = useValidasiMeja(outletId, mejaId);
   const { data: menuResponse, isLoading: isMenuLoading } = usePublicMenus(validasiData?.outlet.id || null);
+  const submitOrder = useSubmitOrder();
 
   // ── View / Navigation State ──
   const [view, setView] = useState<AppView>("main");
@@ -299,12 +302,33 @@ function MainPageContent() {
   };
 
   const handlePayment = (name: string, phone: string) => {
-    const id = generateOrderId();
-    setOrderId(id);
-    setCustomerName(name);
-    setPhoneNumber(phone);
-    setPaidAt(formatDate(new Date()));
-    setView("order-pending");
+    if (!validasiData?.outlet.id || !validasiData?.meja.id) return;
+
+    const payload: OrderPayload = {
+      outlet_id: validasiData.outlet.id,
+      meja_id: validasiData.meja.id,
+      nama_pelanggan: name,
+      no_telp: phone,
+      tipe_pesanan: "dine_in",
+      items: orderItems.map((item) => ({
+        menu_id: item.menu.id,
+        qty: item.qty,
+        addons: item.selectedToppings.map((addonId) => ({
+          addon_id: addonId,
+          qty: 1, // Currently UI only supports 1 qty per addon checkbox
+        })),
+      })),
+    };
+
+    submitOrder.mutate(payload, {
+      onSuccess: (response) => {
+        setOrderId(response.data.pesanan_id);
+        setCustomerName(response.data.nama_pelanggan);
+        setPhoneNumber(response.data.no_telp);
+        setPaidAt(""); // not paid yet
+        setView("order-pending");
+      },
+    });
   };
 
   // Called when cashier confirms the order (from OrderPendingPage)
@@ -348,6 +372,7 @@ function MainPageContent() {
           onEditItem={handleEditItem}
           onAddRecommended={(menu) => setSelectedMenu(menu)}
           onPayment={handlePayment}
+          isLoading={submitOrder.isPending}
         />
         {/* MenuDetailModal for editing or adding recommended items */}
         <MenuDetailModal

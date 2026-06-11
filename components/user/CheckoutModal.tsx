@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ArrowLeft, Plus, Edit2 } from "lucide-react";
+import { ArrowLeft, Plus, Edit2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,6 +30,7 @@ interface CheckoutModalProps {
   onEditItem: (item: OrderItem) => void;
   onAddRecommended: (menu: MenuItem) => void;
   onPayment: (customerName: string, phoneNumber: string) => void;
+  isLoading?: boolean;
 }
 
 export function CheckoutModal({
@@ -43,6 +44,7 @@ export function CheckoutModal({
   onEditItem,
   onAddRecommended,
   onPayment,
+  isLoading = false,
 }: CheckoutModalProps) {
   const [customerName, setCustomerName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -279,9 +281,13 @@ export function CheckoutModal({
         <Button
           className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl h-14 text-base"
           onClick={handlePayment}
-          disabled={orderItems.length === 0}
+          disabled={orderItems.length === 0 || isLoading}
         >
-          Payment
+          {isLoading ? (
+            <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+          ) : (
+            "Payment"
+          )}
         </Button>
 
         <div className="h-4" />
