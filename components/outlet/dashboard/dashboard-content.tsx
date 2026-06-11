@@ -51,6 +51,22 @@ export function OutletDashboardContent() {
     };
   }) || [];
 
+  // Map alerts to notification format
+  const flattenedAlerts = [
+    ...(alerts?.sudah_expired?.map((a: any) => ({ ...a, type: 'sudah_expired' })) || []),
+    ...(alerts?.mendekati_expired?.map((a: any) => ({ ...a, type: 'mendekati_expired' })) || []),
+    ...(alerts?.stok_menipis?.map((a: any) => ({ ...a, type: 'stok_menipis' })) || [])
+  ];
+
+  const extraNotifications = flattenedAlerts.map((alert, idx) => ({
+    id: `alert-${idx}`,
+    title: alert.type === 'stok_menipis' ? 'Peringatan Stok' : 'Peringatan Kedaluwarsa',
+    message: alert.pesan,
+    is_read: false,
+    created_at: new Date().toISOString(),
+    type: alert.type,
+  }));
+
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
       {/* Top Header Bar */}
@@ -68,14 +84,7 @@ export function OutletDashboardContent() {
             <Settings className="size-4" />
           </button>
 
-          <button
-            type="button"
-            className="relative flex items-center justify-center size-9 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-100 transition-colors cursor-pointer"
-            aria-label="Notifications"
-          >
-            <Bell className="size-4" />
-            <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-orange-500 ring-2 ring-white" />
-          </button>
+          <HeaderActions extraNotifications={extraNotifications} />
         </div>
       </header>
 
