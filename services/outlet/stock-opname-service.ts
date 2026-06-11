@@ -24,6 +24,7 @@ export interface StockOpnameSession {
   total_item?: number;
   total_draft?: number;
   total_final?: number;
+  total_kerugian?: number;
   items?: StockOpname[];
 }
 

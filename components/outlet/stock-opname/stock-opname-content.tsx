@@ -274,6 +274,7 @@ export function StockOpnameContent() {
                   <TableHead className="text-gray-600 font-semibold text-sm py-3 text-center">Waktu Penutupan</TableHead>
                   <TableHead className="text-gray-600 font-semibold text-sm py-3 text-center">Item Draft</TableHead>
                   <TableHead className="text-gray-600 font-semibold text-sm py-3 text-center">Item Final</TableHead>
+                  <TableHead className="text-gray-600 font-semibold text-sm py-3 text-center">Total Kerugian</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -311,12 +312,15 @@ export function StockOpnameContent() {
                       <TableCell className="text-gray-600 text-sm font-semibold text-center py-3">
                         {row.total_final || 0}
                       </TableCell>
+                      <TableCell className="text-red-600 text-sm font-semibold text-center py-3">
+                        Rp {new Intl.NumberFormat('id-ID').format(row.total_kerugian || 0)}
+                      </TableCell>
                     </TableRow>
                   );
                 })}
                 {!isLoadingHistory && historyList.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-gray-400 py-12 text-sm">
+                    <TableCell colSpan={7} className="text-center text-gray-400 py-12 text-sm">
                       Belum ada histori sesi stock opname.
                     </TableCell>
                   </TableRow>
