@@ -63,6 +63,7 @@ const SECTIONS = [
 ];
 
 // ── Menu Card Component ───────────────────────────────────────────────
+
 function MenuCard({
   item,
   onClick,
@@ -72,27 +73,42 @@ function MenuCard({
 }) {
   return (
     <div
-      className="group bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm 
+      className="group bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm 
                  hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
       onClick={() => onClick(item)}
     >
-      <div className="relative w-full aspect-[4/3]">
+      {/* 
+        Gambar:
+        - Mobile  : aspect-square (1:1) → lebih compact
+        - md+     : aspect-[4/3]        → lebih lega di desktop
+      */}
+      <div className="relative w-full aspect-square md:aspect-[4/3]">
         <Image src={item.image} alt={item.name} fill className="object-cover" />
       </div>
-      <div className="p-3">
-        <p className="font-semibold text-gray-800 text-sm truncate">
+
+      {/* 
+        Padding:
+        - Mobile  : p-2 (lebih rapat)
+        - md+     : p-3
+      */}
+      <div className="p-2 md:p-3">
+        <p className="font-semibold text-gray-800 text-xs md:text-sm truncate leading-snug">
           {item.name}
         </p>
-        <p className="text-gray-400 text-xs truncate mt-0.5">
+
+        {/* Sembunyikan deskripsi di mobile, tampilkan di md+ */}
+        <p className="hidden md:block text-gray-400 text-xs truncate mt-0.5">
           {item.description}
         </p>
-        <p className="text-gray-700 text-sm font-medium mt-1">
+
+        <p className="text-gray-700 text-xs md:text-sm font-medium mt-1">
           Rp. {item.price.toLocaleString("id-ID")}
         </p>
+
         <Button
           variant="outline"
           size="sm"
-          className="mt-2 w-full text-xs h-8 border-orange-300 text-orange-500 
+          className="mt-1.5 w-full text-xs h-7 md:h-8 border-orange-300 text-orange-500 
                      hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-colors"
           onClick={(e) => {
             e.stopPropagation();
@@ -287,13 +303,7 @@ export default function MainPage() {
               </button>
             </div>
 
-            {/* Responsive Grid:
-                - Mobile  (< sm) : 2 cols, horizontal scroll
-                - Tablet  (sm)   : 3 cols
-                - Desktop (md+)  : 4 cols
-                - Wide    (lg+)  : 5 cols               */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-              {/* Show 2 on mobile, 5 on desktop — slice accordingly */}
+            <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
               {Array.from({ length: 5 }).map((_, idx) => (
                 <MenuCard
                   key={`${section}-${idx}`}
