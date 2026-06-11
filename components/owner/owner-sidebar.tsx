@@ -88,6 +88,13 @@ const ownerNav = {
       icon: CircleDollarSign,
     },
   ],
+  laporan: [
+    {
+      title: "Stock Opname",
+      url: "/owner/stock-opname",
+      icon: ClipboardCheck,
+    },
+  ],
 }
 
 export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -199,6 +206,29 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
           </SidebarGroupLabel>
           <SidebarMenu>
             {ownerNav.keuangan.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === item.url}
+                  className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
+                >
+                  <Link href={item.url}>
+                    <item.icon className="size-4" />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+
+        {/* LAPORAN */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-muted-foreground/70 uppercase">
+            Laporan
+          </SidebarGroupLabel>
+          <SidebarMenu>
+            {ownerNav.laporan.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   asChild
