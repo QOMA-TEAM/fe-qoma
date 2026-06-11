@@ -90,6 +90,11 @@ const ownerNav = {
   ],
   laporan: [
     {
+      title: "Activity Log",
+      url: "/owner/activity-log",
+      icon: ClipboardCheck,
+    },
+    {
       title: "Stock Opname",
       url: "/owner/stock-opname",
       icon: ClipboardCheck,
