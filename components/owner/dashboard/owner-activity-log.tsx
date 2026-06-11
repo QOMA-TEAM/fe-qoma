@@ -33,7 +33,7 @@ export function OwnerActivityLog() {
                   <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-white border-[3px] border-[#F69C35]" />
                   
                   <div className="flex flex-col">
-                    <span className="text-[#1E293B] font-bold text-sm leading-tight mb-1">{item.aktivitas}</span>
+                    <span className="text-[#1E293B] font-bold text-sm leading-tight mb-1 capitalize">{item.aktivitas.replace(/_/g, ' ')}</span>
                     <span className="text-[#44A5E6] text-xs font-semibold">{timeString}</span>
                   </div>
                 </div>
