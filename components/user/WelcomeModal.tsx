@@ -1,7 +1,8 @@
 // components/modals/WelcomeModal.tsx
 "use client";
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, Smartphone, UtensilsCrossed } from "lucide-react";
 
@@ -31,7 +32,10 @@ const steps = [
 export function WelcomeModal({ open, onClose }: WelcomeModalProps) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm w-full bg-orange-500 border-none p-6 rounded-2xl">
+      <DialogContent className="max-w-sm w-full bg-orange-500 border-none p-6 rounded-2xl" showCloseButton={false}>
+        <VisuallyHidden>
+          <DialogTitle>Welcome Message</DialogTitle>
+        </VisuallyHidden>
         <button
           onClick={onClose}
           className="absolute top-3 right-3 rounded-full bg-white w-8 h-8 flex items-center justify-center text-orange-500 font-bold text-lg hover:bg-orange-100 transition"

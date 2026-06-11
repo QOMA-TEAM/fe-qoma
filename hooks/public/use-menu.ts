@@ -9,3 +9,11 @@ export const useValidasiMeja = (outletId: string | null, mejaId: string | null) 
     retry: false, // Don't retry if it fails (e.g., outlet closed or invalid table)
   })
 }
+
+export const usePublicMenus = (outletId: string | null) => {
+  return useQuery({
+    queryKey: ["public-menus", outletId],
+    queryFn: () => publicMenuService.getPublicMenus(outletId!),
+    enabled: !!outletId,
+  })
+}

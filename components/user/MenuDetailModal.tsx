@@ -2,7 +2,9 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -52,6 +54,13 @@ export function MenuDetailModal({
   const [selectedToppings, setSelectedToppings] = useState<string[]>([]);
   const [specialOption, setSpecialOption] = useState<string | null>(null);
   const [note, setNote] = useState("");
+  const [imgSrc, setImgSrc] = useState(menu?.image || "/logoqoma.svg");
+
+  useEffect(() => {
+    if (menu) {
+      setImgSrc(menu.image || "/logoqoma.svg");
+    }
+  }, [menu]);
 
   if (!menu) return null;
 
@@ -91,14 +100,18 @@ export function MenuDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg w-full p-0 overflow-hidden rounded-2xl">
+      <DialogContent className="max-w-lg w-full p-0 overflow-hidden rounded-2xl" showCloseButton={false}>
+        <VisuallyHidden>
+          <DialogTitle>{menu.name}</DialogTitle>
+        </VisuallyHidden>
         {/* Hero Image */}
-        <div className="relative w-full h-56">
+        <div className="relative w-full h-56 bg-gray-50 flex items-center justify-center">
           <Image
-            src={menu.image}
+            src={imgSrc}
             alt={menu.name}
             fill
-            className="object-cover"
+            className={imgSrc === "/logoqoma.svg" ? "object-contain p-8 opacity-50" : "object-cover"}
+            onError={() => setImgSrc("/logoqoma.svg")}
           />
           <button
             onClick={onClose}

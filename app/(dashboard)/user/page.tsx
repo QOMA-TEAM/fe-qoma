@@ -15,7 +15,8 @@ import { CheckoutModal, OrderItem } from "@/components/user/CheckoutModal";
 import { OrderPendingPage } from "@/components/user/OrderPendingModal";
 import { OrderConfirmedModal } from "@/components/user/OrderConfirmedModal";
 import { OrderCompletedModal } from "@/components/user/OrderCompletedModal";
-import { useValidasiMeja } from "@/hooks/public/use-menu";
+import { useValidasiMeja, usePublicMenus } from "@/hooks/public/use-menu";
+import type { PublicMenuItem, KategoriInfo } from "@/types/public/menu";
 
 // ── Types ─────────────────────────────────────────────────────────────
 type AppView =
@@ -26,7 +27,7 @@ type AppView =
   | "order-completed"
   | "category";
 
-// ── Mock Data ────────────────────────────────────────────────────────
+// ── Mock Data (Fallback) ────────────────────────────────────────────────────────
 const MOCK_MENU: MenuItem[] = [
   {
     id: "pizza-mizna",
@@ -64,14 +65,6 @@ const OUTLET_INFO = {
   ],
 };
 
-const CATEGORIES = ["Olahan Western", "Minuman", "Dessert", "Snack"];
-const SECTIONS = [
-  "New Menu",
-  "Foods For You",
-  "Drinks For You",
-  "Best Of The Best",
-];
-
 const PPN_RATE = 0.1; // 10%
 const BIAYA_LAINNYA = 2000;
 const TABLE_NUMBER = "08";
@@ -89,6 +82,29 @@ function formatDate(date: Date): string {
   });
 }
 
+function getImageUrl(path: string | null) {
+  if (!path) return "/logoqoma.svg"; // Fallback to a valid public image
+  if (path.startsWith("http")) return path;
+  
+  // Extract base storage URL from API URL automatically
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+  const storageBaseUrl = apiUrl.replace(/\/api\/?$/, "/storage/");
+  
+  return `${storageBaseUrl}${path}`;
+}
+
+function mapToMenuItem(p: PublicMenuItem): MenuItem {
+  return {
+    id: p.id,
+    name: p.nama,
+    price: p.harga,
+    description: p.keterangan || "",
+    image: getImageUrl(p.gambar),
+    addOnToppings: [], // TODO: Phase 3
+    specialForYou: [],
+  };
+}
+
 // ── Menu Card Component ───────────────────────────────────────────────
 function MenuCard({
   item,
@@ -97,14 +113,26 @@ function MenuCard({
   item: MenuItem;
   onClick: (item: MenuItem) => void;
 }) {
+  const [imgSrc, setImgSrc] = useState(item.image);
+
+  useEffect(() => {
+    setImgSrc(item.image);
+  }, [item.image]);
+
   return (
     <div
       className="group bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm 
                  hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
       onClick={() => onClick(item)}
     >
-      <div className="relative w-full aspect-square md:aspect-[4/3]">
-        <Image src={item.image} alt={item.name} fill className="object-cover" />
+      <div className="relative w-full aspect-square md:aspect-[4/3] bg-gray-50 flex items-center justify-center">
+        <Image 
+          src={imgSrc} 
+          alt={item.name} 
+          fill 
+          className={imgSrc === "/logoqoma.svg" ? "object-contain p-4 opacity-50" : "object-cover"} 
+          onError={() => setImgSrc("/logoqoma.svg")}
+        />
       </div>
       <div className="p-2 md:p-3">
         <p className="font-semibold text-gray-800 text-xs md:text-sm truncate leading-snug">
@@ -143,16 +171,17 @@ function CategoryCard({
 }) {
   return (
     <div
-      className="relative rounded-2xl overflow-hidden cursor-pointer group h-36 md:h-44"
+      className="relative rounded-2xl overflow-hidden cursor-pointer group h-36 md:h-44 bg-white border border-gray-100 flex items-center justify-center p-4"
       onClick={() => onClick(name)}
     >
       <Image
-        src="/images/pizza-mizna.jpg"
+        src="/logoqoma.svg"
         alt={name}
-        fill
-        className="object-cover group-hover:scale-105 transition-transform duration-300"
+        width={64}
+        height={64}
+        className="opacity-50 group-hover:scale-110 transition-transform duration-300"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
       <span className="absolute bottom-3 left-4 text-white font-bold text-sm uppercase tracking-wide">
         {name}
       </span>
@@ -168,6 +197,7 @@ function MainPageContent() {
   const mejaId = searchParams.get("meja_id");
 
   const { data: validasiData, isLoading: isValidating, error: validasiError } = useValidasiMeja(outletId, mejaId);
+  const { data: menuResponse, isLoading: isMenuLoading } = usePublicMenus(validasiData?.outlet.id || null);
 
   // ── View / Navigation State ──
   const [view, setView] = useState<AppView>("main");
@@ -524,46 +554,59 @@ function MainPageContent() {
 
       {/* ── Main Content ── */}
       <main className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12 pb-32">
-        {/* ── Menu Sections ── */}
-        {SECTIONS.map((section) => (
-          <section key={section}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-800">
-                {section}
-              </h2>
-              <button
-                className="flex items-center gap-1 text-orange-500 text-sm font-medium hover:underline"
-                onClick={() => handleOpenCategory(section)}
-              >
-                Lihat semua
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
-              {Array.from({ length: 5 }).map((_, idx) => (
-                <MenuCard
-                  key={`${section}-${idx}`}
-                  item={MOCK_MENU[0]}
-                  onClick={setSelectedMenu}
-                />
-              ))}
-            </div>
-          </section>
-        ))}
+        {isMenuLoading ? (
+          <div className="flex justify-center py-10">
+            <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+          </div>
+        ) : (
+          <>
+            {/* ── Menu Sections ── */}
+            {menuResponse?.kategoris.map((kat: KategoriInfo) => {
+              const group = menuResponse?.menu_per_kategori.find((g) => g.kategori === kat.nama);
+              if (!group || group.items.length === 0) return null;
 
-        {/* ── Category List ── */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-800">
-              Category List
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            {CATEGORIES.map((cat) => (
-              <CategoryCard key={cat} name={cat} onClick={handleOpenCategory} />
-            ))}
-          </div>
-        </section>
+              return (
+                <section key={kat.id}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-800">
+                      {kat.nama}
+                    </h2>
+                    <button
+                      className="flex items-center gap-1 text-orange-500 text-sm font-medium hover:underline"
+                      onClick={() => handleOpenCategory(kat.nama)}
+                    >
+                      Lihat semua
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+                    {group.items.slice(0, 5).map((item) => (
+                      <MenuCard
+                        key={item.id}
+                        item={mapToMenuItem(item)}
+                        onClick={setSelectedMenu}
+                      />
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+
+            {/* ── Category List ── */}
+            <section>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-800">
+                  Category List
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                {menuResponse?.kategoris.map((cat: KategoriInfo) => (
+                  <CategoryCard key={cat.id} name={cat.nama} onClick={handleOpenCategory} />
+                ))}
+              </div>
+            </section>
+          </>
+        )}
       </main>
       </>
       )}
@@ -584,13 +627,15 @@ function MainPageContent() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-            {Array.from({ length: 10 }).map((_, idx) => (
-              <MenuCard
-                key={`${activeCategoryName}-${idx}`}
-                item={MOCK_MENU[0]}
-                onClick={setSelectedMenu}
-              />
-            ))}
+            {menuResponse?.menu_per_kategori
+              .find((g) => g.kategori === activeCategoryName)
+              ?.items.map((item) => (
+                <MenuCard
+                  key={item.id}
+                  item={mapToMenuItem(item)}
+                  onClick={setSelectedMenu}
+                />
+              ))}
           </div>
         </main>
       )}
