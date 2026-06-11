@@ -1,18 +1,28 @@
-// app/page.tsx  (atau pages/index.tsx)
+// app/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { ChevronRight, ShoppingCart, ChevronLeft } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { ChevronRight, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Clock } from "lucide-react";
-import { MapPin } from "lucide-react";
+import { Clock, MapPin } from "lucide-react";
 
 import { WelcomeModal } from "@/components/user/WelcomeModal";
 import { MenuDetailModal, MenuItem } from "@/components/user/MenuDetailModal";
 import { OutletInfoSheet } from "@/components/user/OutletInfoSheet";
 import { CategoryMenuSheet } from "@/components/user/CategoryMenuSheet";
+import { CheckoutModal, OrderItem } from "@/components/user/CheckoutModal";
+import { OrderPendingPage } from "@/components/user/OrderPendingModal";
+import { OrderConfirmedModal } from "@/components/user/OrderConfirmed";
+import { OrderCompletedModal } from "@/components/user/OrderCompleted";
+
+// ── Types ─────────────────────────────────────────────────────────────
+type AppView =
+  | "main"
+  | "checkout"
+  | "order-pending"
+  | "order-confirmed"
+  | "order-completed";
 
 // ── Mock Data ────────────────────────────────────────────────────────
 const MOCK_MENU: MenuItem[] = [
@@ -34,7 +44,6 @@ const MOCK_MENU: MenuItem[] = [
       { id: "s2", name: "Extra mayo", price: 3000 },
     ],
   },
-  // tambahkan menu lain di sini...
 ];
 
 const OUTLET_INFO = {
@@ -54,7 +63,6 @@ const OUTLET_INFO = {
 };
 
 const CATEGORIES = ["Olahan Western", "Minuman", "Dessert", "Snack"];
-
 const SECTIONS = [
   "New Menu",
   "Foods For You",
@@ -62,8 +70,24 @@ const SECTIONS = [
   "Best Of The Best",
 ];
 
-// ── Menu Card Component ───────────────────────────────────────────────
+const PPN_RATE = 0.1; // 10%
+const BIAYA_LAINNYA = 2000;
+const TABLE_NUMBER = "08";
 
+// ── Helpers ──────────────────────────────────────────────────────────
+function generateOrderId(): string {
+  return "ORD-" + Date.now().toString(36).toUpperCase();
+}
+
+function formatDate(date: Date): string {
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+// ── Menu Card Component ───────────────────────────────────────────────
 function MenuCard({
   item,
   onClick,
@@ -77,34 +101,19 @@ function MenuCard({
                  hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
       onClick={() => onClick(item)}
     >
-      {/* 
-        Gambar:
-        - Mobile  : aspect-square (1:1) → lebih compact
-        - md+     : aspect-[4/3]        → lebih lega di desktop
-      */}
       <div className="relative w-full aspect-square md:aspect-[4/3]">
         <Image src={item.image} alt={item.name} fill className="object-cover" />
       </div>
-
-      {/* 
-        Padding:
-        - Mobile  : p-2 (lebih rapat)
-        - md+     : p-3
-      */}
       <div className="p-2 md:p-3">
         <p className="font-semibold text-gray-800 text-xs md:text-sm truncate leading-snug">
           {item.name}
         </p>
-
-        {/* Sembunyikan deskripsi di mobile, tampilkan di md+ */}
         <p className="hidden md:block text-gray-400 text-xs truncate mt-0.5">
           {item.description}
         </p>
-
         <p className="text-gray-700 text-xs md:text-sm font-medium mt-1">
           Rp. {item.price.toLocaleString("id-ID")}
         </p>
-
         <Button
           variant="outline"
           size="sm"
@@ -151,55 +160,234 @@ function CategoryCard({
 
 // ── Main Page ─────────────────────────────────────────────────────────
 export default function MainPage() {
+  // ── View / Navigation State ──
+  const [view, setView] = useState<AppView>("main");
+
+  // ── Modal States ──
   const [showWelcome, setShowWelcome] = useState(true);
   const [showOutletInfo, setShowOutletInfo] = useState(false);
   const [showCategorySheet, setShowCategorySheet] = useState(false);
   const [activeCategoryName, setActiveCategoryName] = useState("");
   const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(null);
-  const [cartTotal, setCartTotal] = useState(0);
 
+  // ── Order State ──
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+  const [editingItem, setEditingItem] = useState<OrderItem | null>(null);
+
+  // ── Completed Order Info ──
+  const [orderId, setOrderId] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [paidAt, setPaidAt] = useState("");
+
+  // ── Derived values ──
+  const subtotal = orderItems.reduce((acc, item) => acc + item.totalPrice, 0);
+  const ppn = Math.round(subtotal * PPN_RATE);
+  const grandTotal = subtotal + ppn + BIAYA_LAINNYA;
+  const cartItemCount = orderItems.reduce((acc, item) => acc + item.qty, 0);
+
+  // ── Handlers: Category & Menu ──
   const handleOpenCategory = (name: string) => {
     setActiveCategoryName(name);
     setShowCategorySheet(true);
   };
 
-  const handleAddOrder = (item: {
+  // ── Handlers: Add / Edit Order Item ──
+  const handleAddOrderItem = (item: {
     menu: MenuItem;
+    selectedToppings: string[];
+    specialOption: string | null;
+    note: string;
+    qty: number;
     totalPrice: number;
-    [key: string]: any;
   }) => {
-    setCartTotal((prev) => prev + item.totalPrice);
+    if (editingItem) {
+      // Replace existing item
+      setOrderItems((prev) =>
+        prev.map((o) =>
+          o.id === editingItem.id
+            ? {
+                ...editingItem,
+                selectedToppings: item.selectedToppings,
+                specialOption: item.specialOption,
+                note: item.note,
+                qty: item.qty,
+                totalPrice: item.totalPrice,
+              }
+            : o,
+        ),
+      );
+      setEditingItem(null);
+    } else {
+      // Add new item
+      const newItem: OrderItem = {
+        id: `${item.menu.id}-${Date.now()}`,
+        menu: item.menu,
+        selectedToppings: item.selectedToppings,
+        specialOption: item.specialOption,
+        note: item.note,
+        qty: item.qty,
+        totalPrice: item.totalPrice,
+      };
+      setOrderItems((prev) => [...prev, newItem]);
+    }
   };
 
+  const handleEditItem = (item: OrderItem) => {
+    setEditingItem(item);
+    setSelectedMenu(item.menu);
+  };
+
+  // ── Handlers: Checkout Flow ──
+  const handleCheckout = () => {
+    setView("checkout");
+  };
+
+  const handlePayment = (name: string, phone: string) => {
+    const id = generateOrderId();
+    setOrderId(id);
+    setCustomerName(name);
+    setPhoneNumber(phone);
+    setPaidAt(formatDate(new Date()));
+    setView("order-pending");
+  };
+
+  // Called when cashier confirms the order (from OrderPendingPage)
+  const handleOrderConfirmed = () => {
+    setView("order-confirmed");
+  };
+
+  // Called after OrderConfirmedModal auto-redirects (after ~15s)
+  const handleConfirmedDone = () => {
+    setView("order-completed");
+  };
+
+  // Reset everything for a new order
+  const handleNewOrder = () => {
+    setOrderItems([]);
+    setOrderId("");
+    setCustomerName("");
+    setPhoneNumber("");
+    setPaidAt("");
+    setEditingItem(null);
+    setView("main");
+  };
+
+  // ── Cancel order from pending ──
+  const handleCancelOrder = () => {
+    setView("checkout");
+  };
+
+  // ── Render: Non-main views (full-screen replacements) ──
+  if (view === "checkout") {
+    return (
+      <>
+        <CheckoutModal
+          orderItems={orderItems}
+          recommendedItems={MOCK_MENU}
+          tableNumber={TABLE_NUMBER}
+          ppn={ppn}
+          biayaLainnya={BIAYA_LAINNYA}
+          onBack={() => setView("main")}
+          onAddItem={() => setView("main")}
+          onEditItem={handleEditItem}
+          onAddRecommended={(menu) => setSelectedMenu(menu)}
+          onPayment={handlePayment}
+        />
+        {/* MenuDetailModal for editing or adding recommended items */}
+        <MenuDetailModal
+          open={!!selectedMenu}
+          onClose={() => {
+            setSelectedMenu(null);
+            setEditingItem(null);
+          }}
+          menu={selectedMenu}
+          onAddOrder={(item) => {
+            handleAddOrderItem(item);
+            setSelectedMenu(null);
+          }}
+        />
+      </>
+    );
+  }
+
+  if (view === "order-pending") {
+    return (
+      <OrderPendingPage
+        tableNumber={TABLE_NUMBER}
+        orderId={orderId}
+        onCancel={handleCancelOrder}
+        onConfirmed={handleOrderConfirmed}
+      />
+    );
+  }
+
+  if (view === "order-confirmed") {
+    return (
+      <OrderConfirmedModal
+        open={true}
+        tableNumber={TABLE_NUMBER}
+        orderId={orderId}
+        onDone={handleConfirmedDone}
+      />
+    );
+  }
+
+  if (view === "order-completed") {
+    return (
+      <OrderCompletedModal
+        tableNumber={TABLE_NUMBER}
+        orderId={orderId}
+        customerName={customerName}
+        phoneNumber={phoneNumber}
+        paidAt={paidAt}
+        orderItems={orderItems}
+        ppn={ppn}
+        biayaLainnya={BIAYA_LAINNYA}
+        onNewOrder={handleNewOrder}
+      />
+    );
+  }
+
+  // ── Render: Main View ─────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gray-100">
       {/* ── Modals ── */}
       <WelcomeModal open={showWelcome} onClose={() => setShowWelcome(false)} />
+
       <OutletInfoSheet
         open={showOutletInfo}
         onClose={() => setShowOutletInfo(false)}
         outlet={OUTLET_INFO}
       />
+
       <CategoryMenuSheet
         open={showCategorySheet}
         onClose={() => setShowCategorySheet(false)}
         categoryName={activeCategoryName}
         items={MOCK_MENU}
-        totalOrderPrice={cartTotal}
+        totalOrderPrice={subtotal}
         onSelectMenu={(menu) => {
           setShowCategorySheet(false);
           setSelectedMenu(menu);
         }}
         onAddOrder={() => setShowCategorySheet(false)}
       />
+
       <MenuDetailModal
         open={!!selectedMenu}
-        onClose={() => setSelectedMenu(null)}
+        onClose={() => {
+          setSelectedMenu(null);
+          setEditingItem(null);
+        }}
         menu={selectedMenu}
-        onAddOrder={handleAddOrder}
+        onAddOrder={(item) => {
+          handleAddOrderItem(item);
+          setSelectedMenu(null);
+        }}
       />
 
-      {/* ── Sticky Header (Desktop) ── */}
+      {/* ── Sticky Header ── */}
       <header className="sticky top-0 z-40 bg-white border-b shadow-sm">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -227,7 +415,7 @@ export default function MainPage() {
 
             {/* Table Number (hidden on xs) */}
             <div className="hidden sm:block bg-orange-100 text-orange-600 text-sm font-medium px-4 py-1.5 rounded-full">
-              Table Number : 08
+              Table Number : {TABLE_NUMBER}
             </div>
 
             {/* Right actions */}
@@ -246,11 +434,12 @@ export default function MainPage() {
                 variant="outline"
                 size="icon"
                 className="relative border-orange-200 hover:bg-orange-50"
+                onClick={cartItemCount > 0 ? handleCheckout : undefined}
               >
                 <ShoppingCart className="w-5 h-5 text-orange-500" />
-                {cartTotal > 0 && (
+                {cartItemCount > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 bg-orange-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                    !
+                    {cartItemCount}
                   </span>
                 )}
               </Button>
@@ -259,7 +448,7 @@ export default function MainPage() {
 
           {/* Table Number mobile */}
           <div className="sm:hidden bg-orange-100 text-orange-600 text-center text-xs font-medium py-1.5 rounded-xl mb-2">
-            Table Number : 08
+            Table Number : {TABLE_NUMBER}
           </div>
         </div>
       </header>
@@ -285,11 +474,10 @@ export default function MainPage() {
       </div>
 
       {/* ── Main Content ── */}
-      <main className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+      <main className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12 pb-32">
         {/* ── Menu Sections ── */}
         {SECTIONS.map((section) => (
           <section key={section}>
-            {/* Section Header */}
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg sm:text-xl font-bold text-gray-800">
                 {section}
@@ -302,7 +490,6 @@ export default function MainPage() {
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
-
             <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
               {Array.from({ length: 5 }).map((_, idx) => (
                 <MenuCard
@@ -322,11 +509,6 @@ export default function MainPage() {
               Category List
             </h2>
           </div>
-
-          {/* Responsive grid:
-              Mobile  : 1 col
-              sm      : 2 cols
-              md+     : 4 cols                          */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             {CATEGORIES.map((cat) => (
               <CategoryCard key={cat} name={cat} onClick={handleOpenCategory} />
@@ -336,17 +518,22 @@ export default function MainPage() {
       </main>
 
       {/* ── Floating Cart Bar ── */}
-      {cartTotal > 0 && (
+      {orderItems.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 z-50 px-4 py-3 bg-white border-t shadow-2xl">
           <div className="max-w-screen-xl mx-auto flex items-center justify-between gap-4">
             <div>
-              <p className="text-xs text-gray-400">Total Order</p>
+              <p className="text-xs text-gray-400">
+                {cartItemCount} item{cartItemCount > 1 ? "s" : ""} · Total Order
+              </p>
               <p className="font-bold text-gray-800">
-                Rp. {cartTotal.toLocaleString("id-ID")}
+                Rp. {subtotal.toLocaleString("id-ID")}
               </p>
             </div>
-            <Button className="bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl px-8">
-              Checkout — Rp {cartTotal.toLocaleString("id-ID")}
+            <Button
+              className="bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl px-8"
+              onClick={handleCheckout}
+            >
+              Checkout — Rp {subtotal.toLocaleString("id-ID")}
             </Button>
           </div>
         </div>
