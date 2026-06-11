@@ -3,6 +3,8 @@ export interface SubscriptionPlan {
   nama_plan: string
   harga: number
   batas_outlet: number | 'Unlimited'
+  is_lifetime?: boolean
+  durasi_hari: number
   deskripsi: string
 }
 
