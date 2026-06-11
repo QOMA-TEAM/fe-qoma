@@ -2,23 +2,50 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
+import { usePublicOrderDetail, useCancelOrder } from "@/hooks/public/use-order";
+import { Loader2 } from "lucide-react";
 
 interface OrderPendingPageProps {
   tableNumber?: string;
   orderId: string;
+  outletId: string;
   onCancel: () => void;
   onConfirmed: () => void; // dipanggil dari luar saat backend konfirmasi
+  onPaid?: () => void;
 }
 
 export function OrderPendingPage({
   tableNumber = "08",
   orderId,
+  outletId,
   onCancel,
   onConfirmed,
+  onPaid,
 }: OrderPendingPageProps) {
-  const DURATION = 10 * 60; // 10 menit dalam detik
+  const { data: orderData } = usePublicOrderDetail(orderId, outletId);
+  const cancelOrder = useCancelOrder();
+
+  const handleCancelClick = () => {
+    cancelOrder.mutate(
+      { pesananId: orderId, outletId },
+      {
+        onSuccess: () => {
+          onCancel();
+        },
+      }
+    );
+  };
+
+  // Sync timer with backend sisa_waktu_detik if available
+  const DURATION = 10 * 60; // fallback 10 menit
   const [secondsLeft, setSecondsLeft] = useState(DURATION);
   const [expired, setExpired] = useState(false);
+
+  useEffect(() => {
+    if (orderData?.sisa_waktu_detik !== undefined && orderData?.sisa_waktu_detik !== null) {
+      setSecondsLeft(Math.max(0, Math.floor(orderData.sisa_waktu_detik)));
+    }
+  }, [orderData?.sisa_waktu_detik]);
 
   useEffect(() => {
     if (secondsLeft <= 0) {
@@ -36,12 +63,23 @@ export function OrderPendingPage({
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [secondsLeft]);
+
+  // Watch status changes
+  useEffect(() => {
+    if (orderData?.status === "confirmed") {
+      onConfirmed();
+    } else if (orderData?.status === "paid" && onPaid) {
+      onPaid();
+    }
+  }, [orderData?.status, onConfirmed, onPaid]);
 
   const minutes = Math.floor(secondsLeft / 60)
     .toString()
     .padStart(2, "0");
-  const seconds = (secondsLeft % 60).toString().padStart(2, "0");
+  const seconds = Math.floor(secondsLeft % 60)
+    .toString()
+    .padStart(2, "0");
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-500 to-orange-400 flex flex-col items-center justify-between px-6 py-16">
@@ -55,7 +93,7 @@ export function OrderPendingPage({
         </p>
 
         <h1 className="text-white font-extrabold text-2xl md:text-3xl mt-2 uppercase tracking-wide">
-          Show Your ID Order to Cashier
+          {orderData?.status_label || "Show Your ID Order to Cashier"}
         </h1>
 
         {/* Pay Before */}
@@ -175,9 +213,14 @@ export function OrderPendingPage({
       <Button
         variant="outline"
         className="bg-white text-orange-500 border-none font-bold text-base rounded-2xl px-16 py-6 hover:bg-orange-50 shadow-md"
-        onClick={onCancel}
+        onClick={handleCancelClick}
+        disabled={cancelOrder.isPending}
       >
-        CANCEL ORDER
+        {cancelOrder.isPending ? (
+          <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+        ) : (
+          "CANCEL ORDER"
+        )}
       </Button>
     </div>
   );

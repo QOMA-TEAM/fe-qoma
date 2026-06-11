@@ -34,7 +34,7 @@ export function OrderConfirmedModal({
           ID ORDER : {orderId}
         </p>
         <h1 className="text-white font-extrabold text-2xl md:text-3xl mt-3 uppercase tracking-wide">
-          Order Has Paid
+          Order Confirmed
         </h1>
       </div>
 

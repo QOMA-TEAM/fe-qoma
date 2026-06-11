@@ -39,6 +39,7 @@ interface MenuDetailModalProps {
   onAddOrder: (item: {
     menu: MenuItem;
     selectedToppings: string[];
+    selectedToppingsData?: ToppingOption[];
     specialOption: string | null;
     note: string;
     qty: number;
@@ -99,6 +100,9 @@ export function MenuDetailModal({
     onAddOrder({
       menu,
       selectedToppings,
+      selectedToppingsData: selectedToppings
+        .map((tid) => dynamicAddons.find((t) => t.id === tid))
+        .filter(Boolean) as ToppingOption[],
       specialOption,
       note,
       qty,

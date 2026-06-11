@@ -12,8 +12,6 @@ interface OrderCompletedPageProps {
   phoneNumber?: string;
   paidAt: string; // misal "24 April 2026"
   orderItems: OrderItem[];
-  ppn?: number;
-  biayaLainnya?: number;
   onNewOrder: () => void;
 }
 
@@ -24,11 +22,10 @@ export function OrderCompletedModal({
   phoneNumber,
   paidAt,
   orderItems,
-  ppn = 0,
-  biayaLainnya = 0,
   onNewOrder,
 }: OrderCompletedPageProps) {
-  const totalFees = ppn + biayaLainnya;
+  const subtotal = orderItems.reduce((acc, item) => acc + item.totalPrice, 0);
+  const grandTotal = subtotal;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -95,11 +92,25 @@ export function OrderCompletedModal({
                     {item.menu.description}
                   </p>
                   <p className="text-gray-700 text-xs font-medium mt-1">
-                    Rp. {item.totalPrice.toLocaleString("id-ID")}
                     {item.qty > 1 && (
-                      <span className="text-gray-400 ml-1">(x{item.qty})</span>
+                      <span className="text-gray-500 mr-1">{item.qty}x</span>
+                    )}
+                    Rp. {(item.totalPrice / item.qty).toLocaleString("id-ID")}
+                    {item.qty > 1 && (
+                      <span className="font-bold ml-2">
+                        = Rp. {item.totalPrice.toLocaleString("id-ID")}
+                      </span>
                     )}
                   </p>
+                  {item.selectedToppingsData && item.selectedToppingsData.length > 0 && (
+                    <p className="text-gray-400 text-xs mt-0.5">
+                      +{" "}
+                      {item.selectedToppingsData
+                        .map((t) => t.name)
+                        .filter(Boolean)
+                        .join(", ")}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
@@ -113,17 +124,13 @@ export function OrderCompletedModal({
           </h2>
           <div className="space-y-2.5">
             <div className="flex justify-between text-sm text-gray-500">
-              <span>PPN 10%</span>
-              <span>Rp. {ppn.toLocaleString("id-ID")}</span>
-            </div>
-            <div className="flex justify-between text-sm text-gray-500">
-              <span>Biaya Lainnya</span>
-              <span>Rp. {biayaLainnya.toLocaleString("id-ID")}</span>
+              <span>Subtotal</span>
+              <span>Rp. {subtotal.toLocaleString("id-ID")}</span>
             </div>
             <Separator />
             <div className="flex justify-between text-sm font-bold text-orange-500">
-              <span>Total</span>
-              <span>Rp. {totalFees.toLocaleString("id-ID")}</span>
+              <span>Total Pembayaran</span>
+              <span>Rp. {grandTotal.toLocaleString("id-ID")}</span>
             </div>
           </div>
         </section>
