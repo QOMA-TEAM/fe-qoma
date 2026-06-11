@@ -10,11 +10,10 @@ import { Clock, MapPin } from "lucide-react";
 import { WelcomeModal } from "@/components/user/WelcomeModal";
 import { MenuDetailModal, MenuItem } from "@/components/user/MenuDetailModal";
 import { OutletInfoSheet } from "@/components/user/OutletInfoSheet";
-import { CategoryMenuSheet } from "@/components/user/CategoryMenuSheet";
 import { CheckoutModal, OrderItem } from "@/components/user/CheckoutModal";
 import { OrderPendingPage } from "@/components/user/OrderPendingModal";
-import { OrderConfirmedModal } from "@/components/user/OrderConfirmed";
-import { OrderCompletedModal } from "@/components/user/OrderCompleted";
+import { OrderConfirmedModal } from "@/components/user/OrderConfirmedModal";
+import { OrderCompletedModal } from "@/components/user/OrderCompletedModal";
 
 // ── Types ─────────────────────────────────────────────────────────────
 type AppView =
@@ -22,7 +21,8 @@ type AppView =
   | "checkout"
   | "order-pending"
   | "order-confirmed"
-  | "order-completed";
+  | "order-completed"
+  | "category";
 
 // ── Mock Data ────────────────────────────────────────────────────────
 const MOCK_MENU: MenuItem[] = [
@@ -189,7 +189,7 @@ export default function MainPage() {
   // ── Handlers: Category & Menu ──
   const handleOpenCategory = (name: string) => {
     setActiveCategoryName(name);
-    setShowCategorySheet(true);
+    setView("category");
   };
 
   // ── Handlers: Add / Edit Order Item ──
@@ -361,18 +361,7 @@ export default function MainPage() {
         outlet={OUTLET_INFO}
       />
 
-      <CategoryMenuSheet
-        open={showCategorySheet}
-        onClose={() => setShowCategorySheet(false)}
-        categoryName={activeCategoryName}
-        items={MOCK_MENU}
-        totalOrderPrice={subtotal}
-        onSelectMenu={(menu) => {
-          setShowCategorySheet(false);
-          setSelectedMenu(menu);
-        }}
-        onAddOrder={() => setShowCategorySheet(false)}
-      />
+      {/* Removed CategoryMenuSheet */}
 
       <MenuDetailModal
         open={!!selectedMenu}
@@ -453,7 +442,10 @@ export default function MainPage() {
         </div>
       </header>
 
-      {/* ── Hero Banner ── */}
+      {/* ── Main View Content ── */}
+      {view === "main" && (
+        <>
+          {/* ── Hero Banner ── */}
       <div className="relative w-full h-48 sm:h-64 md:h-80 lg:h-96">
         <Image
           src="/images/pizza-mizna.jpg"
@@ -516,6 +508,35 @@ export default function MainPage() {
           </div>
         </section>
       </main>
+      </>
+      )}
+
+      {/* ── Category View Content ── */}
+      {view === "category" && (
+        <main className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-32 min-h-screen bg-white shadow-sm mt-4 rounded-xl">
+          <div className="flex items-center gap-3 mb-6 border-b pb-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-gray-500 hover:text-orange-500 rounded-full"
+              onClick={() => setView("main")}
+            >
+              <ChevronRight className="w-6 h-6 rotate-180" />
+            </Button>
+            <h1 className="text-2xl font-bold text-gray-800">{activeCategoryName}</h1>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+            {Array.from({ length: 10 }).map((_, idx) => (
+              <MenuCard
+                key={`${activeCategoryName}-${idx}`}
+                item={MOCK_MENU[0]}
+                onClick={setSelectedMenu}
+              />
+            ))}
+          </div>
+        </main>
+      )}
 
       {/* ── Floating Cart Bar ── */}
       {orderItems.length > 0 && (
