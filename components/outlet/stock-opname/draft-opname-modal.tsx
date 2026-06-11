@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Upload, X } from "lucide-react";
 import { useBahanMasterList } from "@/hooks/outlet/use-bahan-baku";
-import { useCreateDraftOpname, useUpdateDraftOpname } from "@/hooks/outlet/use-stock-opname";
+import { useTambahItem, useUpdateItem } from "@/hooks/outlet/use-stock-opname";
 import type { StockOpname } from "@/services/outlet/stock-opname-service";
 
 interface Props {
@@ -31,13 +31,13 @@ export function DraftOpnameModal({ open, onOpenChange, draftToEdit }: Props) {
   const { data: bahanMasterResponse, isLoading: isLoadingBahan } = useBahanMasterList(1, "");
   const bahanMasterList = bahanMasterResponse?.data || [];
 
-  const { mutate: createDraft, isPending: isCreating } = useCreateDraftOpname();
-  const { mutate: updateDraft, isPending: isUpdating } = useUpdateDraftOpname();
+  const { mutate: tambahItem, isPending: isCreating } = useTambahItem();
+  const { mutate: updateItem, isPending: isUpdating } = useUpdateItem();
 
   useEffect(() => {
     if (open) {
       if (draftToEdit) {
-        setBahanMasterId(draftToEdit.bahan_master_id?.toString() || "");
+        setBahanMasterId(draftToEdit.bahan_master?.id?.toString() || draftToEdit.bahan_master_id?.toString() || "");
         setTipe(draftToEdit.tipe || "");
         setJumlah(draftToEdit.jumlah?.toString() || "");
         setKeterangan(draftToEdit.keterangan || "");
@@ -81,12 +81,12 @@ export function DraftOpnameModal({ open, onOpenChange, draftToEdit }: Props) {
     if (file) formData.append("foto_bukti", file);
 
     if (draftToEdit) {
-      updateDraft(
+      updateItem(
         { id: draftToEdit.id, data: formData },
         { onSuccess: () => onOpenChange(false) }
       );
     } else {
-      createDraft(formData, { onSuccess: () => onOpenChange(false) });
+      tambahItem(formData, { onSuccess: () => onOpenChange(false) });
     }
   };
 

@@ -12,7 +12,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 
-function formatLabel(item) {
+function formatLabel(item: any) {
   // monthly pakai `bulan`, daily/weekly pakai `tanggal`
   return item.bulan ?? item.tanggal ?? "";
 }

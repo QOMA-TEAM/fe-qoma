@@ -14,8 +14,21 @@ export interface StockOpname {
   bahan_master?: BahanMaster;
 }
 
-export interface StockOpnameListResponse {
-  data: StockOpname[];
+export interface StockOpnameSession {
+  id: string;
+  outlet_id: string;
+  tanggal: string;
+  status: "open" | "closed";
+  closed_at: string | null;
+  created_at: string;
+  total_item?: number;
+  total_draft?: number;
+  total_final?: number;
+  items?: StockOpname[];
+}
+
+export interface StockOpnameHistoryResponse {
+  data: StockOpnameSession[];
   meta: {
     current_page: number;
     last_page: number;
@@ -25,47 +38,50 @@ export interface StockOpnameListResponse {
 }
 
 export const stockOpnameService = {
-  // GET /outlet/stock-opname — list semua (draft + final)
-  getList: async (params?: {
-    page?: number;
-    status?: string;
-  }): Promise<StockOpnameListResponse> => {
-    const response = await axiosInstance.get("/outlet/stock-opname", { params });
+  // GET /outlet/stock-opname/sesi — info sesi hari ini
+  getSesiHariIni: async (): Promise<{ data: StockOpnameSession | null }> => {
+    const response = await axiosInstance.get("/outlet/stock-opname/sesi");
     return response.data;
   },
 
-  // GET /outlet/stock-opname/draft — list draft
-  getDraftList: async (): Promise<{ data: StockOpname[], total: number }> => {
-    const response = await axiosInstance.get("/outlet/stock-opname/draft");
+  // GET /outlet/stock-opname/history — history sesi lalu
+  getHistorySesi: async (params?: { page?: number }): Promise<StockOpnameHistoryResponse> => {
+    const response = await axiosInstance.get("/outlet/stock-opname/history", { params });
     return response.data;
   },
 
-  // POST /outlet/stock-opname/draft — buat draft
-  createDraft: async (data: FormData) => {
-    const response = await axiosInstance.post("/outlet/stock-opname/draft", data, {
+  // POST /outlet/stock-opname/item — tambah/update draft item
+  createDraftItem: async (data: FormData) => {
+    const response = await axiosInstance.post("/outlet/stock-opname/item", data, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return response.data;
   },
 
-  // PUT /outlet/stock-opname/draft/{id} — edit draft (using POST + _method=PUT)
-  updateDraft: async (id: string, data: FormData) => {
+  // PUT /outlet/stock-opname/item/{id} — edit draft item
+  updateDraftItem: async (id: string, data: FormData) => {
     data.append('_method', 'PUT');
-    const response = await axiosInstance.post(`/outlet/stock-opname/draft/${id}`, data, {
+    const response = await axiosInstance.post(`/outlet/stock-opname/item/${id}`, data, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return response.data;
   },
 
-  // DELETE /outlet/stock-opname/draft/{id} — hapus draft
-  deleteDraft: async (id: string) => {
-    const response = await axiosInstance.delete(`/outlet/stock-opname/draft/${id}`);
+  // DELETE /outlet/stock-opname/item/{id} — hapus draft item
+  deleteDraftItem: async (id: string) => {
+    const response = await axiosInstance.delete(`/outlet/stock-opname/item/${id}`);
     return response.data;
   },
 
-  // POST /outlet/stock-opname/draft/{id}/final — finalisasi draft
-  finalizeDraft: async (id: string) => {
-    const response = await axiosInstance.post(`/outlet/stock-opname/draft/${id}/final`);
+  // POST /outlet/stock-opname/simpan — 1x klik simpan semua (Finalisasi)
+  simpanSemua: async () => {
+    const response = await axiosInstance.post(`/outlet/stock-opname/simpan`);
+    return response.data;
+  },
+
+  // POST /outlet/stock-opname/sesi/tutup — tutup sesi
+  tutupSesi: async () => {
+    const response = await axiosInstance.post(`/outlet/stock-opname/sesi/tutup`);
     return response.data;
   },
 };
