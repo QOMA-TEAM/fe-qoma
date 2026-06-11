@@ -11,8 +11,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { Minus, Plus, X } from "lucide-react";
+import { Minus, Plus, X, Loader2 } from "lucide-react";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+import { usePublicMenuDetail } from "@/hooks/public/use-menu";
 
 export interface ToppingOption {
   id: string;
@@ -62,11 +64,23 @@ export function MenuDetailModal({
     }
   }, [menu]);
 
+  const searchParams = useSearchParams();
+  const outletId = searchParams?.get("outlet_id");
+  const { data: menuDetail, isLoading } = usePublicMenuDetail(menu?.id || null, outletId);
+
   if (!menu) return null;
 
+  const dynamicAddons: ToppingOption[] = menuDetail?.addons_tersedia
+    ? menuDetail.addons_tersedia.map((a) => ({
+        id: a.id,
+        name: a.nama,
+        price: Number(a.harga),
+      }))
+    : menu.addOnToppings || [];
+
   const toppingPrice = selectedToppings.reduce((acc, id) => {
-    const found = menu.addOnToppings?.find((t) => t.id === id);
-    return acc + (found?.price ?? 0);
+    const t = dynamicAddons.find((x) => x.id === id);
+    return acc + (t ? t.price : 0);
   }, 0);
 
   const specialPrice =
@@ -135,13 +149,17 @@ export function MenuDetailModal({
           <Separator />
 
           {/* Add on Topping (Checkbox, max 3) */}
-          {menu.addOnToppings && menu.addOnToppings.length > 0 && (
+          {isLoading ? (
+            <div className="flex justify-center items-center p-6">
+              <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
+            </div>
+          ) : dynamicAddons.length > 0 && (
             <div className="border rounded-xl p-4 flex flex-col gap-3">
               <div>
                 <h3 className="font-semibold text-gray-800">Add on Topping</h3>
                 <p className="text-xs text-gray-400">Optional Max 3.</p>
               </div>
-              {menu.addOnToppings.map((topping) => (
+              {dynamicAddons.map((topping) => (
                 <div
                   key={topping.id}
                   className="flex items-center justify-between"

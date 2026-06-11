@@ -51,3 +51,25 @@ export interface PublicMenuResponse {
     total_menu: number;
   };
 }
+
+export interface PublicAddon {
+  id: string;
+  nama: string;
+  harga: number;
+}
+
+export interface PublicMenuDetail {
+  id: string;
+  nama: string;
+  kategori: string;
+  harga: number;
+  harga_dasar: number;
+  gambar: string | null;
+  keterangan: string;
+  addons_tersedia: PublicAddon[];
+}
+
+export interface PublicMenuDetailResponse {
+  message: string;
+  data: PublicMenuDetail;
+}

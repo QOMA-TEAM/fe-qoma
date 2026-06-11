@@ -17,3 +17,11 @@ export const usePublicMenus = (outletId: string | null) => {
     enabled: !!outletId,
   })
 }
+
+export const usePublicMenuDetail = (menuId: string | null, outletId: string | null) => {
+  return useQuery({
+    queryKey: ["public-menu-detail", menuId, outletId],
+    queryFn: () => publicMenuService.getPublicMenuDetail(menuId!, outletId!),
+    enabled: !!menuId && !!outletId,
+  })
+}
