@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
-import { cn } from "@/lib/utils"
+import { cn, formatDeskripsi } from "@/lib/utils"
 import { useActivityLogList } from "@/hooks/outlet/use-activity-log"
 import { useDebounce } from "@/hooks/use-debounce"
 
@@ -15,7 +15,7 @@ export function ActivityLogContent() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
   
-  const debouncedSearch = useDebounce(search, 800)
+  const debouncedSearch = useDebounce(search, 300)
   
   const { data: listResponse, isLoading, isError } = useActivityLogList(page, debouncedSearch)
   
@@ -81,7 +81,7 @@ export function ActivityLogContent() {
                   <TableCell className="text-center">
                     <span className="text-sm text-gray-800 capitalize font-medium">{row.aktivitas.replace(/_/g, " ")}</span>
                   </TableCell>
-                  <TableCell className="text-gray-600 text-sm" title={row.deskripsi}>{row.deskripsi}</TableCell>
+                  <TableCell className="text-gray-600 text-sm" title={row.deskripsi}>{formatDeskripsi(row.deskripsi)}</TableCell>
                 </TableRow>
               ))
             )}

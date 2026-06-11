@@ -13,7 +13,7 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
-import { cn } from "@/lib/utils"
+import { cn, formatDeskripsi } from "@/lib/utils"
 import { useOwnerActivityLogList } from "@/hooks/owner/use-activity-log"
 import { useOutlets } from "@/hooks/owner/use-outlets"
 import { useDebounce } from "@/hooks/use-debounce"
@@ -23,7 +23,7 @@ export function ActivityLogContent() {
   const [search, setSearch] = useState("")
   const [outletId, setOutletId] = useState<string>("owner")
   
-  const debouncedSearch = useDebounce(search, 800)
+  const debouncedSearch = useDebounce(search, 300)
   
   const { data: outletsResponse } = useOutlets()
   const outlets = outletsResponse?.data || []
@@ -134,7 +134,7 @@ export function ActivityLogContent() {
                   <TableCell className="text-center py-3">
                     <span className="text-sm text-gray-800 capitalize font-medium">{row.aktivitas.replace(/_/g, " ")}</span>
                   </TableCell>
-                  <TableCell className="text-gray-600 text-sm py-3" title={row.deskripsi}>{row.deskripsi}</TableCell>
+                  <TableCell className="text-gray-600 text-sm py-3" title={row.deskripsi}>{formatDeskripsi(row.deskripsi)}</TableCell>
                 </TableRow>
               ))
             )}
