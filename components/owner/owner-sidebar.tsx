@@ -17,6 +17,7 @@ import {
   ClipboardCheck,
   FileCheck,
   Settings,
+  ListPlus,
 } from "lucide-react"
 
 import { ChangePasswordDialog } from "@/components/settings/change-password-dialog"
@@ -58,6 +59,11 @@ const ownerNav = {
       title: "Menu",
       url: "/owner/menu",
       icon: UtensilsCrossed,
+    },
+    {
+      title: "Add On",
+      url: "/owner/addon",
+      icon: ListPlus,
     },
     {
       title: "Outlet",
