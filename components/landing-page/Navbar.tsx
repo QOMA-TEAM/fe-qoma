@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 const navLinks = [
-  { name: "Home", href: "/" },
+  { name: "Home", href: "/#home" },
   { name: "Feature", href: "/#feature" },
   { name: "Screenshot", href: "/#screenshot" },
   { name: "Pricing", href: "/#pricing" },
@@ -12,33 +12,32 @@ const navLinks = [
 ];
 
 export function Navbar() {
-  const pathname = usePathname();
-
   return (
     <nav className="w-full flex items-center justify-between py-6 px-8 md:px-16 absolute top-0 left-0 z-50">
       <div className="flex items-center gap-12">
         {/* Logo */}
-        <Link href="/" className="flex flex-col items-center justify-center font-black leading-none text-xl tracking-tighter">
-          <div className="flex gap-1">
-            <span className="text-blue-600">Q</span>
-            <span className="text-blue-500">I</span>
-            <span className="text-blue-600">P</span>
-          </div>
-          <div className="flex gap-1">
-            <span className="text-orange-500">A</span>
-            <span className="text-blue-500">I</span>
-            <span className="text-orange-600">M</span>
-          </div>
+        <Link href="/" className="flex items-center justify-center">
+          <Image src="/logoqoma.svg" alt="Qoma Logo" width={80} height={40} className="object-contain" />
         </Link>
 
         {/* Links */}
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-700">
+        <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-gray-800">
           {navLinks.map((link) => (
-            <Link key={link.name} href={link.href} className="hover:text-orange-500 transition-colors">
+            <Link key={link.name} href={link.href} className="hover:text-[#ff6b00] transition-colors">
               {link.name}
             </Link>
           ))}
         </div>
+      </div>
+      
+      {/* Right side - Start Free Button */}
+      <div className="flex items-center">
+        <Link 
+          href="/register" 
+          className="px-6 py-2.5 bg-white text-[#ff6b00] rounded-full font-semibold text-sm hover:text-[#e65a00] hover:bg-white transition-all shadow-sm border border-[#ff6b00]/30 hover:border-[#ff6b00]"
+        >
+          Start Free
+        </Link>
       </div>
     </nav>
   );
