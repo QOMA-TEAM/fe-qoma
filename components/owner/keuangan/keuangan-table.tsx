@@ -9,6 +9,9 @@ import { Badge } from "@/components/ui/badge"
 import { cn, formatRupiah } from "@/lib/utils"
 import { useKeuanganList } from "@/hooks/owner/use-keuangan"
 
+import { format } from "date-fns"
+import { id } from "date-fns/locale"
+
 interface KeuanganTableProps {
   page: number
   setPage: React.Dispatch<React.SetStateAction<number>>
@@ -30,6 +33,7 @@ export function KeuanganTable({ page, setPage, range, tipe, outletId }: Keuangan
           <TableHeader>
             <TableRow className="bg-gray-100 hover:bg-gray-100 border-gray-200">
               <TableHead className="w-32 text-gray-600 font-semibold text-sm">Tanggal</TableHead>
+              <TableHead className="w-20 text-gray-600 font-semibold text-sm">Waktu</TableHead>
               <TableHead className="text-gray-600 font-semibold text-sm">ID Transaksi</TableHead>
               <TableHead className="text-gray-600 font-semibold text-sm">Outlet</TableHead>
               <TableHead className="w-36 text-gray-600 font-semibold text-sm text-center">Tipe</TableHead>
@@ -40,18 +44,23 @@ export function KeuanganTable({ page, setPage, range, tipe, outletId }: Keuangan
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-48 text-center">
+                <TableCell colSpan={7} className="h-48 text-center">
                   <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
                 </TableCell>
               </TableRow>
             ) : transactions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-gray-400 py-12 text-sm">Tidak ada transaksi ditemukan.</TableCell>
+                <TableCell colSpan={7} className="text-center text-gray-400 py-12 text-sm">Tidak ada transaksi ditemukan.</TableCell>
               </TableRow>
             ) : (
               transactions.map((row) => (
                 <TableRow key={row.id} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
-                  <TableCell className="text-gray-600 text-sm whitespace-nowrap">{row.tanggal}</TableCell>
+                  <TableCell className="text-gray-600 text-sm whitespace-nowrap">
+                    {row.tanggal ? format(new Date(row.tanggal), "dd MMM yyyy", { locale: id }) : "-"}
+                  </TableCell>
+                  <TableCell className="text-gray-500 text-sm whitespace-nowrap">
+                    {row.waktu || "-"}
+                  </TableCell>
                   <TableCell className="text-gray-500 text-sm font-mono max-w-[120px] truncate" title={row.id}>{row.id}</TableCell>
                   <TableCell className="text-gray-800 text-sm">{row.outlet}</TableCell>
                   <TableCell className="text-center">

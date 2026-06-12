@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -13,7 +14,13 @@ import {
   CircleDollarSign,
   CreditCard,
   LogOut,
+  ClipboardCheck,
+  FileCheck,
+  Settings,
+  ListPlus,
 } from "lucide-react"
+
+import { ChangePasswordDialog } from "@/components/settings/change-password-dialog"
 
 import {
   Sidebar,
@@ -54,6 +61,11 @@ const ownerNav = {
       icon: UtensilsCrossed,
     },
     {
+      title: "Add On",
+      url: "/owner/addon",
+      icon: ListPlus,
+    },
+    {
       title: "Outlet",
       url: "/owner/outlet",
       icon: Store,
@@ -63,6 +75,17 @@ const ownerNav = {
       url: "/owner/plan",
       icon: CreditCard,
     },
+  ],approval: [
+    {
+      title: "Approve Bahan Baku",
+      url: "/owner/approval-bahan",
+      icon: ClipboardCheck,
+    },
+      {
+      title: "Approval Menu",
+      url: "/owner/approval-menu",
+      icon: FileCheck,
+    },
   ],
   keuangan: [
     {
@@ -71,11 +94,24 @@ const ownerNav = {
       icon: CircleDollarSign,
     },
   ],
+  laporan: [
+    {
+      title: "Activity Log",
+      url: "/owner/activity-log",
+      icon: ClipboardCheck,
+    },
+    {
+      title: "Stock Opname",
+      url: "/owner/stock-opname",
+      icon: ClipboardCheck,
+    },
+  ],
 }
 
 export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const router = useRouter()
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
   const handleLogout = () => {
     localStorage.removeItem("token")
@@ -150,6 +186,30 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
           </SidebarMenu>
         </SidebarGroup>
 
+        {/* APPROVAL */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-muted-foreground/70 uppercase">
+            Approval
+          </SidebarGroupLabel>
+          <SidebarMenu>
+            {ownerNav.approval.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === item.url}
+                  className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
+                >
+                  <Link href={item.url}>
+                    <item.icon className="size-4" />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+
+
         {/* KEUANGAN */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-muted-foreground/70 uppercase">
@@ -172,14 +232,45 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
             ))}
           </SidebarMenu>
         </SidebarGroup>
+
+        {/* LAPORAN */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-muted-foreground/70 uppercase">
+            Laporan
+          </SidebarGroupLabel>
+          <SidebarMenu>
+            {ownerNav.laporan.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === item.url}
+                  className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
+                >
+                  <Link href={item.url}>
+                    <item.icon className="size-4" />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
 
-      {/* FOOTER: Logout */}
+      {/* FOOTER: Logout & Settings */}
       <SidebarFooter className="p-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="hover:bg-red-50 hover:text-red-600">
-              <button type="button" className="w-full" onClick={handleLogout}>
+            <SidebarMenuButton asChild className="hover:bg-slate-100 hover:text-slate-900 cursor-pointer">
+              <button type="button" className="w-full cursor-pointer" onClick={() => setIsSettingsOpen(true)}>
+                <Settings className="size-4" />
+                <span>Setting</span>
+              </button>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild className="hover:bg-red-50 hover:text-red-600 cursor-pointer">
+              <button type="button" className="w-full cursor-pointer" onClick={handleLogout}>
                 <Avatar className="size-7">
                   <AvatarImage src="/avatar-placeholder.png" alt="Owner" />
                   <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-semibold">
@@ -195,6 +286,8 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
       </SidebarFooter>
 
       <SidebarRail />
+      
+      <ChangePasswordDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
     </Sidebar>
   )
 }

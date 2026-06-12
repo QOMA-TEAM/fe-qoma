@@ -1,64 +1,71 @@
-import { Utensils, Trash2, ArrowRight } from "lucide-react"
+"use client";
 
-interface Order {
-  id: string
-  nama: string
-  meja: string
-  status: "Unpaid" | "Paid"
-}
-
-const dummyOrders: Order[] = [
-  { id: "A4104", nama: "Surikiti", meja: "04", status: "Unpaid" },
-  { id: "A4104", nama: "Surikiti", meja: "04", status: "Unpaid" },
-  { id: "A4104", nama: "Surikiti", meja: "04", status: "Unpaid" },
-]
+import { useState } from "react"
+import { ArrowRight, Loader2 } from "lucide-react"
+import Link from "next/link"
+import { OrderCard } from "@/components/outlet/sales/order-card"
+import { CheckoutModal } from "@/components/outlet/sales/checkout-modal"
+import { usePesananList } from "@/hooks/outlet/use-pesanan"
+import type { Pesanan } from "@/services/outlet/pesanan-service"
 
 export function IncomingOrders() {
+  const [selectedOrder, setSelectedOrder] = useState<Pesanan | null>(null);
+
+  // Ambil semua pesanan (kecuali expired)
+  const { data: pesananResponse, isLoading, isError } = usePesananList();
+
+  // Filter yang belum lunas (pending atau confirmed) dan ambil 3 teratas
+  const activeOrders = pesananResponse?.data
+    ?.filter((o) => o.status === "pending" || o.status === "confirmed")
+    ?.slice(0, 3) || [];
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold text-gray-900">Pesanan Datang</h3>
-        <button className="text-sm font-semibold text-gray-700 hover:text-black flex items-center gap-1">
-          Tampilkan Semua <ArrowRight className="w-4 h-4" />
-        </button>
+    <>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-bold text-gray-900">Pesanan Datang</h3>
+          <Link
+            href="/outlet/pesanan-datang"
+            className="text-sm font-semibold text-gray-700 hover:text-black flex items-center gap-1 transition-colors"
+          >
+            Tampilkan Semua <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        {isLoading ? (
+          <div className="flex justify-center items-center py-10">
+            <Loader2 className="w-8 h-8 animate-spin text-[#1a5f7a]" />
+          </div>
+        ) : isError ? (
+          <div className="text-center py-6 text-red-500 font-medium bg-red-50 rounded-xl">
+            Gagal memuat pesanan
+          </div>
+        ) : activeOrders.length === 0 ? (
+          <div className="text-center py-10 text-gray-500 font-medium bg-white rounded-xl shadow-sm border border-gray-100">
+            Belum ada pesanan masuk.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {activeOrders.map((order) => (
+              <OrderCard
+                key={order.id}
+                order={order}
+                onClick={() => setSelectedOrder(order)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {dummyOrders.map((order, idx) => (
-          <div key={idx} className="flex h-28 rounded-xl overflow-hidden shadow-sm bg-[#1a5f7a]">
-            {/* Left Icon Strip */}
-            <div className="w-16 flex-shrink-0 flex items-center justify-center">
-              <Utensils className="w-6 h-6 text-white" />
-            </div>
-            
-            {/* Right Content */}
-            <div className="flex-1 bg-white m-1 rounded-lg p-4 flex flex-col justify-center">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-[#1a5f7a]">ID : {order.id}</span>
-                <span className="px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-bold">
-                  {order.status}
-                </span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-12 text-sm">
-                    <span className="text-[#1a5f7a] font-medium w-16">Nama</span>
-                    <span className="text-[#1a5f7a]">{order.nama}</span>
-                  </div>
-                  <div className="flex items-center gap-12 text-sm">
-                    <span className="text-[#1a5f7a] font-medium w-16">No. Meja</span>
-                    <span className="text-[#1a5f7a]">{order.meja}</span>
-                  </div>
-                </div>
-                <button className="p-2 text-gray-400 hover:text-red-500 transition-colors">
-                  <Trash2 className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+      {/* Checkout Modal POS */}
+      <CheckoutModal
+        open={!!selectedOrder}
+        onOpenChange={(open) => {
+          if (!open) setSelectedOrder(null);
+        }}
+        orderId={selectedOrder?.id || null}
+      />
+    </>
   )
 }
+

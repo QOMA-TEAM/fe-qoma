@@ -19,3 +19,9 @@ export function formatDateLabel(dateStr: string) {
   if (isNaN(d.getTime())) return dateStr
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
+
+export function formatDeskripsi(text: string) {
+  if (!text) return text;
+  // Replace any 36-character UUID with just its first 8 characters
+  return text.replace(/([a-f0-9]{8})-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/gi, '$1...');
+}
