@@ -24,13 +24,14 @@ export function PlanCard({ plan, allVariants, onEdit, onDelete }: PlanCardProps)
     : plan.harga;
 
   return (
+    <div className="w-[280px] shrink-0">
     <GlobalPlanCard
       name={plan.nama_plan}
       price={minPrice}
       period={(!allVariants || allVariants.length === 0) ? plan.tagihan : undefined}
       description={plan.deskripsi || undefined}
       isActive={isActive}
-      className="max-w-[280px]"
+      className="h-full"
       headerBadge={
         <Badge
           variant="outline"
@@ -89,6 +90,7 @@ export function PlanCard({ plan, allVariants, onEdit, onDelete }: PlanCardProps)
         </div>
       }
     />
+    </div>
   );
 }
 
@@ -96,23 +98,25 @@ export function PlanCard({ plan, allVariants, onEdit, onDelete }: PlanCardProps)
 
 export function PlanCardSkeleton() {
   return (
-    <Card className="w-full max-w-[280px] border border-gray-200 rounded-xl overflow-hidden">
-      <CardContent className="p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="h-5 w-24 bg-gray-100 rounded animate-pulse" />
-          <div className="h-5 w-16 bg-gray-100 rounded-full animate-pulse" />
-        </div>
-        <div className="space-y-1.5">
-          <div className="h-8 w-32 bg-gray-100 rounded animate-pulse" />
-          <div className="h-3 w-20 bg-gray-100 rounded animate-pulse" />
-        </div>
-        <Separator className="bg-gray-100" />
-        <div className="h-4 w-20 bg-gray-100 rounded animate-pulse" />
-        <div className="flex gap-2">
-          <div className="flex-1 h-8 bg-gray-100 rounded animate-pulse" />
-          <div className="flex-1 h-8 bg-gray-100 rounded animate-pulse" />
-        </div>
-      </CardContent>
-    </Card>
+    <div className="w-[280px] shrink-0">
+      <Card className="w-full border border-gray-200 rounded-2xl overflow-hidden">
+        <CardContent className="p-6 space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="h-6 w-28 bg-gray-100 rounded animate-pulse" />
+            <div className="h-5 w-16 bg-gray-100 rounded-full animate-pulse" />
+          </div>
+          <div className="space-y-2">
+            <div className="h-9 w-36 bg-gray-100 rounded animate-pulse" />
+            <div className="h-3 w-24 bg-gray-100 rounded animate-pulse" />
+          </div>
+          <Separator className="bg-gray-100" />
+          <div className="h-4 w-24 bg-gray-100 rounded animate-pulse" />
+          <div className="flex gap-2">
+            <div className="flex-1 h-8 bg-gray-100 rounded animate-pulse" />
+            <div className="flex-1 h-8 bg-gray-100 rounded animate-pulse" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
