@@ -1,4 +1,3 @@
-// plan-card.tsx
 "use client"
 
 import * as React from "react"
@@ -49,16 +48,17 @@ export function PlanCard({
           : '0 1px 3px 0 rgba(0,0,0,0.08)',
         outline: hovered ? '2px solid #FB6300' : '2px solid transparent',
         transition: 'transform 0.22s ease, box-shadow 0.22s ease, outline 0.22s ease',
+        height: '100%',
       }}
       className={cn(
-        "w-full border rounded-2xl overflow-hidden flex flex-col h-full",
+        "w-full border rounded-2xl overflow-hidden flex flex-col",
         isActive
           ? "bg-white border-gray-200"
           : "border-gray-200 bg-gray-50 opacity-75",
         className
       )}
     >
-      <CardContent className="p-6 md:p-8 flex flex-col h-full space-y-6">
+      <CardContent className="p-6 md:p-8 flex flex-col flex-1 space-y-6">
         {/* Header: Name + Badge */}
         <div className="flex items-center justify-between gap-4">
           <h3
@@ -104,17 +104,12 @@ export function PlanCard({
 
         <Separator className={isActive ? "bg-gray-100" : "bg-gray-200"} />
 
-        {/* Features */}
+        {/* Features — flex-1 supaya mendorong tombol ke bawah */}
         <ul className="space-y-4 flex-1">
           {features.map((feature, index) => (
             <li key={index} className="flex items-center gap-3 text-sm">
               {feature.icon && (
-                <span
-                  className={cn(
-                    "flex-shrink-0",
-                    isActive ? "text-orange-600" : "text-gray-400"
-                  )}
-                >
+                <span className="flex-shrink-0">
                   {feature.icon}
                 </span>
               )}
@@ -125,9 +120,9 @@ export function PlanCard({
           ))}
         </ul>
 
-        {/* Actions */}
+        {/* Action — selalu di bawah */}
         {actionButton && (
-          <div className="pt-2 mt-auto">
+          <div className="pt-2">
             {actionButton}
           </div>
         )}

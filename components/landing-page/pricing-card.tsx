@@ -15,8 +15,8 @@ export function PricingSection() {
                     </p>
                 </div>
 
-                {/* Cards */}
-                <div className="flex flex-col md:flex-row items-stretch justify-center gap-6 max-w-3xl mx-auto">
+                {/* Cards — grid supaya tinggi otomatis sama */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
 
                     {/* Free Plan */}
                     <PlanCard
@@ -24,7 +24,7 @@ export function PricingSection() {
                         price={0}
                         period="30 Hari"
                         description="Cocok untuk kamu yang baru mulai mengelola bisnis F&B pertama."
-                        className="w-full md:w-1/2"
+                        className="h-full"
                         headerBadge={
                             <span className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-white text-gray-500 border border-gray-200">
                                 <Zap size={11} />
@@ -65,7 +65,7 @@ export function PricingSection() {
                         price={100000}
                         period="30 Hari"
                         description="Untuk bisnis yang berkembang dengan kebutuhan lebih dari satu outlet."
-                        className="w-full md:w-1/2 bg-[#dde8f7]"
+                        className="h-full bg-[#dde8f7]"
                         headerBadge={
                             <span className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-[#3874BC] text-white">
                                 <Star size={11} />
