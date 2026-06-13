@@ -8,7 +8,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#fff4ec] font-sans relative overflow-x-hidden">
       <Navbar />
-
+      <br />
+      <br />
       {/* Background decorations */}
       <div className="absolute top-[-5%] right-[-10%] w-[800px] h-[800px] bg-[#ff6b00] rounded-[100px] rotate-45 blur-[4px] z-0 opacity-90 hidden md:block" style={{ borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%' }}></div>
       <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#ff6b00]/10 to-transparent z-0"></div>
