@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/landing-page/Navbar";
 import Image from "next/image";
 import Link from "next/link";
+import { PlanCard } from "@/components/ui/plan-card";
 
 export default function Home() {
   return (
@@ -91,50 +92,46 @@ export default function Home() {
             
             <div className="flex flex-col md:flex-row items-center justify-center gap-8 max-w-4xl mx-auto">
               {/* Free Plan */}
-              <div className="bg-[#fff4ec] rounded-3xl p-10 w-full md:w-1/2 border-2 border-[#ff6b00] shadow-lg relative transform hover:-translate-y-1 transition-transform">
-                <h3 className="text-2xl font-bold text-gray-900">Free</h3>
-                <p className="text-sm text-gray-500 mb-6">Plan</p>
-                <div className="flex items-end gap-1 mb-2">
-                  <span className="text-4xl font-bold text-gray-900">Rp. 0</span>
-                </div>
-                <p className="text-gray-500 text-sm mb-8">Per 30 Hari</p>
-                
-                <div className="w-full h-px bg-gray-300 mb-8"></div>
-                
-                <ul className="mb-10 space-y-4 text-gray-600">
-                  <li className="flex items-center gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
-                    1 Outlet
-                  </li>
-                </ul>
-                
-                <Link href="/register" className="block w-full py-3.5 px-4 bg-[#ff6b00] hover:bg-[#e65a00] text-white text-center font-semibold rounded-xl transition-colors">
-                  Get Start
-                </Link>
-              </div>
+              <PlanCard
+                name="Free"
+                price={0}
+                period="30 Hari"
+                description=""
+                className="w-full md:w-1/2 border-2 border-[#ff6b00] shadow-lg transform hover:-translate-y-1"
+                headerBadge={<span className="text-sm text-gray-500 font-medium">Plan</span>}
+                features={[
+                  {
+                    icon: <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>,
+                    text: "1 Outlet"
+                  }
+                ]}
+                actionButton={
+                  <Link href="/register" className="block w-full py-3.5 px-4 bg-[#ff6b00] hover:bg-[#e65a00] text-white text-center font-semibold rounded-xl transition-colors">
+                    Get Start
+                  </Link>
+                }
+              />
               
               {/* Pro Plan */}
-              <div className="bg-[#eef2f6] rounded-3xl p-10 w-full md:w-1/2 border border-gray-200 shadow-md relative transform hover:-translate-y-1 transition-transform">
-                <h3 className="text-2xl font-bold text-gray-900">Pro</h3>
-                <p className="text-sm text-gray-500 mb-6">Plan</p>
-                <div className="flex items-end gap-1 mb-2">
-                  <span className="text-4xl font-bold text-gray-900">Rp. 100.000</span>
-                </div>
-                <p className="text-gray-500 text-sm mb-8">Per 30 Hari</p>
-                
-                <div className="w-full h-px bg-gray-300 mb-8"></div>
-                
-                <ul className="mb-10 space-y-4 text-gray-600">
-                  <li className="flex items-center gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
-                    3 Outlet
-                  </li>
-                </ul>
-                
-                <Link href="/register" className="block w-full py-3.5 px-4 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-center font-semibold rounded-xl transition-colors">
-                  Get Start
-                </Link>
-              </div>
+              <PlanCard
+                name="Pro"
+                price={100000}
+                period="30 Hari"
+                description=""
+                className="w-full md:w-1/2 bg-[#eef2f6] shadow-md transform hover:-translate-y-1"
+                headerBadge={<span className="text-sm text-gray-500 font-medium">Plan</span>}
+                features={[
+                  {
+                    icon: <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>,
+                    text: "3 Outlet"
+                  }
+                ]}
+                actionButton={
+                  <Link href="/register" className="block w-full py-3.5 px-4 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-center font-semibold rounded-xl transition-colors">
+                    Get Start
+                  </Link>
+                }
+              />
             </div>
           </div>
         </section>
