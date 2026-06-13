@@ -1,3 +1,6 @@
+// plan-card.tsx
+"use client"
+
 import * as React from "react"
 import { cn, formatRupiah } from "@/lib/utils"
 import { Card, CardContent } from "@/components/ui/card"
@@ -14,13 +17,9 @@ export interface PlanCardProps {
   period?: string
   description?: React.ReactNode
   features: PlanFeature[]
-  
-  // Customization Slots
   headerBadge?: React.ReactNode
   actionButton?: React.ReactNode
   priceSubtext?: React.ReactNode
-  
-  // Styling modifiers
   isActive?: boolean
   className?: string
 }
@@ -37,10 +36,22 @@ export function PlanCard({
   isActive = true,
   className,
 }: PlanCardProps) {
+  const [hovered, setHovered] = React.useState(false)
+
   return (
     <Card
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        transform: hovered ? 'translateY(-6px)' : 'translateY(0)',
+        boxShadow: hovered
+          ? '0 8px 28px 0 rgba(251,99,0,0.28), 0 2px 8px 0 rgba(251,99,0,0.14)'
+          : '0 1px 3px 0 rgba(0,0,0,0.08)',
+        outline: hovered ? '2px solid #FB6300' : '2px solid transparent',
+        transition: 'transform 0.22s ease, box-shadow 0.22s ease, outline 0.22s ease',
+      }}
       className={cn(
-        "w-full border shadow-sm hover:shadow-md transition-all duration-200 rounded-2xl overflow-hidden flex flex-col h-full",
+        "w-full border rounded-2xl overflow-hidden flex flex-col h-full",
         isActive
           ? "bg-white border-gray-200"
           : "border-gray-200 bg-gray-50 opacity-75",
