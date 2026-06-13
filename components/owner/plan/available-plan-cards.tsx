@@ -21,45 +21,50 @@ export function AvailablePlanCards() {
   return (
     <>
       {availablePlans.map((plan) => (
-        <PlanCard
-          key={plan.id}
-          name={plan.nama_plan}
-          price={plan.harga}
-          period="30 Hari"
-          description="Tingkatkan efisiensi dengan akses diperluas"
-          className="bg-[#F9FAFB] max-w-sm"
-          headerBadge={
-            <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border-none">
-              Baru
-            </Badge>
-          }
-          features={[
-            {
-              icon: <Zap className="w-4 h-4" />,
-              text: "Prioritas Layanan Utama"
-            },
-            {
-              icon: <Store className="w-4 h-4" />,
-              text: plan.batas_outlet === 'Unlimited' ? 'Akses Tanpa Batas Outlet' : `Kapasitas ${plan.batas_outlet} Outlet`
-            },
-            {
-              icon: <ShieldCheck className="w-4 h-4" />,
-              text: "Keamanan Data Tingkat Lanjut"
+        <div key={plan.id} className="w-[300px] shrink-0">
+          <PlanCard
+            name={plan.nama_plan}
+            price={plan.harga}
+            description="Tingkatkan efisiensi dengan akses diperluas"
+            className="bg-[#F9FAFB]"
+            headerBadge={
+              <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border-none">
+                Baru
+              </Badge>
             }
-          ]}
-          actionButton={
-            <button
-              onClick={() => {
-                setSelectedPlanId(plan.id)
-                setUpgradeOpen(true)
-              }}
-              disabled={isPending}
-              className={`w-full text-sm font-semibold py-3 px-4 rounded-xl transition-colors cursor-pointer ${isPending ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-[#EA580C] hover:bg-[#c2410c] text-white shadow-sm'}`}
-            >
-              {isPending ? 'Menunggu Konfirmasi Upgrade' : `Tingkatkan ke ${plan.nama_plan}`}
-            </button>
-          }
-        />
+            features={[
+              {
+                icon: <Zap className="w-4 h-4" />,
+                text: 'Prioritas Layanan Utama'
+              },
+              {
+                icon: <Store className="w-4 h-4" />,
+                text: plan.batas_outlet === 'Unlimited'
+                  ? 'Akses Tanpa Batas Outlet'
+                  : `Kapasitas ${plan.batas_outlet} Outlet`
+              },
+              {
+                icon: <ShieldCheck className="w-4 h-4" />,
+                text: 'Keamanan Data Tingkat Lanjut'
+              }
+            ]}
+            actionButton={
+              <button
+                onClick={() => {
+                  setSelectedPlanId(plan.id)
+                  setUpgradeOpen(true)
+                }}
+                disabled={isPending}
+                className={`w-full text-sm font-semibold py-3 px-4 rounded-xl transition-colors cursor-pointer ${isPending
+                  ? 'bg-gray-400 text-white cursor-not-allowed'
+                  : 'bg-[#EA580C] hover:bg-[#c2410c] text-white shadow-sm'
+                  }`}
+              >
+                {isPending ? 'Menunggu Konfirmasi Upgrade' : `Tingkatkan ke ${plan.nama_plan}`}
+              </button>
+            }
+          />
+        </div>
       ))}
       <UpgradePlanDialog
         open={upgradeOpen}
