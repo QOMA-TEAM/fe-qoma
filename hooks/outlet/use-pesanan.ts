@@ -5,10 +5,10 @@ import { toast } from "sonner";
 export const PESANAN_QUERY_KEY = ["outletPesananList"];
 export const PESANAN_DETAIL_QUERY_KEY = (id: string) => ["outletPesananDetail", id];
 
-export function usePesananList(status?: string) {
+export function usePesananList(params?: { status?: string; search?: string; page?: number }) {
   return useQuery({
-    queryKey: [...PESANAN_QUERY_KEY, status],
-    queryFn: () => pesananService.getList(status),
+    queryKey: [...PESANAN_QUERY_KEY, params],
+    queryFn: () => pesananService.getList(params),
     refetchInterval: 15000, // Auto refetch tiap 15 detik agar pesanan baru terlihat
   });
 }

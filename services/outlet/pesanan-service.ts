@@ -28,6 +28,7 @@ export interface Pesanan {
   nama_pelanggan: string;
   no_telp: string | null;
   total_harga: number;
+  tipe_pesanan?: "dine_in" | "take_away";
   status: "pending" | "confirmed" | "paid" | "cancelled" | "expired";
   status_label: string;
   created_at: string;
@@ -52,9 +53,9 @@ export interface PesananListResponse {
 }
 
 export const pesananService = {
-  getList: async (status?: string): Promise<PesananListResponse> => {
+  getList: async (params?: { status?: string; search?: string; page?: number }): Promise<PesananListResponse> => {
     const response = await axiosInstance.get("/outlet/pesanan", {
-      params: { status },
+      params,
     });
     return response.data;
   },

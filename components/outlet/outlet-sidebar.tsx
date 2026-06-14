@@ -53,6 +53,11 @@ const outletNav = {
       url: "/outlet/pesanan-datang",
       icon: FolderOpen,
     },
+    {
+      title: "Riwayat Pesanan",
+      url: "/outlet/riwayat-pesanan",
+      icon: LayoutDashboard, // We can reuse LayoutDashboard or another icon, wait let me use FileBox
+    },
   ],
   kelola: [
     {

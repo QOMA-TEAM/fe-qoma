@@ -21,6 +21,7 @@ const routeMap: Record<string, { label: string; group: string }> = {
     "/outlet/menu": { label: "Menu", group: "Kelola" },
     "/outlet/stock-opname": { label: "Stock Opname", group: "Kelola" },
     "/outlet/meja": { label: "Meja", group: "Kelola" },
+    "/outlet/riwayat-pesanan": { label: "Riwayat Pesanan", group: "Sales" },
     "/outlet/detail-keuangan": { label: "Detail Keuangan", group: "Financial" },
     "/outlet/activity-log": { label: "Activity Log", group: "Financial" },
 };
