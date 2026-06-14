@@ -59,7 +59,7 @@ export function useTambahItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, items }: { id: string; items: Array<{ menu_id: string; qty: number }>; menuNama?: string; menuHarga?: number }) =>
+    mutationFn: ({ id, items }: { id: string; items: Array<{ menu_id: string; qty: number; addons?: Array<{ addon_id: string; qty: number }> }>; menuNama?: string; menuHarga?: number }) =>
       pesananService.tambahItem(id, items),
     onMutate: async (variables) => {
       await queryClient.cancelQueries({ queryKey: PESANAN_DETAIL_QUERY_KEY(variables.id) });
@@ -74,10 +74,17 @@ export function useTambahItem() {
           qty: 1,
           harga: variables.menuHarga,
           subtotal: variables.menuHarga,
-          addons: []
+          addons: (variables.items[0].addons as any[] || []).map(a => ({
+            id: `temp-addon-${Date.now()}-${a.addon_id}`,
+            nama: a.nama,
+            harga: a.harga,
+            qty: a.qty,
+            subtotal: a.harga * a.qty
+          }))
         };
         newPesanan.data.items.push(fakeItem);
-        newPesanan.data.total_harga += variables.menuHarga;
+        const addonTotal = fakeItem.addons.reduce((acc, a) => acc + a.subtotal, 0);
+        newPesanan.data.total_harga += (variables.menuHarga + addonTotal);
         queryClient.setQueryData(PESANAN_DETAIL_QUERY_KEY(variables.id), newPesanan);
       }
       return { previousPesanan };

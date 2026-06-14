@@ -80,7 +80,7 @@ export const pesananService = {
     return response.data;
   },
 
-  tambahItem: async (id: string, items: Array<{ menu_id: string; qty: number }>): Promise<PesananResponse> => {
+  tambahItem: async (id: string, items: Array<{ menu_id: string; qty: number; addons?: Array<{ addon_id: string; qty: number }> }>): Promise<PesananResponse> => {
     const response = await axiosInstance.post(`/outlet/pesanan/${id}/tambah-item`, { items });
     return response.data;
   },

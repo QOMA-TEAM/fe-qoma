@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { usePesananDetail, useKonfirmasiPesanan, useBayarPesanan, useTambahItem, useUpdateQtyItem, useHapusItem } from "@/hooks/outlet/use-pesanan";
 import { useOutletMenuList } from "@/hooks/outlet/use-menu-outlet";
 import type { PesananDetail } from "@/services/outlet/pesanan-service";
+import type { OutletMenu } from "@/services/outlet/menu-outlet-service";
 
 function QtyInput({ 
   item, 
@@ -68,6 +69,10 @@ export function CheckoutModal({
   const [isPaying, setIsPaying] = useState(false);
   const [nominal, setNominal] = useState("0");
 
+  // State for Addon Selection
+  const [selectedMenuForAddon, setSelectedMenuForAddon] = useState<OutletMenu | null>(null);
+  const [addonSelections, setAddonSelections] = useState<{ addon_id: string; qty: number; nama: string; harga: number }[]>([]);
+
   const { data: detailResponse, isLoading } = usePesananDetail(orderId || "");
   const order = detailResponse?.data;
 
@@ -85,6 +90,8 @@ export function CheckoutModal({
     if (!open) {
       setIsPaying(false);
       setNominal("0");
+      setSelectedMenuForAddon(null);
+      setAddonSelections([]);
     }
   }, [open]);
 
@@ -128,14 +135,25 @@ export function CheckoutModal({
     );
   };
 
-  const handleTambahItem = (menuId: string, menuNama: string, menuHarga: number) => {
+  const handleKlikAddMenu = (menu: OutletMenu) => {
+    if (menu.addons && menu.addons.length > 0) {
+      setSelectedMenuForAddon(menu);
+      setAddonSelections([]);
+    } else {
+      handleTambahItem(menu.id, menu.nama, menu.harga, []);
+    }
+  };
+
+  const handleTambahItem = (menuId: string, menuNama: string, menuHarga: number, addons: any[] = []) => {
     if (!orderId || !order) return;
     
-    // Cek apakah menu sudah ada di keranjang
-    const existingItem = order.items?.find((item) => item.menu_id === menuId);
+    // Cek apakah menu sudah ada di keranjang (hanya merge jika tidak pakai addon)
+    const existingItem = addons.length === 0 
+      ? order.items?.find((item) => item.menu_id === menuId && (!item.addons || item.addons.length === 0))
+      : null;
     
     if (existingItem) {
-      // Jika sudah ada, tambah qty saja
+      // Jika sudah ada dan tanpa addon, tambah qty saja
       updateQty({ 
         id: orderId, 
         detailId: existingItem.id, 
@@ -144,14 +162,37 @@ export function CheckoutModal({
         harga: menuHarga 
       });
     } else {
-      // Jika belum ada, tambah item baru
+      // Jika belum ada atau pakai addon, tambah item baru
       tambahItem({ 
         id: orderId, 
-        items: [{ menu_id: menuId, qty: 1 }],
+        items: [{ menu_id: menuId, qty: 1, addons: addons }],
         menuNama,
         menuHarga 
+      }, {
+        onSuccess: () => {
+          setSelectedMenuForAddon(null);
+          setAddonSelections([]);
+        }
       });
     }
+  };
+
+  const handleAddonQty = (addon: { id: string; nama: string; harga: number }, delta: number) => {
+    setAddonSelections(prev => {
+      const existing = prev.find(a => a.addon_id === addon.id);
+      if (existing) {
+        const newQty = existing.qty + delta;
+        if (newQty <= 0) {
+          return prev.filter(a => a.addon_id !== addon.id);
+        }
+        return prev.map(a => a.addon_id === addon.id ? { ...a, qty: newQty } : a);
+      } else {
+        if (delta > 0) {
+          return [...prev, { addon_id: addon.id, qty: 1, nama: addon.nama, harga: addon.harga }];
+        }
+        return prev;
+      }
+    });
   };
 
   const handleHapusItem = (detailId: string) => {
@@ -416,38 +457,106 @@ export function CheckoutModal({
 
             {/* SISI KANAN */}
             {!isPaying ? (
-              // VIEW: TAMBAH PESANAN (GALLERY)
+              // VIEW: TAMBAH PESANAN (GALLERY) ATAU ADDON
               <div className="w-1/2 bg-white flex flex-col h-full rounded-r-3xl border-l border-gray-100">
-                <div className="p-8 pb-4">
-                  <h2 className="text-[22px] font-bold text-center text-[#1E293B] mb-2">
-                    Tambah Pesanan
-                  </h2>
-                </div>
+                {selectedMenuForAddon ? (
+                  <>
+                    <div className="p-8 pb-4 relative">
+                      <button 
+                        onClick={() => setSelectedMenuForAddon(null)}
+                        className="absolute left-6 top-8 text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="w-6 h-6" />
+                      </button>
+                      <h2 className="text-[22px] font-bold text-center text-[#1E293B] mb-2 px-8">
+                        Pilih Add-on
+                      </h2>
+                      <p className="text-center text-sm font-semibold text-gray-600">
+                        {selectedMenuForAddon.nama}
+                      </p>
+                    </div>
+                    <div className="flex-1 overflow-y-auto px-8 pb-4 space-y-3">
+                      {selectedMenuForAddon.addons?.map((addon) => {
+                        const selectedAddon = addonSelections.find((a) => a.addon_id === addon.id);
+                        const qty = selectedAddon ? selectedAddon.qty : 0;
+                        return (
+                          <div key={addon.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl">
+                            <div>
+                              <p className="font-bold text-gray-800 text-sm">{addon.nama}</p>
+                              <p className="font-medium text-[#3874BC] text-xs">+{formatRp(addon.harga)}</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              {qty > 0 ? (
+                                <>
+                                  <button 
+                                    onClick={() => handleAddonQty(addon, -1)}
+                                    className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-gray-600 hover:bg-slate-200"
+                                  >
+                                    <Minus className="w-4 h-4" />
+                                  </button>
+                                  <span className="font-semibold text-sm w-4 text-center">{qty}</span>
+                                  <button 
+                                    onClick={() => handleAddonQty(addon, 1)}
+                                    className="w-7 h-7 rounded-full bg-[#3874BC] flex items-center justify-center text-white hover:bg-[#2c5b96]"
+                                  >
+                                    <Plus className="w-4 h-4" />
+                                  </button>
+                                </>
+                              ) : (
+                                <button 
+                                  onClick={() => handleAddonQty(addon, 1)}
+                                  className="text-xs font-bold text-[#3874BC] border border-[#3874BC] rounded-full px-4 py-1 hover:bg-blue-50"
+                                >
+                                  Tambah
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="p-6 border-t border-gray-100">
+                      <Button
+                        onClick={() => handleTambahItem(selectedMenuForAddon.id, selectedMenuForAddon.nama, selectedMenuForAddon.harga, addonSelections)}
+                        disabled={isAddingItem || isUpdatingQty}
+                        className="w-full h-12 bg-[#3874BC] hover:bg-[#2c5b96] rounded-xl text-white font-semibold"
+                      >
+                        {isAddingItem ? <Loader2 className="w-5 h-5 animate-spin" /> : "Tambahkan ke Pesanan"}
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="p-8 pb-4">
+                      <h2 className="text-[22px] font-bold text-center text-[#1E293B] mb-2">
+                        Tambah Pesanan
+                      </h2>
+                    </div>
 
-                <div className="flex-1 overflow-y-auto px-8 pb-8">
-                  {isLoadingMenus ? (
-                    <div className="flex flex-col items-center justify-center h-full">
-                      <Loader2 className="w-8 h-8 animate-spin text-[#3874BC] mb-2" />
-                      <p className="text-sm text-gray-500">Memuat daftar menu...</p>
-                    </div>
-                  ) : menusError ? (
-                    <div className="flex flex-col items-center justify-center h-full text-red-500">
-                      <p className="text-sm font-medium">Gagal memuat menu</p>
-                    </div>
-                  ) : !menus || menus.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                      <p className="text-sm">Belum ada menu yang tersedia.</p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-3 gap-4">
-                      {menus.map((menu) => (
-                        <div
-                          key={menu.id}
-                          className={cn(
-                            "flex flex-col bg-white border rounded-2xl overflow-hidden shadow-sm pb-3 transition-shadow relative",
-                            menu.is_available ? "border-gray-100 hover:shadow-md" : "border-gray-200 opacity-60 grayscale"
-                          )}
-                        >
+                    <div className="flex-1 overflow-y-auto px-8 pb-8">
+                      {isLoadingMenus ? (
+                        <div className="flex flex-col items-center justify-center h-full">
+                          <Loader2 className="w-8 h-8 animate-spin text-[#3874BC] mb-2" />
+                          <p className="text-sm text-gray-500">Memuat daftar menu...</p>
+                        </div>
+                      ) : menusError ? (
+                        <div className="flex flex-col items-center justify-center h-full text-red-500">
+                          <p className="text-sm font-medium">Gagal memuat menu</p>
+                        </div>
+                      ) : !menus || menus.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                          <p className="text-sm">Belum ada menu yang tersedia.</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-3 gap-4">
+                          {menus.map((menu) => (
+                            <div
+                              key={menu.id}
+                              className={cn(
+                                "flex flex-col bg-white border rounded-2xl overflow-hidden shadow-sm pb-3 transition-shadow relative",
+                                menu.is_available ? "border-gray-100 hover:shadow-md" : "border-gray-200 opacity-60 grayscale"
+                              )}
+                            >
                           <div className="w-full aspect-square bg-slate-100 relative">
                             <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-xs font-medium">
                               {menu.is_available ? "Gambar Menu" : "Habis"}
@@ -461,7 +570,7 @@ export function CheckoutModal({
                               {formatRp(menu.harga)}
                             </p>
                             <button 
-                              onClick={() => handleTambahItem(menu.id, menu.nama, menu.harga)}
+                              onClick={() => handleKlikAddMenu(menu)}
                               disabled={!menu.is_available || isAddingItem || isUpdatingQty}
                               className="mt-2 text-[10px] font-bold text-[#3874BC] border border-[#3874BC] rounded-md px-4 py-1 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
@@ -473,8 +582,10 @@ export function CheckoutModal({
                     </div>
                   )}
                 </div>
-              </div>
-            ) : (
+              </>
+            )}
+          </div>
+        ) : (
               // VIEW: RINGKASAN MENU (saat di layar pembayaran)
               <div className="w-1/2 bg-white flex flex-col h-full rounded-r-3xl border-l border-gray-100">
                 <div className="p-8 pb-4">

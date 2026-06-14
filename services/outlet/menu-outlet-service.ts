@@ -15,6 +15,11 @@ export interface OutletMenu {
   keterangan: string | null;
   is_available: boolean;
   bahan_baku: BahanBakuMenu[];
+  addons?: {
+    id: string;
+    nama: string;
+    harga: number;
+  }[];
 }
 
 export interface OutletMenuResponse {

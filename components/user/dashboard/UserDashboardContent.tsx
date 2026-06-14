@@ -270,10 +270,7 @@ export function UserDashboardContent() {
       <OrderCompletedModal
         tableNumber={tableNumber}
         orderId={orderId}
-        customerName={customerName}
-        phoneNumber={phoneNumber}
-        paidAt={paidAt}
-        orderItems={orderItems}
+        outletId={validasiData?.outlet.id || ""}
         onNewOrder={handleNewOrder}
       />
     );
