@@ -81,4 +81,13 @@ export const bahanBakuService = {
     const response = await axiosInstance.post("/outlet/bahan-baku", data);
     return response.data;
   },
+
+  ajukanPerubahanHarga: async (data: {
+    bahan_outlet_id: string;
+    harga_baru: number;
+    alasan: string;
+  }) => {
+    const response = await axiosInstance.post("/outlet/approval-harga-bahan", data);
+    return response.data;
+  },
 };
