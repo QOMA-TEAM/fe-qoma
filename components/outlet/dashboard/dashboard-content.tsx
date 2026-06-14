@@ -10,12 +10,10 @@ import { NotificationFeed } from "@/components/outlet/dashboard/notification-fee
 import { Loader2, Store, Settings, Bell } from "lucide-react";
 import { useState } from "react";
 import { ChangePasswordDialog } from "@/components/settings/change-password-dialog";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { OutletSettingsContent } from "@/components/outlet/outlet-settings-content";
 
 export function OutletDashboardContent() {
   const { data: response, isLoading, isError } = useOutletDashboard();
-  const { mutate: toggleStatus, isPending } = useToggleOutletStatus();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   if (isLoading) {
@@ -89,22 +87,7 @@ export function OutletDashboardContent() {
       </header>
 
       <ChangePasswordDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label className="text-base font-semibold">Status Outlet</Label>
-            <p className="text-sm text-gray-500">
-              {outlet.status_buka ? "Outlet saat ini sedang Buka" : "Outlet saat ini sedang Tutup"}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Switch
-              checked={outlet.status_buka}
-              onCheckedChange={() => toggleStatus()}
-              aria-label="Toggle outlet status"
-              className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-red-500"
-            />
-          </div>
-        </div>
+        <OutletSettingsContent outlet={outlet} />
       </ChangePasswordDialog>
 
       <main className="flex-1 overflow-auto p-8 space-y-8">
