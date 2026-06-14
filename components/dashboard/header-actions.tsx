@@ -20,9 +20,11 @@ import { id } from "date-fns/locale"
 
 interface HeaderActionsProps {
   extraNotifications?: any[];
+  onMarkAlertRead?: (id: string) => void;
+  onMarkAllAlertsRead?: () => void;
 }
 
-export function HeaderActions({ extraNotifications = [] }: HeaderActionsProps = {}) {
+export function HeaderActions({ extraNotifications = [], onMarkAlertRead, onMarkAllAlertsRead }: HeaderActionsProps = {}) {
   const { data: unreadData } = useUnreadNotificationCount();
   const { data: notifData, isLoading } = useNotifications(1, 10);
   const markRead = useMarkNotificationRead();
@@ -57,9 +59,12 @@ export function HeaderActions({ extraNotifications = [] }: HeaderActionsProps = 
               <span className="font-semibold text-sm text-gray-900">Notifikasi</span>
               {unreadCount > 0 && (
                 <button 
-                  onClick={() => markAllRead.mutate()}
-                  disabled={markAllRead.isPending || fetchedUnreadCount === 0}
-                  className="text-xs text-orange-600 hover:text-orange-700 font-medium disabled:opacity-50"
+                  onClick={() => {
+                    markAllRead.mutate();
+                    if (onMarkAllAlertsRead) onMarkAllAlertsRead();
+                  }}
+                  disabled={(markAllRead.isPending && fetchedUnreadCount > 0) || unreadCount === 0}
+                  className="text-xs text-orange-600 hover:text-orange-700 font-medium disabled:opacity-50 cursor-pointer"
                 >
                   Tandai semua dibaca
                 </button>
@@ -87,8 +92,12 @@ export function HeaderActions({ extraNotifications = [] }: HeaderActionsProps = 
                       key={notif.id}
                       className="flex flex-col items-start px-4 py-3 gap-1 cursor-pointer focus:bg-gray-50 border-b last:border-0 rounded-none relative overflow-hidden group"
                       onClick={() => {
-                        if (!notif.is_read && !notif.id.startsWith('alert-')) {
-                          markRead.mutate(notif.id);
+                        if (!notif.is_read) {
+                          if (notif.id.startsWith('alert-')) {
+                            if (onMarkAlertRead) onMarkAlertRead(notif.id);
+                          } else {
+                            markRead.mutate(notif.id);
+                          }
                         }
                       }}
                     >

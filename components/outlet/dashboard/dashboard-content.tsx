@@ -8,13 +8,23 @@ import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { CustomersChart } from "@/components/dashboard/customers-chart";
 import { NotificationFeed } from "@/components/outlet/dashboard/notification-feed";
 import { Loader2, Store, Settings, Bell } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChangePasswordDialog } from "@/components/settings/change-password-dialog";
 import { OutletSettingsContent } from "@/components/outlet/outlet-settings-content";
 
 export function OutletDashboardContent() {
   const { data: response, isLoading, isError } = useOutletDashboard();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [readAlerts, setReadAlerts] = useState<string[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("qoma_read_alerts");
+    if (saved) {
+      try {
+        setReadAlerts(JSON.parse(saved));
+      } catch (e) {}
+    }
+  }, []);
 
   if (isLoading) {
     return (
@@ -33,6 +43,20 @@ export function OutletDashboardContent() {
   }
 
   const { outlet, keuangan_7_hari, alert_summary, grafik_pendapatan, alerts } = response.data;
+
+  const handleMarkAlertRead = (alertId: string) => {
+    if (!readAlerts.includes(alertId)) {
+      const newReadAlerts = [...readAlerts, alertId];
+      setReadAlerts(newReadAlerts);
+      localStorage.setItem("qoma_read_alerts", JSON.stringify(newReadAlerts));
+    }
+  };
+
+  const handleMarkAllAlertsRead = (alertIds: string[]) => {
+    const newReadAlerts = Array.from(new Set([...readAlerts, ...alertIds]));
+    setReadAlerts(newReadAlerts);
+    localStorage.setItem("qoma_read_alerts", JSON.stringify(newReadAlerts));
+  };
 
   // Format the chart data from the backend
   const chartData = grafik_pendapatan?.map((item) => {
@@ -56,14 +80,17 @@ export function OutletDashboardContent() {
     ...(alerts?.stok_menipis?.map((a: any) => ({ ...a, type: 'stok_menipis' })) || [])
   ];
 
-  const extraNotifications = flattenedAlerts.map((alert, idx) => ({
-    id: `alert-${idx}`,
-    title: alert.type === 'stok_menipis' ? 'Peringatan Stok' : 'Peringatan Kedaluwarsa',
-    message: alert.pesan,
-    is_read: false,
-    created_at: new Date().toISOString(),
-    type: alert.type,
-  }));
+  const extraNotifications = flattenedAlerts.map((alert) => {
+    const id = `alert-${alert.type}-${alert.bahan}`;
+    return {
+      id,
+      title: alert.type === 'stok_menipis' ? 'Peringatan Stok' : 'Peringatan Kedaluwarsa',
+      message: alert.pesan,
+      is_read: readAlerts.includes(id),
+      created_at: new Date().toISOString(),
+      type: alert.type,
+    };
+  });
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
@@ -82,7 +109,11 @@ export function OutletDashboardContent() {
             <Settings className="size-4" />
           </button>
 
-          <HeaderActions extraNotifications={extraNotifications} />
+          <HeaderActions 
+            extraNotifications={extraNotifications} 
+            onMarkAlertRead={handleMarkAlertRead}
+            onMarkAllAlertsRead={() => handleMarkAllAlertsRead(extraNotifications.map(n => n.id))}
+          />
         </div>
       </header>
 
