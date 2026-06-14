@@ -161,3 +161,19 @@ export function useHapusItem() {
     },
   });
 }
+
+export function useCancelPesanan() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => pesananService.cancel(id),
+    onSuccess: (data) => {
+      toast.success(data.message);
+      queryClient.setQueryData(PESANAN_DETAIL_QUERY_KEY(data.data.id), data);
+      queryClient.invalidateQueries({ queryKey: PESANAN_QUERY_KEY });
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Gagal membatalkan pesanan");
+    },
+  });
+}

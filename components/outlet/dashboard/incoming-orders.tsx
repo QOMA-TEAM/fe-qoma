@@ -14,9 +14,9 @@ export function IncomingOrders() {
   // Ambil semua pesanan (kecuali expired)
   const { data: pesananResponse, isLoading, isError } = usePesananList();
 
-  // Filter yang belum lunas (pending atau confirmed) dan ambil 3 teratas
+  // Filter yang belum lunas (pending, confirmed, atau expired) dan ambil 3 teratas
   const activeOrders = pesananResponse?.data
-    ?.filter((o) => o.status === "pending" || o.status === "confirmed")
+    ?.filter((o) => o.status === "pending" || o.status === "confirmed" || o.status === "expired")
     ?.slice(0, 3) || [];
 
   return (
