@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { MenuItem } from "@/components/user/MenuDetailModal";
 
 export interface OrderItem {
-  id: string; // unique per order line
+  id: string;
   menu: MenuItem;
   selectedToppings: string[];
   selectedToppingsData?: { id: string; name: string; price: number }[];
@@ -25,7 +25,7 @@ interface CheckoutModalProps {
   recommendedItems: MenuItem[];
   tableNumber?: string;
   onBack: () => void;
-  onAddItem: () => void; // kembali ke main untuk tambah item
+  onAddItem: () => void;
   onEditItem: (item: OrderItem) => void;
   onAddRecommended: (menu: MenuItem) => void;
   onPayment: (customerName: string, phoneNumber: string) => void;
@@ -96,9 +96,7 @@ export function CheckoutModal({
             {/* ── Recommended Menu ── */}
             {recommendedItems.length > 0 && (
               <section className="bg-white rounded-2xl p-5 shadow-sm">
-                <h2 className="font-bold text-gray-900 text-lg mb-4">
-                  Foods For You
-                </h2>
+                <h2 className="font-bold text-gray-900 text-lg mb-4">Foods For You</h2>
                 <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
                   {recommendedItems.map((item) => (
                     <div
@@ -107,28 +105,16 @@ export function CheckoutModal({
                       onClick={() => onAddRecommended(item)}
                     >
                       <div className="relative w-full aspect-square">
-                        <Image
-                          src={item.image}
-                          alt={item.name}
-                          fill
-                          className="object-cover"
-                        />
+                        <Image src={item.image} alt={item.name} fill className="object-cover" />
                       </div>
                       <div className="p-2">
-                        <p className="font-semibold text-gray-800 text-xs truncate">
-                          {item.name}
-                        </p>
-                        <p className="text-gray-600 text-xs mt-0.5">
-                          Rp. {item.price.toLocaleString("id-ID")}
-                        </p>
+                        <p className="font-semibold text-gray-800 text-xs truncate">{item.name}</p>
+                        <p className="text-gray-600 text-xs mt-0.5">Rp. {item.price.toLocaleString("id-ID")}</p>
                         <Button
                           variant="outline"
                           size="sm"
                           className="mt-1.5 w-full text-xs h-7 border-orange-300 text-orange-500 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onAddRecommended(item);
-                          }}
+                          onClick={(e) => { e.stopPropagation(); onAddRecommended(item); }}
                         >
                           Add
                         </Button>
@@ -161,45 +147,21 @@ export function CheckoutModal({
               ) : (
                 <div className="flex flex-col gap-3">
                   {orderItems.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center gap-3 border border-gray-100 rounded-xl p-3"
-                    >
+                    <div key={item.id} className="flex items-center gap-3 border border-gray-100 rounded-xl p-3">
                       <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                        <Image
-                          src={item.menu.image}
-                          alt={item.menu.name}
-                          fill
-                          className="object-cover"
-                        />
+                        <Image src={item.menu.image} alt={item.menu.name} fill className="object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-800 text-sm">
-                          {item.menu.name}
-                        </p>
-                        <p className="text-gray-400 text-xs line-clamp-1 mt-0.5">
-                          {item.menu.description}
-                        </p>
+                        <p className="font-semibold text-gray-800 text-sm">{item.menu.name}</p>
+                        <p className="text-gray-400 text-xs line-clamp-1 mt-0.5">{item.menu.description}</p>
                         <p className="text-gray-700 text-xs font-medium mt-1">
-                          {item.qty > 1 && (
-                            <span className="text-gray-500 mr-1">
-                              {item.qty}x
-                            </span>
-                          )}
+                          {item.qty > 1 && <span className="text-gray-500 mr-1">{item.qty}x</span>}
                           Rp. {(item.totalPrice / item.qty).toLocaleString("id-ID")}
-                          {item.qty > 1 && (
-                            <span className="font-bold ml-2">
-                              = Rp. {item.totalPrice.toLocaleString("id-ID")}
-                            </span>
-                          )}
+                          {item.qty > 1 && <span className="font-bold ml-2">= Rp. {item.totalPrice.toLocaleString("id-ID")}</span>}
                         </p>
                         {item.selectedToppingsData && item.selectedToppingsData.length > 0 && (
                           <p className="text-gray-400 text-xs mt-0.5">
-                            +{" "}
-                            {item.selectedToppingsData
-                              .map((t) => t.name)
-                              .filter(Boolean)
-                              .join(", ")}
+                            + {item.selectedToppingsData.map((t) => t.name).filter(Boolean).join(", ")}
                           </p>
                         )}
                       </div>
@@ -239,9 +201,7 @@ export function CheckoutModal({
           <>
             {/* ── Customer Information ── */}
             <section className="bg-white rounded-2xl p-5 shadow-sm space-y-4">
-              <h2 className="font-bold text-gray-900 text-lg">
-                Customer Information
-              </h2>
+              <h2 className="font-bold text-gray-900 text-lg">Customer Information</h2>
               <div className="space-y-1.5">
                 <Label className="text-sm text-gray-700">Name :</Label>
                 <Input
@@ -253,9 +213,7 @@ export function CheckoutModal({
                   }}
                   className={`rounded-xl ${nameError ? "border-red-400 focus-visible:ring-red-300" : ""}`}
                 />
-                {nameError && (
-                  <p className="text-xs text-red-500">Name is required.</p>
-                )}
+                {nameError && <p className="text-xs text-red-500">Name is required.</p>}
               </div>
               <div className="space-y-1.5">
                 <Label className="text-sm text-gray-700">Phone Number (Optional) :</Label>
@@ -270,15 +228,42 @@ export function CheckoutModal({
             </section>
 
             {/* ── Dine In Banner ── */}
-            <div className="w-full bg-orange-100 text-orange-500 text-center py-3.5 rounded-xl font-semibold mt-4">
+            <div className="w-full bg-orange-100 text-orange-500 text-center py-3.5 rounded-xl font-semibold">
               Makan di tempat
             </div>
 
+            {/* ── Ordered Menu Summary ── */}
+            <section className="bg-white rounded-2xl p-5 shadow-sm">
+              <h2 className="font-bold text-gray-900 text-lg mb-3">Ordered Menu</h2>
+              <div className="flex flex-col gap-3">
+                {orderItems.map((item) => (
+                  <div key={item.id} className="flex items-center gap-3 border-b border-gray-50 pb-3 last:border-0 last:pb-0">
+                    <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                      <Image src={item.menu.image} alt={item.menu.name} fill className="object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-800 text-sm truncate">{item.menu.name}</p>
+                      {item.selectedToppingsData && item.selectedToppingsData.length > 0 && (
+                        <p className="text-gray-400 text-xs mt-0.5 truncate">
+                          + {item.selectedToppingsData.map((t) => t.name).filter(Boolean).join(", ")}
+                        </p>
+                      )}
+                      {item.note && (
+                        <p className="text-gray-400 text-xs italic mt-0.5 truncate">Catatan: {item.note}</p>
+                      )}
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-xs text-gray-500">{item.qty}x</p>
+                      <p className="font-bold text-gray-800 text-sm">Rp. {item.totalPrice.toLocaleString("id-ID")}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
             {/* ── Payment Detail ── */}
-            <section className="bg-white rounded-2xl p-5 shadow-sm mt-4">
-              <h2 className="font-bold text-gray-900 text-lg text-center mb-4">
-                Payment Detail
-              </h2>
+            <section className="bg-white rounded-2xl p-5 shadow-sm">
+              <h2 className="font-bold text-gray-900 text-lg text-center mb-4">Payment Detail</h2>
               <div className="space-y-2.5">
                 <div className="flex justify-between text-sm text-gray-500">
                   <span>Subtotal</span>
@@ -294,7 +279,7 @@ export function CheckoutModal({
 
             {/* ── Payment Button ── */}
             <Button
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl h-14 text-base mt-4"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl h-14 text-base"
               onClick={handlePayment}
               disabled={isLoading}
             >

@@ -71,8 +71,10 @@ export function OrderPendingPage({
       onConfirmed();
     } else if (orderData?.status === "paid" && onPaid) {
       onPaid();
+    } else if (orderData?.status === "cancelled") {
+      onCancel();
     }
-  }, [orderData?.status, onConfirmed, onPaid]);
+  }, [orderData?.status, onConfirmed, onPaid, onCancel]);
 
   const minutes = Math.floor(secondsLeft / 60)
     .toString()
