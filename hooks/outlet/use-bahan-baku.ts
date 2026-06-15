@@ -36,3 +36,15 @@ export function useRestockBahanBaku() {
     },
   });
 }
+
+export function useAjukanPerubahanHargaBahan() {
+  return useMutation({
+    mutationFn: bahanBakuService.ajukanPerubahanHarga,
+    onSuccess: (data) => {
+      toast.success(data.message || "Permohonan perubahan harga berhasil dikirim!");
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Gagal mengajukan perubahan harga");
+    },
+  });
+}

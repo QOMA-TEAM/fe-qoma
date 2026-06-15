@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { User, Table2, Minus, Plus, Delete, Loader2, CheckCircle2, X, Banknote, QrCode, CreditCard } from "lucide-react";
+import { User, Table2, Minus, Plus, Delete, Loader2, CheckCircle2, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { usePesananDetail, useKonfirmasiPesanan, useBayarPesanan, useTambahItem, useUpdateQtyItem, useHapusItem } from "@/hooks/outlet/use-pesanan";
+import { usePesananDetail, useKonfirmasiPesanan, useBayarPesanan, useTambahItem, useUpdateQtyItem, useHapusItem, useUpdateTipePesanan } from "@/hooks/outlet/use-pesanan";
 import { useOutletMenuList } from "@/hooks/outlet/use-menu-outlet";
 import type { PesananDetail } from "@/services/outlet/pesanan-service";
-
-type PaymentMethod = "tunai" | "qris" | "debit";
+import type { OutletMenu } from "@/services/outlet/menu-outlet-service";
 
 function QtyInput({
   item,
@@ -38,7 +37,7 @@ function QtyInput({
         harga: item.harga
       });
     } else {
-      setVal(item.qty.toString());
+      setVal(item.qty.toString()); // revert jika tidak valid (termasuk jika 0)
     }
   };
 
@@ -66,9 +65,13 @@ export function CheckoutModal({
   open,
   onOpenChange,
 }: CheckoutModalProps) {
+  // State for Payment Screen
   const [isPaying, setIsPaying] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("tunai");
   const [nominal, setNominal] = useState("0");
+
+  // State for Addon Selection
+  const [selectedMenuForAddon, setSelectedMenuForAddon] = useState<OutletMenu | null>(null);
+  const [addonSelections, setAddonSelections] = useState<{ addon_id: string; qty: number; nama: string; harga: number }[]>([]);
 
   const { data: detailResponse, isLoading } = usePesananDetail(orderId || "");
   const order = detailResponse?.data;
@@ -81,19 +84,17 @@ export function CheckoutModal({
   const { mutate: tambahItem, isPending: isAddingItem } = useTambahItem();
   const { mutate: updateQty, isPending: isUpdatingQty } = useUpdateQtyItem();
   const { mutate: hapusItem, isPending: isDeletingItem } = useHapusItem();
+  const { mutate: updateTipe, isPending: isUpdatingTipe } = useUpdateTipePesanan();
 
+  // Reset state when opened/closed
   useEffect(() => {
     if (!open) {
       setIsPaying(false);
       setNominal("0");
-      setPaymentMethod("tunai");
+      setSelectedMenuForAddon(null);
+      setAddonSelections([]);
     }
   }, [open]);
-
-  // Reset nominal when switching payment method
-  useEffect(() => {
-    setNominal("0");
-  }, [paymentMethod]);
 
   if (!open) return null;
 
@@ -126,7 +127,7 @@ export function CheckoutModal({
   const handlePay = () => {
     if (!orderId) return;
     payOrder(
-      { id: orderId, metode: paymentMethod },
+      { id: orderId, metode: "tunai" },
       {
         onSuccess: () => {
           onOpenChange(false);
@@ -135,10 +136,25 @@ export function CheckoutModal({
     );
   };
 
-  const handleTambahItem = (menuId: string, menuNama: string, menuHarga: number) => {
+  const handleKlikAddMenu = (menu: OutletMenu) => {
+    if (menu.addons && menu.addons.length > 0) {
+      setSelectedMenuForAddon(menu);
+      setAddonSelections([]);
+    } else {
+      handleTambahItem(menu.id, menu.nama, menu.harga, []);
+    }
+  };
+
+  const handleTambahItem = (menuId: string, menuNama: string, menuHarga: number, addons: any[] = []) => {
     if (!orderId || !order) return;
-    const existingItem = order.items?.find((item) => item.menu_id === menuId);
+
+    // Cek apakah menu sudah ada di keranjang (hanya merge jika tidak pakai addon)
+    const existingItem = addons.length === 0
+      ? order.items?.find((item) => item.menu_id === menuId && (!item.addons || item.addons.length === 0))
+      : null;
+
     if (existingItem) {
+      // Jika sudah ada dan tanpa addon, tambah qty saja
       updateQty({
         id: orderId,
         detailId: existingItem.id,
@@ -147,13 +163,37 @@ export function CheckoutModal({
         harga: menuHarga
       });
     } else {
+      // Jika belum ada atau pakai addon, tambah item baru
       tambahItem({
         id: orderId,
-        items: [{ menu_id: menuId, qty: 1 }],
+        items: [{ menu_id: menuId, qty: 1, addons: addons }],
         menuNama,
         menuHarga
+      }, {
+        onSuccess: () => {
+          setSelectedMenuForAddon(null);
+          setAddonSelections([]);
+        }
       });
     }
+  };
+
+  const handleAddonQty = (addon: { id: string; nama: string; harga: number }, delta: number) => {
+    setAddonSelections(prev => {
+      const existing = prev.find(a => a.addon_id === addon.id);
+      if (existing) {
+        const newQty = existing.qty + delta;
+        if (newQty <= 0) {
+          return prev.filter(a => a.addon_id !== addon.id);
+        }
+        return prev.map(a => a.addon_id === addon.id ? { ...a, qty: newQty } : a);
+      } else {
+        if (delta > 0) {
+          return [...prev, { addon_id: addon.id, qty: 1, nama: addon.nama, harga: addon.harga }];
+        }
+        return prev;
+      }
+    });
   };
 
   const handleHapusItem = (detailId: string) => {
@@ -164,17 +204,6 @@ export function CheckoutModal({
   const totalBelanja = order?.total_harga || 0;
   const nominalNumber = parseFloat(nominal) || 0;
   const kembalian = Math.max(0, nominalNumber - totalBelanja);
-
-  // ── Payment method config ────────────────────────────────────────────────
-  const paymentMethods: { id: PaymentMethod; label: string; icon: React.ReactNode }[] = [
-    { id: "tunai", label: "Tunai", icon: <Banknote className="w-4 h-4" /> },
-    { id: "qris", label: "QRIS", icon: <QrCode className="w-4 h-4" /> },
-    { id: "debit", label: "Debit", icon: <CreditCard className="w-4 h-4" /> },
-  ];
-
-  // Determine if non-cash method can proceed (always true for confirmation flow)
-  const canPayNonCash = paymentMethod !== "tunai";
-  const canPayCash = paymentMethod === "tunai" && nominalNumber >= totalBelanja;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -190,45 +219,105 @@ export function CheckoutModal({
           </div>
         ) : (
           <div className="flex flex-1 h-full overflow-hidden">
-
-            {/* ── SISI KIRI ─────────────────────────────────────────────── */}
+            {/* SISI KIRI */}
             {!isPaying ? (
               // VIEW: CART CHECKOUT
               <div className="w-1/2 bg-white flex flex-col h-full rounded-l-3xl">
                 <div className="p-8 pb-4">
-                  <h2 className="text-[22px] font-bold text-center text-[#1E293B] mb-6">Checkout</h2>
+                  <h2 className="text-[22px] font-bold text-center text-[#1E293B] mb-6">
+                    Checkout
+                  </h2>
 
-                  <div className="flex items-center gap-4 mb-6">
+                  {/* Info Pelanggan & Meja */}
+                  <div className="flex items-center gap-4 mb-4">
                     <div className="flex-1 bg-slate-100/80 rounded-xl p-3 flex items-center gap-3">
-                      <div className="text-orange-700"><User className="size-5 fill-current" /></div>
+                      <div className="text-orange-700">
+                        <User className="size-5 fill-current" />
+                      </div>
                       <div className="flex flex-col">
-                        <span className="text-xs text-gray-500 font-medium">Nama :</span>
-                        <span className="text-sm font-semibold text-gray-800">{order.nama_pelanggan}</span>
+                        <span className="text-xs text-gray-500 font-medium">
+                          Nama :
+                        </span>
+                        <span className="text-sm font-semibold text-gray-800">
+                          {order.nama_pelanggan}
+                        </span>
                       </div>
                     </div>
                     <div className="flex-1 bg-slate-100/80 rounded-xl p-3 flex items-center gap-3">
-                      <div className="text-orange-700"><Table2 className="size-5" /></div>
+                      <div className="text-orange-700">
+                        <Table2 className="size-5" />
+                      </div>
                       <div className="flex flex-col">
-                        <span className="text-xs text-gray-500 font-medium">No. Meja</span>
-                        <span className="text-sm font-semibold text-gray-800">{order.nomor_meja}</span>
+                        <span className="text-xs text-gray-500 font-medium">
+                          No. Meja
+                        </span>
+                        <span className="text-sm font-semibold text-gray-800">
+                          {order.nomor_meja}
+                        </span>
                       </div>
                     </div>
                   </div>
 
+                  {/* Tipe Pesanan Toggle */}
+                  <div className="flex items-center bg-slate-100/80 p-1 rounded-xl mb-6 w-full max-w-[280px] mx-auto">
+                    <button
+                      onClick={() => updateTipe({ id: order.id, tipe_pesanan: "dine_in" })}
+                      disabled={isUpdatingTipe || order.status !== "pending"}
+                      className={cn(
+                        "flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all",
+                        order.tipe_pesanan === "dine_in" || !order.tipe_pesanan
+                          ? "bg-white text-orange-600 shadow-sm"
+                          : "text-gray-500 hover:text-gray-700"
+                      )}
+                    >
+                      Dine In
+                    </button>
+                    <button
+                      onClick={() => updateTipe({ id: order.id, tipe_pesanan: "take_away" })}
+                      disabled={isUpdatingTipe || order.status !== "pending"}
+                      className={cn(
+                        "flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all",
+                        order.tipe_pesanan === "take_away"
+                          ? "bg-white text-orange-600 shadow-sm"
+                          : "text-gray-500 hover:text-gray-700"
+                      )}
+                    >
+                      Take Away
+                    </button>
+                  </div>
+
+                  {/* Table Header */}
                   <div className="grid grid-cols-12 gap-4 bg-slate-100/80 px-4 py-2 rounded-lg mb-2">
-                    <div className="col-span-5 text-sm font-medium text-gray-400 text-center">Name</div>
-                    <div className="col-span-3 text-sm font-medium text-gray-400 text-center">QTY</div>
-                    <div className="col-span-4 text-sm font-medium text-gray-400 text-center">Price</div>
+                    <div className="col-span-5 text-sm font-medium text-gray-400 text-center">
+                      Name
+                    </div>
+                    <div className="col-span-3 text-sm font-medium text-gray-400 text-center">
+                      QTY
+                    </div>
+                    <div className="col-span-4 text-sm font-medium text-gray-400 text-center">
+                      Price
+                    </div>
                   </div>
                 </div>
 
+                {/* List Order Items */}
                 <div className="flex-1 overflow-y-auto px-8 space-y-1">
                   {order.items?.map((item) => (
-                    <div key={item.id} className="flex flex-col px-4 py-3 border-b border-gray-50">
+                    <div
+                      key={item.id}
+                      className="flex flex-col px-4 py-3 border-b border-gray-50"
+                    >
                       <div className="grid grid-cols-12 gap-4 items-center">
-                        <div className="col-span-5 text-sm font-bold text-gray-800 line-clamp-2 leading-tight">{item.nama}</div>
+                        <div className="col-span-5 text-sm font-bold text-gray-800 line-clamp-2 leading-tight">
+                          {item.nama}
+                        </div>
                         <div className="col-span-3 flex items-center justify-center gap-1">
-                          <QtyInput item={item} orderId={orderId!} updateQty={updateQty} isUpdating={isUpdatingQty} />
+                          <QtyInput
+                            item={item}
+                            orderId={orderId!}
+                            updateQty={updateQty}
+                            isUpdating={isUpdatingQty}
+                          />
                           <button
                             onClick={() => handleHapusItem(item.id)}
                             disabled={isDeletingItem}
@@ -238,15 +327,25 @@ export function CheckoutModal({
                             <X className="w-4 h-4" />
                           </button>
                         </div>
-                        <div className="col-span-4 text-sm font-bold text-gray-800 text-center whitespace-nowrap">{formatRp(item.subtotal)}</div>
+                        <div className="col-span-4 text-sm font-bold text-gray-800 text-center whitespace-nowrap">
+                          {formatRp(item.subtotal)}
+                        </div>
                       </div>
+
+                      {/* Add-ons rendering */}
                       {item.addons && item.addons.length > 0 && (
                         <div className="mt-2 pl-2 border-l-2 border-orange-200 space-y-1">
                           {item.addons.map((addon) => (
                             <div key={addon.id} className="grid grid-cols-12 gap-4 items-center">
-                              <div className="col-span-5 text-[11px] font-medium text-gray-500 truncate">+ {addon.nama}</div>
-                              <div className="col-span-3 text-[11px] font-medium text-gray-500 text-center">x{addon.qty}</div>
-                              <div className="col-span-4 text-[11px] font-medium text-gray-500 text-center whitespace-nowrap">{formatRp(addon.subtotal)}</div>
+                              <div className="col-span-5 text-[11px] font-medium text-gray-500 truncate">
+                                + {addon.nama}
+                              </div>
+                              <div className="col-span-3 text-[11px] font-medium text-gray-500 text-center">
+                                x{addon.qty}
+                              </div>
+                              <div className="col-span-4 text-[11px] font-medium text-gray-500 text-center whitespace-nowrap">
+                                {formatRp(addon.subtotal)}
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -258,14 +357,23 @@ export function CheckoutModal({
                   )}
                 </div>
 
+                {/* Summary & Bayar */}
                 <div className="p-8 pt-4 space-y-3 bg-white border-t border-gray-50">
                   <div className="flex items-center justify-between px-6 py-3 bg-slate-50 rounded-lg">
-                    <span className="text-sm font-semibold text-gray-600">Sub total</span>
-                    <span className="text-sm font-bold text-gray-800">{formatRp(totalBelanja)}</span>
+                    <span className="text-sm font-semibold text-gray-600">
+                      Sub total
+                    </span>
+                    <span className="text-sm font-bold text-gray-800">
+                      {formatRp(totalBelanja)}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between px-6 py-3 mb-6">
-                    <span className="text-base font-bold text-gray-800">Total</span>
-                    <span className="text-base font-bold text-gray-800">{formatRp(totalBelanja)}</span>
+                    <span className="text-base font-bold text-gray-800">
+                      Total
+                    </span>
+                    <span className="text-base font-bold text-gray-800">
+                      {formatRp(totalBelanja)}
+                    </span>
                   </div>
 
                   <div className="flex justify-center pt-2">
@@ -275,7 +383,11 @@ export function CheckoutModal({
                         disabled={isConfirming}
                         className="w-[240px] h-12 bg-orange-500 hover:bg-orange-600 rounded-xl text-white font-semibold text-base shadow-sm"
                       >
-                        {isConfirming ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <CheckCircle2 className="w-5 h-5 mr-2" />}
+                        {isConfirming ? (
+                          <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                        ) : (
+                          <CheckCircle2 className="w-5 h-5 mr-2" />
+                        )}
                         Konfirmasi Pesanan
                       </Button>
                     ) : order.status === "confirmed" ? (
@@ -294,112 +406,72 @@ export function CheckoutModal({
                 </div>
               </div>
             ) : (
-              // VIEW: PAYMENT SCREEN
+              // VIEW: PAYMENT NUMPAD
               <div className="w-1/2 bg-white flex flex-col h-full rounded-l-3xl p-8 pb-4">
-                <h2 className="text-[22px] font-bold text-center text-[#1E293B] mb-5">Pembayaran</h2>
+                <h2 className="text-[22px] font-bold text-center text-[#1E293B] mb-6">
+                  Pembayaran
+                </h2>
 
-                {/* ── Pilih Metode Pembayaran ─────────────────────────── */}
-                <div className="flex gap-2 mb-5 px-4">
-                  {paymentMethods.map((m) => (
-                    <button
-                      key={m.id}
-                      onClick={() => setPaymentMethod(m.id)}
-                      className={cn(
-                        "flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all",
-                        paymentMethod === m.id
-                          ? "border-[#3874BC] bg-[#3874BC]/5 text-[#3874BC]"
-                          : "border-gray-200 text-gray-400 hover:border-gray-300"
-                      )}
-                    >
-                      {m.icon} {m.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* ── Ringkasan ───────────────────────────────────────── */}
-                <div className="space-y-3 mb-5 px-4">
+                {/* Ringkasan */}
+                <div className="space-y-4 mb-6 px-4">
                   <div className="flex justify-between items-center text-sm">
                     <span className="font-semibold text-gray-500">Sub total</span>
                     <span className="font-bold text-gray-800">{formatRp(totalBelanja)}</span>
                   </div>
-                  <div className="flex justify-between items-center text-sm pt-3 border-t border-gray-100">
+                  <div className="flex justify-between items-center text-sm mt-4 pt-4 border-t border-gray-100">
                     <span className="font-bold text-gray-800">Total Dibayar</span>
                     <span className="font-bold text-gray-800">{formatRp(totalBelanja)}</span>
                   </div>
-                  {paymentMethod === "tunai" && (
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="font-bold text-emerald-600">Kembalian</span>
-                      <span className="font-bold text-emerald-600">{formatRp(kembalian)}</span>
-                    </div>
-                  )}
+                  <div className="flex justify-between items-center text-sm mt-4">
+                    <span className="font-bold text-emerald-600">Kembalian</span>
+                    <span className="font-bold text-emerald-600">{formatRp(kembalian)}</span>
+                  </div>
                 </div>
 
-                {/* ── Konten per Metode ───────────────────────────────── */}
-                {paymentMethod === "tunai" && (
-                  <>
-                    {/* Input Nominal */}
-                    <div className="bg-slate-100 rounded-lg p-3 text-center text-lg font-bold text-gray-800 mb-4 mx-4">
-                      {formatRp(nominalNumber)}
-                    </div>
+                {/* Input Nominal */}
+                <div className="bg-slate-100 rounded-lg p-3 text-center text-lg font-bold text-gray-800 mb-6 mx-4">
+                  {formatRp(nominalNumber)}
+                </div>
 
-                    {/* Numpad */}
-                    <div className="grid grid-cols-3 gap-2.5 mb-auto px-4 flex-1">
-                      {["7", "8", "9", "4", "5", "6", "1", "2", "3"].map((num) => (
-                        <button
-                          key={num}
-                          onClick={() => handleNumpad(num)}
-                          className="bg-white border border-slate-200 hover:bg-slate-50 text-[#1E293B] shadow-sm text-2xl font-medium rounded-xl py-3.5 transition-colors"
-                        >
-                          {num}
-                        </button>
-                      ))}
-                      <button onClick={() => handleNumpad("000")} className="bg-white border border-slate-200 hover:bg-slate-50 text-[#1E293B] shadow-sm text-lg font-bold rounded-xl py-3.5 transition-colors">000</button>
-                      <button onClick={() => handleNumpad("0")} className="bg-white border border-slate-200 hover:bg-slate-50 text-[#1E293B] shadow-sm text-2xl font-medium rounded-xl py-3.5 transition-colors">0</button>
-                      <button onClick={handleBackspace} className="bg-white border border-slate-200 hover:bg-slate-50 text-red-500 shadow-sm text-2xl font-medium rounded-xl py-3.5 transition-colors flex items-center justify-center">
-                        <Delete className="w-6 h-6" />
-                      </button>
-                    </div>
-                  </>
-                )}
+                {/* Numpad */}
+                <div className="grid grid-cols-3 gap-3 mb-auto px-4 flex-1">
+                  {["7", "8", "9", "4", "5", "6", "1", "2", "3"].map((num) => (
+                    <button
+                      key={num}
+                      onClick={() => handleNumpad(num)}
+                      className="bg-white border border-slate-200 hover:bg-slate-50 text-[#1E293B] shadow-sm text-2xl font-medium rounded-xl py-4 transition-colors"
+                    >
+                      {num}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => handleNumpad("000")}
+                    className="bg-white border border-slate-200 hover:bg-slate-50 text-[#1E293B] shadow-sm text-lg font-bold rounded-xl py-4 transition-colors"
+                  >
+                    000
+                  </button>
+                  <button
+                    onClick={() => handleNumpad("0")}
+                    className="bg-white border border-slate-200 hover:bg-slate-50 text-[#1E293B] shadow-sm text-2xl font-medium rounded-xl py-4 transition-colors"
+                  >
+                    0
+                  </button>
+                  <button
+                    onClick={handleBackspace}
+                    className="bg-white border border-slate-200 hover:bg-slate-50 text-red-500 shadow-sm text-2xl font-medium rounded-xl py-4 transition-colors flex items-center justify-center"
+                  >
+                    <Delete className="w-6 h-6" />
+                  </button>
+                </div>
 
-                {paymentMethod === "qris" && (
-                  <div className="flex-1 flex flex-col items-center justify-center px-4 gap-4">
-                    {/* QRIS mock placeholder */}
-                    <div className="w-44 h-44 bg-slate-100 rounded-2xl flex items-center justify-center border-2 border-dashed border-slate-300">
-                      <QrCode className="w-20 h-20 text-slate-300" />
-                    </div>
-                    <p className="text-xs text-gray-400 text-center">Tampilkan kode QR kepada pelanggan untuk melakukan pembayaran.</p>
-                    <div className="w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-center mt-2">
-                      <p className="text-xs text-amber-700 font-semibold">Konfirmasi setelah pelanggan berhasil melakukan pembayaran via QRIS.</p>
-                    </div>
-                  </div>
-                )}
-
-                {paymentMethod === "debit" && (
-                  <div className="flex-1 flex flex-col items-center justify-center px-4 gap-4">
-                    <div className="w-44 h-44 bg-slate-100 rounded-2xl flex items-center justify-center border-2 border-dashed border-slate-300">
-                      <CreditCard className="w-20 h-20 text-slate-300" />
-                    </div>
-                    <p className="text-xs text-gray-400 text-center">Arahkan pelanggan untuk melakukan tap / swipe kartu debit pada mesin EDC.</p>
-                    <div className="w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-center mt-2">
-                      <p className="text-xs text-amber-700 font-semibold">Konfirmasi setelah transaksi debit berhasil disetujui oleh mesin EDC.</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* ── Aksi ────────────────────────────────────────────── */}
-                <div className="flex items-center justify-center gap-4 mt-5">
+                {/* Aksi */}
+                <div className="flex items-center justify-center gap-4 mt-6">
                   <Button
                     onClick={handlePay}
-                    disabled={isPayingOrder || (paymentMethod === "tunai" && !canPayCash)}
+                    disabled={isPayingOrder || nominalNumber < totalBelanja}
                     className="w-[140px] h-12 bg-[#3874BC] hover:bg-[#2c5b96] rounded-xl text-white font-semibold shadow-sm"
                   >
-                    {isPayingOrder
-                      ? <Loader2 className="w-5 h-5 animate-spin" />
-                      : paymentMethod === "tunai"
-                        ? "Selesaikan"
-                        : "Konfirmasi"
-                    }
+                    {isPayingOrder ? <Loader2 className="w-5 h-5 animate-spin" /> : "Selesaikan"}
                   </Button>
                   <Button
                     onClick={() => setIsPaying(false)}
@@ -412,64 +484,143 @@ export function CheckoutModal({
               </div>
             )}
 
-            {/* ── SISI KANAN ────────────────────────────────────────────── */}
+            {/* SISI KANAN */}
             {!isPaying ? (
-              // VIEW: TAMBAH PESANAN (GALLERY)
+              // VIEW: TAMBAH PESANAN (GALLERY) ATAU ADDON
               <div className="w-1/2 bg-white flex flex-col h-full rounded-r-3xl border-l border-gray-100">
-                <div className="p-8 pb-4">
-                  <h2 className="text-[22px] font-bold text-center text-[#1E293B] mb-2">Tambah Pesanan</h2>
-                </div>
-                <div className="flex-1 overflow-y-auto px-8 pb-8">
-                  {isLoadingMenus ? (
-                    <div className="flex flex-col items-center justify-center h-full">
-                      <Loader2 className="w-8 h-8 animate-spin text-[#3874BC] mb-2" />
-                      <p className="text-sm text-gray-500">Memuat daftar menu...</p>
+                {selectedMenuForAddon ? (
+                  <>
+                    <div className="p-8 pb-4 relative">
+                      <button
+                        onClick={() => setSelectedMenuForAddon(null)}
+                        className="absolute left-6 top-8 text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="w-6 h-6" />
+                      </button>
+                      <h2 className="text-[22px] font-bold text-center text-[#1E293B] mb-2 px-8">
+                        Pilih Add-on
+                      </h2>
+                      <p className="text-center text-sm font-semibold text-gray-600">
+                        {selectedMenuForAddon.nama}
+                      </p>
                     </div>
-                  ) : menusError ? (
-                    <div className="flex flex-col items-center justify-center h-full text-red-500">
-                      <p className="text-sm font-medium">Gagal memuat menu</p>
-                    </div>
-                  ) : !menus || menus.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                      <p className="text-sm">Belum ada menu yang tersedia.</p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-3 gap-4">
-                      {menus.map((menu) => (
-                        <div
-                          key={menu.id}
-                          className={cn(
-                            "flex flex-col bg-white border rounded-2xl overflow-hidden shadow-sm pb-3 transition-shadow relative",
-                            menu.is_available ? "border-gray-100 hover:shadow-md" : "border-gray-200 opacity-60 grayscale"
-                          )}
-                        >
-                          <div className="w-full aspect-square bg-slate-100 relative">
-                            <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-xs font-medium">
-                              {menu.is_available ? "Gambar Menu" : "Habis"}
+                    <div className="flex-1 overflow-y-auto px-8 pb-4 space-y-3">
+                      {selectedMenuForAddon.addons?.map((addon) => {
+                        const selectedAddon = addonSelections.find((a) => a.addon_id === addon.id);
+                        const qty = selectedAddon ? selectedAddon.qty : 0;
+                        return (
+                          <div key={addon.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl">
+                            <div>
+                              <p className="font-bold text-gray-800 text-sm">{addon.nama}</p>
+                              <p className="font-medium text-[#3874BC] text-xs">+{formatRp(addon.harga)}</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              {qty > 0 ? (
+                                <>
+                                  <button
+                                    onClick={() => handleAddonQty(addon, -1)}
+                                    className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-gray-600 hover:bg-slate-200"
+                                  >
+                                    <Minus className="w-4 h-4" />
+                                  </button>
+                                  <span className="font-semibold text-sm w-4 text-center">{qty}</span>
+                                  <button
+                                    onClick={() => handleAddonQty(addon, 1)}
+                                    className="w-7 h-7 rounded-full bg-[#3874BC] flex items-center justify-center text-white hover:bg-[#2c5b96]"
+                                  >
+                                    <Plus className="w-4 h-4" />
+                                  </button>
+                                </>
+                              ) : (
+                                <button
+                                  onClick={() => handleAddonQty(addon, 1)}
+                                  className="text-xs font-bold text-[#3874BC] border border-[#3874BC] rounded-full px-4 py-1 hover:bg-blue-50"
+                                >
+                                  Tambah
+                                </button>
+                              )}
                             </div>
                           </div>
-                          <div className="px-3 pt-3 flex flex-col items-center text-center space-y-1">
-                            <h4 className="text-[11px] font-bold text-gray-800 line-clamp-2 leading-tight">{menu.nama}</h4>
-                            <p className="text-[10px] font-bold text-gray-500">{formatRp(menu.harga)}</p>
-                            <button
-                              onClick={() => handleTambahItem(menu.id, menu.nama, menu.harga)}
-                              disabled={!menu.is_available || isAddingItem || isUpdatingQty}
-                              className="mt-2 text-[10px] font-bold text-[#3874BC] border border-[#3874BC] rounded-md px-4 py-1 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              {isAddingItem || isUpdatingQty ? "..." : "Add"}
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
-                  )}
-                </div>
+                    <div className="p-6 border-t border-gray-100">
+                      <Button
+                        onClick={() => handleTambahItem(selectedMenuForAddon.id, selectedMenuForAddon.nama, selectedMenuForAddon.harga, addonSelections)}
+                        disabled={isAddingItem || isUpdatingQty}
+                        className="w-full h-12 bg-[#3874BC] hover:bg-[#2c5b96] rounded-xl text-white font-semibold"
+                      >
+                        {isAddingItem ? <Loader2 className="w-5 h-5 animate-spin" /> : "Tambahkan ke Pesanan"}
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="p-8 pb-4">
+                      <h2 className="text-[22px] font-bold text-center text-[#1E293B] mb-2">
+                        Tambah Pesanan
+                      </h2>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto px-8 pb-8">
+                      {isLoadingMenus ? (
+                        <div className="flex flex-col items-center justify-center h-full">
+                          <Loader2 className="w-8 h-8 animate-spin text-[#3874BC] mb-2" />
+                          <p className="text-sm text-gray-500">Memuat daftar menu...</p>
+                        </div>
+                      ) : menusError ? (
+                        <div className="flex flex-col items-center justify-center h-full text-red-500">
+                          <p className="text-sm font-medium">Gagal memuat menu</p>
+                        </div>
+                      ) : !menus || menus.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                          <p className="text-sm">Belum ada menu yang tersedia.</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-3 gap-4">
+                          {menus.map((menu) => (
+                            <div
+                              key={menu.id}
+                              className={cn(
+                                "flex flex-col bg-white border rounded-2xl overflow-hidden shadow-sm pb-3 transition-shadow relative",
+                                menu.is_available ? "border-gray-100 hover:shadow-md" : "border-gray-200 opacity-60 grayscale"
+                              )}
+                            >
+                              <div className="w-full aspect-square bg-slate-100 relative">
+                                <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-xs font-medium">
+                                  {menu.is_available ? "Gambar Menu" : "Habis"}
+                                </div>
+                              </div>
+                              <div className="px-3 pt-3 flex flex-col items-center text-center space-y-1">
+                                <h4 className="text-[11px] font-bold text-gray-800 line-clamp-2 leading-tight">
+                                  {menu.nama}
+                                </h4>
+                                <p className="text-[10px] font-bold text-gray-500">
+                                  {formatRp(menu.harga)}
+                                </p>
+                                <button
+                                  onClick={() => handleKlikAddMenu(menu)}
+                                  disabled={!menu.is_available || isAddingItem || isUpdatingQty}
+                                  className="mt-2 text-[10px] font-bold text-[#3874BC] border border-[#3874BC] rounded-md px-4 py-1 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  {isAddingItem || isUpdatingQty ? "..." : "Add"}
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             ) : (
               // VIEW: RINGKASAN MENU (saat di layar pembayaran)
               <div className="w-1/2 bg-white flex flex-col h-full rounded-r-3xl border-l border-gray-100">
                 <div className="p-8 pb-4">
-                  <h2 className="text-[22px] font-bold text-center text-[#1E293B] mb-6">Menu yang dipesan</h2>
+                  <h2 className="text-[22px] font-bold text-center text-[#1E293B] mb-6">
+                    Menu yang dipesan
+                  </h2>
                   <div className="grid grid-cols-12 gap-4 bg-slate-50 px-4 py-3 rounded-t-lg border border-gray-100">
                     <div className="col-span-6 text-sm font-semibold text-gray-400 text-center">Name</div>
                     <div className="col-span-2 text-sm font-semibold text-gray-400 text-center">QTY</div>
@@ -482,11 +633,15 @@ export function CheckoutModal({
                       <div className="col-span-6 text-xs font-bold text-gray-800 line-clamp-2 leading-tight">
                         {item.nama}
                         {item.addons && item.addons.length > 0 && (
-                          <span className="block text-[10px] text-gray-400 font-normal mt-0.5">+{item.addons.length} Add-on</span>
+                          <span className="block text-[10px] text-gray-400 font-normal mt-0.5">
+                            +{item.addons.length} Add-on
+                          </span>
                         )}
                       </div>
                       <div className="col-span-2 text-xs font-bold text-gray-800 text-center">x{item.qty}</div>
-                      <div className="col-span-4 text-xs font-bold text-gray-800 text-center whitespace-nowrap">{formatRp(item.subtotal)}</div>
+                      <div className="col-span-4 text-xs font-bold text-gray-800 text-center whitespace-nowrap">
+                        {formatRp(item.subtotal)}
+                      </div>
                     </div>
                   ))}
                 </div>

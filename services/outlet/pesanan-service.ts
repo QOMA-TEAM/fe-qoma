@@ -28,6 +28,7 @@ export interface Pesanan {
   nama_pelanggan: string;
   no_telp: string | null;
   total_harga: number;
+  tipe_pesanan?: "dine_in" | "take_away";
   status: "pending" | "confirmed" | "paid" | "cancelled" | "expired";
   status_label: string;
   created_at: string;
@@ -52,9 +53,9 @@ export interface PesananListResponse {
 }
 
 export const pesananService = {
-  getList: async (status?: string): Promise<PesananListResponse> => {
+  getList: async (params?: { status?: string; search?: string; page?: number }): Promise<PesananListResponse> => {
     const response = await axiosInstance.get("/outlet/pesanan", {
-      params: { status },
+      params,
     });
     return response.data;
   },
@@ -79,7 +80,7 @@ export const pesananService = {
     return response.data;
   },
 
-  tambahItem: async (id: string, items: Array<{ menu_id: string; qty: number }>): Promise<PesananResponse> => {
+  tambahItem: async (id: string, items: Array<{ menu_id: string; qty: number; addons?: Array<{ addon_id: string; qty: number }> }>): Promise<PesananResponse> => {
     const response = await axiosInstance.post(`/outlet/pesanan/${id}/tambah-item`, { items });
     return response.data;
   },
@@ -91,6 +92,11 @@ export const pesananService = {
 
   hapusItem: async (id: string, detailId: string): Promise<PesananResponse> => {
     const response = await axiosInstance.delete(`/outlet/pesanan/${id}/item/${detailId}`);
+    return response.data;
+  },
+
+  updateTipePesanan: async (id: string, tipe_pesanan: "dine_in" | "take_away"): Promise<PesananResponse> => {
+    const response = await axiosInstance.patch(`/outlet/pesanan/${id}/tipe`, { tipe_pesanan });
     return response.data;
   },
 };

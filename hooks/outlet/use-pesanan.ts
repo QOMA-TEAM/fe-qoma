@@ -5,10 +5,10 @@ import { toast } from "sonner";
 export const PESANAN_QUERY_KEY = ["outletPesananList"];
 export const PESANAN_DETAIL_QUERY_KEY = (id: string) => ["outletPesananDetail", id];
 
-export function usePesananList(status?: string) {
+export function usePesananList(params?: { status?: string; search?: string; page?: number }) {
   return useQuery({
-    queryKey: [...PESANAN_QUERY_KEY, status],
-    queryFn: () => pesananService.getList(status),
+    queryKey: [...PESANAN_QUERY_KEY, params],
+    queryFn: () => pesananService.getList(params),
     refetchInterval: 15000, // Auto refetch tiap 15 detik agar pesanan baru terlihat
   });
 }
@@ -59,7 +59,7 @@ export function useTambahItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, items }: { id: string; items: Array<{ menu_id: string; qty: number }>; menuNama?: string; menuHarga?: number }) =>
+    mutationFn: ({ id, items }: { id: string; items: Array<{ menu_id: string; qty: number; addons?: Array<{ addon_id: string; qty: number }> }>; menuNama?: string; menuHarga?: number }) =>
       pesananService.tambahItem(id, items),
     onMutate: async (variables) => {
       await queryClient.cancelQueries({ queryKey: PESANAN_DETAIL_QUERY_KEY(variables.id) });
@@ -74,10 +74,17 @@ export function useTambahItem() {
           qty: 1,
           harga: variables.menuHarga,
           subtotal: variables.menuHarga,
-          addons: []
+          addons: (variables.items[0].addons as any[] || []).map(a => ({
+            id: `temp-addon-${Date.now()}-${a.addon_id}`,
+            nama: a.nama,
+            harga: a.harga,
+            qty: a.qty,
+            subtotal: a.harga * a.qty
+          }))
         };
         newPesanan.data.items.push(fakeItem);
-        newPesanan.data.total_harga += variables.menuHarga;
+        const addonTotal = fakeItem.addons.reduce((acc, a) => acc + a.subtotal, 0);
+        newPesanan.data.total_harga += (variables.menuHarga + addonTotal);
         queryClient.setQueryData(PESANAN_DETAIL_QUERY_KEY(variables.id), newPesanan);
       }
       return { previousPesanan };
@@ -158,6 +165,57 @@ export function useHapusItem() {
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Gagal menghapus item pesanan");
+    },
+  });
+}
+
+export function useCancelPesanan() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => pesananService.cancel(id),
+    onSuccess: (data) => {
+      toast.success(data.message);
+      queryClient.setQueryData(PESANAN_DETAIL_QUERY_KEY(data.data.id), data);
+      queryClient.invalidateQueries({ queryKey: PESANAN_QUERY_KEY });
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Gagal membatalkan pesanan");
+    },
+  });
+}
+
+export function useUpdateTipePesanan() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, tipe_pesanan }: { id: string; tipe_pesanan: "dine_in" | "take_away" }) =>
+      pesananService.updateTipePesanan(id, tipe_pesanan),
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: PESANAN_DETAIL_QUERY_KEY(variables.id) });
+      const previousPesanan = queryClient.getQueryData<any>(PESANAN_DETAIL_QUERY_KEY(variables.id));
+      
+      if (previousPesanan) {
+        const newPesanan = { ...previousPesanan };
+        newPesanan.data.tipe_pesanan = variables.tipe_pesanan;
+        queryClient.setQueryData(PESANAN_DETAIL_QUERY_KEY(variables.id), newPesanan);
+      }
+      
+      return { previousPesanan };
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(PESANAN_DETAIL_QUERY_KEY(data.data.id), data);
+      queryClient.invalidateQueries({ queryKey: PESANAN_QUERY_KEY });
+      toast.success("Tipe pesanan berhasil diubah");
+    },
+    onError: (error: any, variables, context) => {
+      if (context?.previousPesanan) {
+        queryClient.setQueryData(PESANAN_DETAIL_QUERY_KEY(variables.id), context.previousPesanan);
+      }
+      toast.error(error.response?.data?.message || "Gagal mengubah tipe pesanan");
+    },
+    onSettled: (data, error, variables) => {
+      queryClient.invalidateQueries({ queryKey: PESANAN_DETAIL_QUERY_KEY(variables.id) });
     },
   });
 }

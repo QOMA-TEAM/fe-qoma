@@ -1,16 +1,23 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Bell } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { HeaderActions } from "@/components/dashboard/header-actions";
+
+// Maps each route to a readable label + section group
+const routeMap: Record<string, { label: string; group: string }> = {
+    "/superadmin/dashboard": { label: "Dashboard", group: "Overview" },
+    "/superadmin/tenant": { label: "Tenant", group: "Kelola" },
+    "/superadmin/new-tenant": { label: "Tenant Baru", group: "Kelola" },
+    "/superadmin/plan": { label: "Plan", group: "Kelola" },
+    "/superadmin/upgrade-request": { label: "Upgrade Request", group: "Kelola" },
+};
 
 interface SuperadminHeader {
   username?: string;
@@ -22,31 +29,34 @@ export function SuperadminHeader({
   notificationCount = 3,
 }: SuperadminHeader) {
   const pathname = usePathname();
-
-  const getPageTitle = () => {
-    if (pathname === "/superadmin/dashboard") {
-      return `Welcome back, ${username}`;
-    }
-    if (pathname.includes("/superadmin/new-tenant")) {
-      return "Persetujuan Tenant Baru";
-    }
-    if (pathname.includes("/superadmin/plan")) {
-      return "Manajemen Plan";
-    }
-    if (pathname.includes("/superadmin/tenant")) {
-      return "Manajemen Tenant";
-    }
-    return "Dashboard";
-  };
+  const route = routeMap[pathname];
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b bg-white px-6 shadow-sm">
-      {/* Left: Welcome Text */}
-      <div>
-        <h2 className="text-[#1E293B] text-[15px] font-bold">
-          {getPageTitle()}
-        </h2>
-      </div>
+      {/* Breadcrumb — grows to fill available space */}
+      <Breadcrumb className="flex-1">
+        <BreadcrumbList>
+          {route ? (
+            <>
+              <BreadcrumbItem>
+                <span className="text-sm text-muted-foreground uppercase font-medium">
+                  {route.group}
+                </span>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="text-sm font-semibold text-[#1E293B]">
+                  {route.label}
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </>
+          ) : (
+            <BreadcrumbItem>
+              <BreadcrumbPage className="text-sm font-semibold text-[#1E293B]">Superadmin</BreadcrumbPage>
+            </BreadcrumbItem>
+          )}
+        </BreadcrumbList>
+      </Breadcrumb>
 
       {/* Right: Actions */}
       <HeaderActions />

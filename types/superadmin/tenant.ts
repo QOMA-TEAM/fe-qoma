@@ -51,6 +51,7 @@ export interface TenantListFilters {
   status?: TenantStatus;
   exclude_status?: TenantStatus;
   search?: string;
+  page?: number;
 }
 
 // ─── API Responses ────────────────────────────────────────────────────────────

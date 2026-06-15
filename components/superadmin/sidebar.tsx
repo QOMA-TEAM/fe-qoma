@@ -15,6 +15,7 @@ import {
   CreditCard,
   LogOut,
   Settings,
+  ArrowUpCircle,
 } from "lucide-react";
 
 import { ChangePasswordDialog } from "@/components/settings/change-password-dialog";
@@ -56,6 +57,11 @@ const ownerNav = {
       title: "Plan",
       url: "/superadmin/plan",
       icon: UtensilsCrossed,
+    },
+    {
+      title: "Upgrade Request",
+      url: "/superadmin/upgrade-request",
+      icon: ArrowUpCircle,
     },
   ],
 };

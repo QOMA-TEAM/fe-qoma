@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
-import { cn } from "@/lib/utils"
+import { cn, formatDeskripsi } from "@/lib/utils"
 import { useActivityLogList } from "@/hooks/outlet/use-activity-log"
 import { useDebounce } from "@/hooks/use-debounce"
 
@@ -15,7 +15,7 @@ export function ActivityLogContent() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
   
-  const debouncedSearch = useDebounce(search, 800)
+  const debouncedSearch = useDebounce(search, 300)
   
   const { data: listResponse, isLoading, isError } = useActivityLogList(page, debouncedSearch)
   
@@ -52,7 +52,7 @@ export function ActivityLogContent() {
             <TableRow className="bg-gray-100 hover:bg-gray-100 border-gray-200">
               <TableHead className="w-48 text-gray-600 font-semibold text-sm">Waktu</TableHead>
               <TableHead className="w-48 text-gray-600 font-semibold text-sm">User</TableHead>
-              <TableHead className="w-36 text-gray-600 font-semibold text-sm text-center">Aktivitas</TableHead>
+              <TableHead className="w-48 text-gray-600 font-semibold text-sm">Aktivitas</TableHead>
               <TableHead className="text-gray-600 font-semibold text-sm">Deskripsi</TableHead>
             </TableRow>
           </TableHeader>
@@ -78,10 +78,10 @@ export function ActivityLogContent() {
                 <TableRow key={row.id} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
                   <TableCell className="text-gray-600 text-sm whitespace-nowrap">{row.created_at}</TableCell>
                   <TableCell className="text-gray-800 text-sm">{row.user?.nama_lengkap || row.user?.username || "-"}</TableCell>
-                  <TableCell className="text-center">
+                  <TableCell>
                     <span className="text-sm text-gray-800 capitalize font-medium">{row.aktivitas.replace(/_/g, " ")}</span>
                   </TableCell>
-                  <TableCell className="text-gray-600 text-sm" title={row.deskripsi}>{row.deskripsi}</TableCell>
+                  <TableCell className="text-gray-600 text-sm" title={row.deskripsi}>{formatDeskripsi(row.deskripsi)}</TableCell>
                 </TableRow>
               ))
             )}
