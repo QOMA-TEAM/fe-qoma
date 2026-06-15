@@ -184,3 +184,38 @@ export function useCancelPesanan() {
     },
   });
 }
+
+export function useUpdateTipePesanan() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, tipe_pesanan }: { id: string; tipe_pesanan: "dine_in" | "take_away" }) =>
+      pesananService.updateTipePesanan(id, tipe_pesanan),
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: PESANAN_DETAIL_QUERY_KEY(variables.id) });
+      const previousPesanan = queryClient.getQueryData<any>(PESANAN_DETAIL_QUERY_KEY(variables.id));
+      
+      if (previousPesanan) {
+        const newPesanan = { ...previousPesanan };
+        newPesanan.data.tipe_pesanan = variables.tipe_pesanan;
+        queryClient.setQueryData(PESANAN_DETAIL_QUERY_KEY(variables.id), newPesanan);
+      }
+      
+      return { previousPesanan };
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(PESANAN_DETAIL_QUERY_KEY(data.data.id), data);
+      queryClient.invalidateQueries({ queryKey: PESANAN_QUERY_KEY });
+      toast.success("Tipe pesanan berhasil diubah");
+    },
+    onError: (error: any, variables, context) => {
+      if (context?.previousPesanan) {
+        queryClient.setQueryData(PESANAN_DETAIL_QUERY_KEY(variables.id), context.previousPesanan);
+      }
+      toast.error(error.response?.data?.message || "Gagal mengubah tipe pesanan");
+    },
+    onSettled: (data, error, variables) => {
+      queryClient.invalidateQueries({ queryKey: PESANAN_DETAIL_QUERY_KEY(variables.id) });
+    },
+  });
+}

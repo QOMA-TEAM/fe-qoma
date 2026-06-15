@@ -4,7 +4,7 @@ import { User, Table2, Minus, Plus, Delete, Loader2, CheckCircle2, X } from "luc
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { usePesananDetail, useKonfirmasiPesanan, useBayarPesanan, useTambahItem, useUpdateQtyItem, useHapusItem } from "@/hooks/outlet/use-pesanan";
+import { usePesananDetail, useKonfirmasiPesanan, useBayarPesanan, useTambahItem, useUpdateQtyItem, useHapusItem, useUpdateTipePesanan } from "@/hooks/outlet/use-pesanan";
 import { useOutletMenuList } from "@/hooks/outlet/use-menu-outlet";
 import type { PesananDetail } from "@/services/outlet/pesanan-service";
 import type { OutletMenu } from "@/services/outlet/menu-outlet-service";
@@ -84,6 +84,7 @@ export function CheckoutModal({
   const { mutate: tambahItem, isPending: isAddingItem } = useTambahItem();
   const { mutate: updateQty, isPending: isUpdatingQty } = useUpdateQtyItem();
   const { mutate: hapusItem, isPending: isDeletingItem } = useHapusItem();
+  const { mutate: updateTipe, isPending: isUpdatingTipe } = useUpdateTipePesanan();
 
   // Reset state when opened/closed
   useEffect(() => {
@@ -228,7 +229,7 @@ export function CheckoutModal({
                   </h2>
 
                   {/* Info Pelanggan & Meja */}
-                  <div className="flex items-center gap-4 mb-6">
+                  <div className="flex items-center gap-4 mb-4">
                     <div className="flex-1 bg-slate-100/80 rounded-xl p-3 flex items-center gap-3">
                       <div className="text-orange-700">
                         <User className="size-5 fill-current" />
@@ -255,6 +256,34 @@ export function CheckoutModal({
                         </span>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Tipe Pesanan Toggle */}
+                  <div className="flex items-center bg-slate-100/80 p-1 rounded-xl mb-6 w-full max-w-[280px] mx-auto">
+                    <button
+                      onClick={() => updateTipe({ id: order.id, tipe_pesanan: "dine_in" })}
+                      disabled={isUpdatingTipe || order.status !== "pending"}
+                      className={cn(
+                        "flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all",
+                        order.tipe_pesanan === "dine_in" || !order.tipe_pesanan
+                          ? "bg-white text-orange-600 shadow-sm"
+                          : "text-gray-500 hover:text-gray-700"
+                      )}
+                    >
+                      Dine In
+                    </button>
+                    <button
+                      onClick={() => updateTipe({ id: order.id, tipe_pesanan: "take_away" })}
+                      disabled={isUpdatingTipe || order.status !== "pending"}
+                      className={cn(
+                        "flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all",
+                        order.tipe_pesanan === "take_away"
+                          ? "bg-white text-orange-600 shadow-sm"
+                          : "text-gray-500 hover:text-gray-700"
+                      )}
+                    >
+                      Take Away
+                    </button>
                   </div>
 
                   {/* Table Header */}

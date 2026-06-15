@@ -94,4 +94,9 @@ export const pesananService = {
     const response = await axiosInstance.delete(`/outlet/pesanan/${id}/item/${detailId}`);
     return response.data;
   },
+
+  updateTipePesanan: async (id: string, tipe_pesanan: "dine_in" | "take_away"): Promise<PesananResponse> => {
+    const response = await axiosInstance.patch(`/outlet/pesanan/${id}/tipe`, { tipe_pesanan });
+    return response.data;
+  },
 };
