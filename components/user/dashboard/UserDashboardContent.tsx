@@ -21,6 +21,7 @@ import { OrderPayload } from "@/services/public/order";
 import type { PublicMenuItem, KategoriInfo } from "@/types/public/menu";
 import { MenuCard } from "@/components/user/MenuCard";
 import { CategoryCard } from "@/components/user/CategoryCard";
+import { useLocalStorage } from "@/hooks/shared/use-local-storage";
 import {
   OUTLET_INFO,
   TABLE_NUMBER,
@@ -51,25 +52,31 @@ export function UserDashboardContent() {
   const { data: menuResponse, isLoading: isMenuLoading } = usePublicMenus(validasiData?.outlet.id || null);
   const submitOrder = useSubmitOrder();
 
-  // ── View / Navigation State ──
-  const [view, setView] = useState<AppView>("main");
-
-  // ── Modal States ──
+  // ── Modals ──
   const [showWelcome, setShowWelcome] = useState(false);
   const [showOutletInfo, setShowOutletInfo] = useState(false);
   const [showCategorySheet, setShowCategorySheet] = useState(false);
-  const [activeCategoryName, setActiveCategoryName] = useState("");
+  const [activeCategoryName, setActiveCategoryName] = useLocalStorage("qoma_user_activeCategory", "");
   const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(null);
 
+  // ── Persisted State ──
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // ── View / Navigation State ──
+  const [view, setView] = useLocalStorage<AppView>("qoma_user_view", "main");
+
   // ── Order State ──
-  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+  const [orderItems, setOrderItems] = useLocalStorage<OrderItem[]>("qoma_user_orderItems", []);
   const [editingItem, setEditingItem] = useState<OrderItem | null>(null);
 
   // ── Completed Order Info ──
-  const [orderId, setOrderId] = useState("");
-  const [customerName, setCustomerName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [paidAt, setPaidAt] = useState("");
+  const [orderId, setOrderId] = useLocalStorage("qoma_user_orderId", "");
+  const [customerName, setCustomerName] = useLocalStorage("qoma_user_customerName", "");
+  const [phoneNumber, setPhoneNumber] = useLocalStorage("qoma_user_phoneNumber", "");
+  const [paidAt, setPaidAt] = useLocalStorage("qoma_user_paidAt", "");
 
   // ── Derived values ──
   const subtotal = orderItems.reduce((acc, item) => acc + item.totalPrice, 0);
@@ -277,6 +284,14 @@ export function UserDashboardContent() {
   }
 
   // ── Render: Loading or Error ──────────────────────────────────────
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 text-center px-4">
+        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+      </div>
+    );
+  }
+
   if (!outletId || !mejaId) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100 text-center px-4">
@@ -341,6 +356,18 @@ export function UserDashboardContent() {
           <div className="flex items-center justify-between h-16">
             {/* Logo + Name */}
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  if (view === "main") {
+                    window.history.back();
+                  } else {
+                    setView("main");
+                  }
+                }}
+                className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 transition"
+              >
+                <ChevronRight className="w-5 h-5 text-gray-700 rotate-180" />
+              </button>
               <div className="w-9 h-9 rounded-full overflow-hidden bg-amber-50 border">
                 <Image
                   src="/images/coffee-cat-logo.png"
@@ -451,13 +478,14 @@ export function UserDashboardContent() {
                       <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+                  <div className="flex overflow-x-auto gap-3 sm:gap-4 pb-2 snap-x">
                     {group.items.slice(0, 5).map((item) => (
-                      <MenuCard
-                        key={item.id}
-                        item={mapToMenuItem(item)}
-                        onClick={setSelectedMenu}
-                      />
+                      <div className="flex-shrink-0 w-40 snap-start" key={item.id}>
+                        <MenuCard
+                          item={mapToMenuItem(item)}
+                          onClick={setSelectedMenu}
+                        />
+                      </div>
                     ))}
                   </div>
                 </section>

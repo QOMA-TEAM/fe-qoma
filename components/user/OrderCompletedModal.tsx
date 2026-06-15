@@ -68,7 +68,7 @@ export function OrderCompletedModal({
             </div>
             <div className="text-right flex-shrink-0">
               <p className="text-sm text-gray-500">ID ORDER :</p>
-              <p className="font-bold text-gray-900 break-all w-48 ml-auto text-xs">{orderId}</p>
+              <p className="font-bold text-gray-900 break-all w-48 ml-auto text-xs">{orderId.substring(0, 8)}</p>
               <p className="text-sm text-gray-500 mt-2">Paid :</p>
               <p className="font-bold text-gray-900">{paidAt}</p>
             </div>
