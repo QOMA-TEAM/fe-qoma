@@ -36,7 +36,7 @@ export function AvailablePlanCards() {
             <h3 className="text-2xl font-bold text-gray-900">{plan.nama_plan}</h3>
             <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border-none">Baru</Badge>
           </div>
-
+          
           <div className="mb-2 flex flex-wrap items-end gap-x-2 gap-y-1">
             <div className="text-2xl leading-none font-bold text-gray-900">{plan.harga === 0 ? "Gratis" : formatRupiah(plan.harga)}</div>
             {plan.is_lifetime ? (
@@ -45,10 +45,10 @@ export function AvailablePlanCards() {
               <div className="text-gray-400 text-sm font-medium mb-1 whitespace-nowrap">IDR / {plan.durasi_hari} Hari</div>
             )}
           </div>
-
+          
           <p className="text-gray-500 text-sm mb-6">{plan.deskripsi}</p>
 
-          <button
+          <button 
             onClick={() => {
               setSelectedPlanId(plan.id)
               setUpgradeOpen(true)
@@ -56,10 +56,10 @@ export function AvailablePlanCards() {
             disabled={isPending}
             className={`w-full text-sm font-semibold py-3 px-4 rounded-xl mb-8 transition-colors cursor-pointer ${isPending ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-[#EA580C] hover:bg-[#c2410c] text-white shadow-sm'}`}
           >
-            {isPending
-              ? 'Menunggu Konfirmasi'
+            {isPending 
+              ? 'Menunggu Konfirmasi' 
               : activeSub && isDowngrade(plan.batas_outlet, activeSub.plan.batas_outlet)
-                ? `Turunkan ke ${plan.nama_plan}`
+                ? `Turunkan ke ${plan.nama_plan}` 
                 : `Tingkatkan ke ${plan.nama_plan}`}
           </button>
 

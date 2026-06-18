@@ -22,7 +22,7 @@ export function ActivePlanCard() {
           </Badge>
         )}
       </div>
-
+      
       <div className="mb-2 flex flex-wrap items-end gap-x-2 gap-y-1">
         <div className="text-2xl leading-none font-bold text-gray-900">{activeSub.plan.harga === 0 ? "Gratis" : formatRupiah(activeSub.plan.harga)}</div>
         {activeSub.plan.is_lifetime ? (
@@ -31,7 +31,7 @@ export function ActivePlanCard() {
           <div className="text-gray-400 text-sm font-medium mb-1 whitespace-nowrap">IDR / {activeSub.plan.durasi_hari} Hari</div>
         )}
       </div>
-
+      
       <p className="text-gray-500 text-sm mb-6">{activeSub.plan.deskripsi}</p>
 
       <button disabled className="w-full text-sm font-semibold py-3 px-4 rounded-xl border border-gray-300 text-gray-700 bg-transparent mb-8">

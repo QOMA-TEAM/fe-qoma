@@ -42,7 +42,7 @@ export function useBayarPesanan() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, metode }: { id: string; metode: "tunai" | "transfer" | "qris" }) =>
+    mutationFn: ({ id, metode }: { id: string; metode: "tunai" | "transfer" | "qris" | "debit" }) =>
       pesananService.bayar(id, metode),
     onSuccess: (data) => {
       toast.success(data.message);
