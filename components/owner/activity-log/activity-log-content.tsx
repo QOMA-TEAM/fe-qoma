@@ -13,7 +13,7 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
-import { cn } from "@/lib/utils"
+import { cn, formatDeskripsi } from "@/lib/utils"
 import { useOwnerActivityLogList } from "@/hooks/owner/use-activity-log"
 import { useOutlets } from "@/hooks/owner/use-outlets"
 import { useDebounce } from "@/hooks/use-debounce"
@@ -23,7 +23,7 @@ export function ActivityLogContent() {
   const [search, setSearch] = useState("")
   const [outletId, setOutletId] = useState<string>("owner")
   
-  const debouncedSearch = useDebounce(search, 800)
+  const debouncedSearch = useDebounce(search, 300)
   
   const { data: outletsResponse } = useOutlets()
   const outlets = outletsResponse?.data || []
@@ -105,7 +105,7 @@ export function ActivityLogContent() {
             <TableRow className="bg-gray-100 hover:bg-gray-100 border-gray-200">
               <TableHead className="w-40 text-gray-600 font-semibold text-sm">Waktu</TableHead>
               <TableHead className="w-48 text-gray-600 font-semibold text-sm">User</TableHead>
-              <TableHead className="w-36 text-gray-600 font-semibold text-sm text-center">Aktivitas</TableHead>
+              <TableHead className="w-48 text-gray-600 font-semibold text-sm">Aktivitas</TableHead>
               <TableHead className="text-gray-600 font-semibold text-sm">Deskripsi</TableHead>
             </TableRow>
           </TableHeader>
@@ -131,10 +131,10 @@ export function ActivityLogContent() {
                 <TableRow key={row.id} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
                   <TableCell className="text-gray-600 text-sm whitespace-nowrap py-3">{row.created_at}</TableCell>
                   <TableCell className="text-gray-800 text-sm font-medium py-3">{row.user?.nama_lengkap || row.user?.username || "-"}</TableCell>
-                  <TableCell className="text-center py-3">
+                  <TableCell className="py-3">
                     <span className="text-sm text-gray-800 capitalize font-medium">{row.aktivitas.replace(/_/g, " ")}</span>
                   </TableCell>
-                  <TableCell className="text-gray-600 text-sm py-3" title={row.deskripsi}>{row.deskripsi}</TableCell>
+                  <TableCell className="text-gray-600 text-sm py-3" title={row.deskripsi}>{formatDeskripsi(row.deskripsi)}</TableCell>
                 </TableRow>
               ))
             )}

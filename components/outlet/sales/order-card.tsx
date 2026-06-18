@@ -1,6 +1,8 @@
-import { UtensilsCrossed, Trash2 } from "lucide-react";
+import { UtensilsCrossed, Trash2, Clock, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Pesanan } from "@/services/outlet/pesanan-service";
+import { useState, useEffect } from "react";
+import { useCancelPesanan } from "@/hooks/outlet/use-pesanan";
 
 interface OrderCardProps {
   order: Pesanan;
@@ -10,7 +12,41 @@ interface OrderCardProps {
 
 export function OrderCard({ order, onClick, className }: OrderCardProps) {
   const isConfirmed = order.status === "confirmed";
+  const isExpired = order.status === "expired";
+  const { mutate: cancelPesanan, isPending: isCanceling } = useCancelPesanan();
   
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (order.status !== "pending") {
+      setTimeLeft(null);
+      return;
+    }
+
+    const calculateTimeLeft = () => {
+      // 10 menit batas waktunya dari created_at
+      const createdTime = new Date(order.created_at).getTime();
+      const expireTime = createdTime + 10 * 60 * 1000;
+      const now = new Date().getTime();
+      const diff = Math.floor((expireTime - now) / 1000);
+      return diff > 0 ? diff : 0;
+    };
+
+    setTimeLeft(calculateTimeLeft());
+
+    const interval = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [order.created_at, order.status]);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
+
   // Ambil 5 karakter pertama dari ID agar tidak terlalu panjang
   const shortId = order.id.split("-")[0].toUpperCase();
 
@@ -36,10 +72,10 @@ export function OrderCard({ order, onClick, className }: OrderCardProps) {
           <span
             className={cn(
               "px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-white",
-              isConfirmed ? "bg-blue-600" : "bg-red-600"
+              isConfirmed ? "bg-blue-600" : isExpired ? "bg-red-700" : "bg-orange-500"
             )}
           >
-            {isConfirmed ? "CONFIRMED" : "PENDING"}
+            {isConfirmed ? "CONFIRMED" : isExpired ? "EXPIRED" : "PENDING"}
           </span>
         </div>
 
@@ -54,15 +90,30 @@ export function OrderCard({ order, onClick, className }: OrderCardProps) {
               <span className="text-[#1a5f7a] font-medium">{order.nomor_meja}</span>
             </div>
           </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              // Akan diimplementasikan (misal hapus atau cancel pesanan)
-            }}
-            className="p-2 text-[#1a5f7a]/60 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer flex-shrink-0"
-          >
-            <Trash2 className="w-[18px] h-[18px]" />
-          </button>
+          <div className="flex flex-col items-end justify-between gap-2">
+            {order.status === "pending" && timeLeft !== null && (
+              <div className={cn(
+                "flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-md",
+                timeLeft <= 60 ? "text-red-700 bg-red-100" : "text-orange-700 bg-orange-100"
+              )}>
+                {timeLeft === 0 ? <AlertCircle className="size-3.5" /> : <Clock className="size-3.5" />}
+                <span>{timeLeft === 0 ? "Waktu Habis" : `Sisa Waktu: ${formatTime(timeLeft)}`}</span>
+              </div>
+            )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (window.confirm("Apakah Anda yakin ingin membatalkan pesanan ini?")) {
+                  cancelPesanan(order.id);
+                }
+              }}
+              disabled={isCanceling}
+              className="p-2 text-[#1a5f7a]/60 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer flex-shrink-0 disabled:opacity-50"
+              title="Batalkan Pesanan"
+            >
+              <Trash2 className="w-[18px] h-[18px]" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

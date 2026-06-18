@@ -107,7 +107,7 @@ export function ViewQrDialog({ meja, onClose }: ViewQrDialogProps) {
             <QrCode className="size-4" />
           </div>
           <DialogTitle className="text-xl font-bold text-gray-800">
-            QR Code - {meja.nomor_meja}
+            QR Code - Meja {meja.nomor_meja}
           </DialogTitle>
         </DialogHeader>
 
@@ -121,13 +121,15 @@ export function ViewQrDialog({ meja, onClose }: ViewQrDialogProps) {
           </div>
           <div className="text-center space-y-1">
             <p className="text-sm font-semibold text-gray-800">{meja.nomor_meja}</p>
-            <p className="text-xs text-gray-400 break-all max-w-[280px]">
-              {meja.qr_code}
-            </p>
+            <Button className="w-full mt-2 bg-orange-600 hover:bg-orange-700">
+              <a href={meja.qr_code || undefined} target="_blank" rel="noopener noreferrer" className="text-xs text-white">
+                Buka Link QR Code
+              </a>
+            </Button>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 mt-4">
+        <div className="flex items-center gap-3">
           <Button
             type="button"
             variant="outline"

@@ -4,6 +4,8 @@ export interface OutletProfile {
   id: number;
   nama_outlet: string;
   status_buka: boolean;
+  gambar_icon: string | null;
+  gambar_header: string | null;
 }
 
 export interface KeuanganSummary {
@@ -73,6 +75,15 @@ export const outletDashboardService = {
 
   toggleStatus: async (): Promise<{ message: string; status_buka: boolean }> => {
     const response = await axiosInstance.patch("/outlet/toggle-status");
+    return response.data;
+  },
+
+  updateGambar: async (data: FormData): Promise<{ message: string; gambar_icon: string | null; gambar_header: string | null }> => {
+    const response = await axiosInstance.post("/outlet/gambar", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return response.data;
   },
 };

@@ -8,15 +8,23 @@ import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { CustomersChart } from "@/components/dashboard/customers-chart";
 import { NotificationFeed } from "@/components/outlet/dashboard/notification-feed";
 import { Loader2, Store, Settings, Bell } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChangePasswordDialog } from "@/components/settings/change-password-dialog";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { OutletSettingsContent } from "@/components/outlet/outlet-settings-content";
 
 export function OutletDashboardContent() {
   const { data: response, isLoading, isError } = useOutletDashboard();
-  const { mutate: toggleStatus, isPending } = useToggleOutletStatus();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [readAlerts, setReadAlerts] = useState<string[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("qoma_read_alerts");
+    if (saved) {
+      try {
+        setReadAlerts(JSON.parse(saved));
+      } catch (e) {}
+    }
+  }, []);
 
   if (isLoading) {
     return (
@@ -36,6 +44,20 @@ export function OutletDashboardContent() {
 
   const { outlet, keuangan_7_hari, alert_summary, grafik_pendapatan, alerts } = response.data;
 
+  const handleMarkAlertRead = (alertId: string) => {
+    if (!readAlerts.includes(alertId)) {
+      const newReadAlerts = [...readAlerts, alertId];
+      setReadAlerts(newReadAlerts);
+      localStorage.setItem("qoma_read_alerts", JSON.stringify(newReadAlerts));
+    }
+  };
+
+  const handleMarkAllAlertsRead = (alertIds: string[]) => {
+    const newReadAlerts = Array.from(new Set([...readAlerts, ...alertIds]));
+    setReadAlerts(newReadAlerts);
+    localStorage.setItem("qoma_read_alerts", JSON.stringify(newReadAlerts));
+  };
+
   // Format the chart data from the backend
   const chartData = grafik_pendapatan?.map((item) => {
     const date = new Date(item.periode);
@@ -50,6 +72,25 @@ export function OutletDashboardContent() {
       revenue: item.total_pendapatan
     };
   }) || [];
+
+  // Map alerts to notification format
+  const flattenedAlerts = [
+    ...(alerts?.sudah_expired?.map((a: any) => ({ ...a, type: 'sudah_expired' })) || []),
+    ...(alerts?.mendekati_expired?.map((a: any) => ({ ...a, type: 'mendekati_expired' })) || []),
+    ...(alerts?.stok_menipis?.map((a: any) => ({ ...a, type: 'stok_menipis' })) || [])
+  ];
+
+  const extraNotifications = flattenedAlerts.map((alert) => {
+    const id = `alert-${alert.type}-${alert.bahan}`;
+    return {
+      id,
+      title: alert.type === 'stok_menipis' ? 'Peringatan Stok' : 'Peringatan Kedaluwarsa',
+      message: alert.pesan,
+      is_read: readAlerts.includes(id),
+      created_at: new Date().toISOString(),
+      type: alert.type,
+    };
+  });
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
@@ -68,34 +109,16 @@ export function OutletDashboardContent() {
             <Settings className="size-4" />
           </button>
 
-          <button
-            type="button"
-            className="relative flex items-center justify-center size-9 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-100 transition-colors cursor-pointer"
-            aria-label="Notifications"
-          >
-            <Bell className="size-4" />
-            <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-orange-500 ring-2 ring-white" />
-          </button>
+          <HeaderActions 
+            extraNotifications={extraNotifications} 
+            onMarkAlertRead={handleMarkAlertRead}
+            onMarkAllAlertsRead={() => handleMarkAllAlertsRead(extraNotifications.map(n => n.id))}
+          />
         </div>
       </header>
 
       <ChangePasswordDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label className="text-base font-semibold">Status Outlet</Label>
-            <p className="text-sm text-gray-500">
-              {outlet.status_buka ? "Outlet saat ini sedang Buka" : "Outlet saat ini sedang Tutup"}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Switch
-              checked={outlet.status_buka}
-              onCheckedChange={() => toggleStatus()}
-              aria-label="Toggle outlet status"
-              className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-red-500"
-            />
-          </div>
-        </div>
+        <OutletSettingsContent outlet={outlet} />
       </ChangePasswordDialog>
 
       <main className="flex-1 overflow-auto p-8 space-y-8">
