@@ -70,7 +70,7 @@ export const pesananService = {
     return response.data;
   },
 
-  bayar: async (id: string, metode: "tunai" | "transfer" | "qris"): Promise<PesananResponse> => {
+  bayar: async (id: string, metode: "tunai" | "transfer" | "qris" | "debit"): Promise<PesananResponse> => {
     const response = await axiosInstance.post(`/outlet/pesanan/${id}/bayar`, { metode });
     return response.data;
   },

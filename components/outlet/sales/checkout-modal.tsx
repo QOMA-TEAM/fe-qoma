@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { User, Table2, Minus, Plus, Delete, Loader2, CheckCircle2, X } from "lucide-react";
+import { User, Table2, Minus, Plus, Delete, Loader2, CheckCircle2, X, CreditCard, QrCode, Banknote, Building } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -68,6 +68,7 @@ export function CheckoutModal({
   // State for Payment Screen
   const [isPaying, setIsPaying] = useState(false);
   const [nominal, setNominal] = useState("0");
+  const [paymentMethod, setPaymentMethod] = useState<"tunai" | "qris" | "debit" | "transfer">("tunai");
 
   // State for Addon Selection
   const [selectedMenuForAddon, setSelectedMenuForAddon] = useState<OutletMenu | null>(null);
@@ -91,6 +92,7 @@ export function CheckoutModal({
     if (!open) {
       setIsPaying(false);
       setNominal("0");
+      setPaymentMethod("tunai");
       setSelectedMenuForAddon(null);
       setAddonSelections([]);
     }
@@ -127,7 +129,7 @@ export function CheckoutModal({
   const handlePay = () => {
     if (!orderId) return;
     payOrder(
-      { id: orderId, metode: "tunai" },
+      { id: orderId, metode: paymentMethod },
       {
         onSuccess: () => {
           onOpenChange(false);
@@ -407,65 +409,112 @@ export function CheckoutModal({
               </div>
             ) : (
               // VIEW: PAYMENT NUMPAD
-              <div className="w-1/2 bg-white flex flex-col h-full rounded-l-3xl p-8 pb-4">
-                <h2 className="text-[22px] font-bold text-center text-[#1E293B] mb-6">
+              <div className="w-1/2 bg-white flex flex-col h-full rounded-l-3xl p-6 pb-4 overflow-y-auto">
+                <h2 className="text-[22px] font-bold text-center text-[#1E293B] mb-4">
                   Pembayaran
                 </h2>
                 
                 {/* Ringkasan */}
-                <div className="space-y-4 mb-6 px-4">
+                <div className="space-y-2 mb-3 px-4 flex-none">
                   <div className="flex justify-between items-center text-sm">
                     <span className="font-semibold text-gray-500">Sub total</span>
                     <span className="font-bold text-gray-800">{formatRp(totalBelanja)}</span>
                   </div>
-                  <div className="flex justify-between items-center text-sm mt-4 pt-4 border-t border-gray-100">
+                  <div className="flex justify-between items-center text-sm mt-2 pt-2 border-t border-gray-100">
                     <span className="font-bold text-gray-800">Total Dibayar</span>
                     <span className="font-bold text-gray-800">{formatRp(totalBelanja)}</span>
                   </div>
-                  <div className="flex justify-between items-center text-sm mt-4">
-                    <span className="font-bold text-emerald-600">Kembalian</span>
-                    <span className="font-bold text-emerald-600">{formatRp(kembalian)}</span>
-                  </div>
+                  {paymentMethod === "tunai" && (
+                    <div className="flex justify-between items-center text-sm mt-2">
+                      <span className="font-bold text-emerald-600">Kembalian</span>
+                      <span className="font-bold text-emerald-600">{formatRp(kembalian)}</span>
+                    </div>
+                  )}
                 </div>
 
-                {/* Input Nominal */}
-                <div className="bg-slate-100 rounded-lg p-3 text-center text-lg font-bold text-gray-800 mb-6 mx-4">
-                  {formatRp(nominalNumber)}
-                </div>
-
-                {/* Numpad */}
-                <div className="grid grid-cols-3 gap-3 mb-auto px-4 flex-1">
-                  {["7", "8", "9", "4", "5", "6", "1", "2", "3"].map((num) => (
-                    <button 
-                      key={num} 
-                      onClick={() => handleNumpad(num)}
-                      className="bg-white border border-slate-200 hover:bg-slate-50 text-[#1E293B] shadow-sm text-2xl font-medium rounded-xl py-4 transition-colors"
+                {/* Pilih Metode Pembayaran */}
+                <div className="grid grid-cols-2 gap-2 px-4 mb-3 flex-none">
+                  {["tunai", "qris", "debit", "transfer"].map((method) => (
+                    <button
+                      key={method}
+                      onClick={() => {
+                        setPaymentMethod(method as any);
+                        if (method !== "tunai") {
+                          setNominal(totalBelanja.toString());
+                        } else {
+                          setNominal("0");
+                        }
+                      }}
+                      className={cn(
+                        "py-2 px-4 rounded-xl text-sm font-semibold capitalize border transition-all flex items-center justify-center gap-2",
+                        paymentMethod === method
+                          ? "bg-[#3874BC] text-white border-[#3874BC]"
+                          : "bg-white text-gray-600 border-gray-200 hover:bg-slate-50"
+                      )}
                     >
-                      {num}
+                      {method === "tunai" && <Banknote className="w-4 h-4" />}
+                      {method === "qris" && <QrCode className="w-4 h-4" />}
+                      {method === "debit" && <CreditCard className="w-4 h-4" />}
+                      {method === "transfer" && <Building className="w-4 h-4" />}
+                      {method}
                     </button>
                   ))}
-                  <button 
-                    onClick={() => handleNumpad("000")}
-                    className="bg-white border border-slate-200 hover:bg-slate-50 text-[#1E293B] shadow-sm text-lg font-bold rounded-xl py-4 transition-colors"
-                  >
-                    000
-                  </button>
-                  <button 
-                    onClick={() => handleNumpad("0")}
-                    className="bg-white border border-slate-200 hover:bg-slate-50 text-[#1E293B] shadow-sm text-2xl font-medium rounded-xl py-4 transition-colors"
-                  >
-                    0
-                  </button>
-                  <button 
-                    onClick={handleBackspace}
-                    className="bg-white border border-slate-200 hover:bg-slate-50 text-red-500 shadow-sm text-2xl font-medium rounded-xl py-4 transition-colors flex items-center justify-center"
-                  >
-                    <Delete className="w-6 h-6" />
-                  </button>
                 </div>
 
-                {/* Aksi */}
-                <div className="flex items-center justify-center gap-4 mt-6">
+                {paymentMethod === "tunai" ? (
+                  <>
+                    {/* Input Nominal */}
+                    <div className="bg-slate-100 rounded-lg p-2 text-center text-lg font-bold text-gray-800 mb-3 mx-4 flex-none">
+                      {formatRp(nominalNumber)}
+                    </div>
+
+                    {/* Numpad */}
+                    <div className="grid grid-cols-3 gap-2 mb-auto px-4 flex-1 min-h-0">
+                      {["7", "8", "9", "4", "5", "6", "1", "2", "3"].map((num) => (
+                        <button 
+                          key={num} 
+                          onClick={() => handleNumpad(num)}
+                          className="bg-white border border-slate-200 hover:bg-slate-50 text-[#1E293B] shadow-sm text-xl font-medium rounded-xl py-2 transition-colors"
+                        >
+                          {num}
+                        </button>
+                      ))}
+                      <button 
+                        onClick={() => handleNumpad("000")}
+                        className="bg-white border border-slate-200 hover:bg-slate-50 text-[#1E293B] shadow-sm text-base font-bold rounded-xl py-2 transition-colors"
+                      >
+                        000
+                      </button>
+                      <button 
+                        onClick={() => handleNumpad("0")}
+                        className="bg-white border border-slate-200 hover:bg-slate-50 text-[#1E293B] shadow-sm text-xl font-medium rounded-xl py-2 transition-colors"
+                      >
+                        0
+                      </button>
+                      <button 
+                        onClick={handleBackspace}
+                        className="bg-white border border-slate-200 hover:bg-slate-50 text-red-500 shadow-sm text-xl font-medium rounded-xl py-2 transition-colors flex items-center justify-center"
+                      >
+                        <Delete className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center px-4 bg-slate-50 rounded-2xl mx-4 mb-4 border border-slate-100 shadow-inner">
+                    <div className="w-16 h-16 bg-white shadow-sm rounded-full flex items-center justify-center mb-4 text-[#3874BC]">
+                      {paymentMethod === "qris" && <QrCode className="w-8 h-8" />}
+                      {paymentMethod === "debit" && <CreditCard className="w-8 h-8" />}
+                      {paymentMethod === "transfer" && <Building className="w-8 h-8" />}
+                    </div>
+                    <p className="text-gray-800 font-bold text-base capitalize">Pembayaran {paymentMethod}</p>
+                    <p className="text-gray-500 text-sm mt-1 max-w-[200px]">
+                      Pastikan pembayaran sebesar <span className="font-bold text-gray-800">{formatRp(totalBelanja)}</span> berhasil diterima.
+                    </p>
+                  </div>
+                )}
+
+                 {/* Aksi */}
+                <div className="flex items-center justify-center gap-4 mt-4 flex-none pb-2">
                   <Button 
                     onClick={handlePay}
                     disabled={isPayingOrder || nominalNumber < totalBelanja}
