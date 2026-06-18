@@ -3,29 +3,37 @@
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { OrderItem } from "./CheckoutModal";
+import { usePublicOrderDetail } from "@/hooks/public/use-order";
+import { Loader2 } from "lucide-react";
 
 interface OrderCompletedPageProps {
   tableNumber?: string;
   orderId: string;
-  customerName: string;
-  phoneNumber?: string;
-  paidAt: string; // misal "24 April 2026"
-  orderItems: OrderItem[];
+  outletId: string;
   onNewOrder: () => void;
 }
 
 export function OrderCompletedModal({
   tableNumber = "08",
   orderId,
-  customerName,
-  phoneNumber,
-  paidAt,
-  orderItems,
+  outletId,
   onNewOrder,
 }: OrderCompletedPageProps) {
-  const subtotal = orderItems.reduce((acc, item) => acc + item.totalPrice, 0);
+  const { data: orderData, isLoading } = usePublicOrderDetail(orderId, outletId);
+
+  if (isLoading || !orderData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+      </div>
+    );
+  }
+
+  const subtotal = orderData.total_harga;
   const grandTotal = subtotal;
+  const paidAt = orderData.pembayaran?.paid_at || "-";
+  const customerName = orderData.nama_pelanggan;
+  const phoneNumber = orderData.no_telp;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -60,7 +68,7 @@ export function OrderCompletedModal({
             </div>
             <div className="text-right flex-shrink-0">
               <p className="text-sm text-gray-500">ID ORDER :</p>
-              <p className="font-bold text-gray-900">{orderId}</p>
+              <p className="font-bold text-gray-900 break-all w-48 ml-auto text-xs">{orderId}</p>
               <p className="text-sm text-gray-500 mt-2">Paid :</p>
               <p className="font-bold text-gray-900">{paidAt}</p>
             </div>
@@ -71,45 +79,34 @@ export function OrderCompletedModal({
         <section className="bg-white rounded-2xl p-5 shadow-sm">
           <h2 className="font-bold text-gray-900 text-xl mb-4">Ordered Menu</h2>
           <div className="flex flex-col gap-3">
-            {orderItems.map((item) => (
+            {orderData.items.map((item, idx) => (
               <div
-                key={item.id}
+                key={idx}
                 className="flex items-center gap-3 border border-gray-100 rounded-xl p-3"
               >
-                <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                  <Image
-                    src={item.menu.image}
-                    alt={item.menu.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-gray-800 text-sm">
-                    {item.menu.name}
-                  </p>
-                  <p className="text-gray-400 text-xs line-clamp-1 mt-0.5">
-                    {item.menu.description}
+                    {item.nama}
                   </p>
                   <p className="text-gray-700 text-xs font-medium mt-1">
                     {item.qty > 1 && (
                       <span className="text-gray-500 mr-1">{item.qty}x</span>
                     )}
-                    Rp. {(item.totalPrice / item.qty).toLocaleString("id-ID")}
+                    Rp. {item.harga.toLocaleString("id-ID")}
                     {item.qty > 1 && (
                       <span className="font-bold ml-2">
-                        = Rp. {item.totalPrice.toLocaleString("id-ID")}
+                        = Rp. {item.subtotal.toLocaleString("id-ID")}
                       </span>
                     )}
                   </p>
-                  {item.selectedToppingsData && item.selectedToppingsData.length > 0 && (
-                    <p className="text-gray-400 text-xs mt-0.5">
-                      +{" "}
-                      {item.selectedToppingsData
-                        .map((t) => t.name)
-                        .filter(Boolean)
-                        .join(", ")}
-                    </p>
+                  {item.addons && item.addons.length > 0 && (
+                    <div className="mt-2 space-y-1 pl-2 border-l-2 border-orange-200">
+                      {item.addons.map((a, i) => (
+                        <p key={i} className="text-gray-500 text-xs font-medium">
+                          + {a.nama} {a.qty > 1 ? `(${a.qty}x)` : ""} - Rp. {(a.harga * a.qty).toLocaleString("id-ID")}
+                        </p>
+                      ))}
+                    </div>
                   )}
                 </div>
               </div>

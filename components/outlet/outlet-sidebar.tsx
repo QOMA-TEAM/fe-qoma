@@ -21,10 +21,9 @@ import {
   Settings
 } from "lucide-react"
 
-import { useOutletDashboard, useToggleOutletStatus } from "@/hooks/outlet/use-dashboard"
+import { useOutletDashboard } from "@/hooks/outlet/use-dashboard"
 import { ChangePasswordDialog } from "@/components/settings/change-password-dialog"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
+import { OutletSettingsContent } from "@/components/outlet/outlet-settings-content"
 
 import {
   Sidebar,
@@ -53,6 +52,11 @@ const outletNav = {
       title: "Pesanan Datang",
       url: "/outlet/pesanan-datang",
       icon: FolderOpen,
+    },
+    {
+      title: "Riwayat Pesanan",
+      url: "/outlet/riwayat-pesanan",
+      icon: LayoutDashboard, // We can reuse LayoutDashboard or another icon, wait let me use FileBox
     },
   ],
   kelola: [
@@ -96,9 +100,8 @@ export function OutletSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
   const router = useRouter()
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const { data: dashboardData, isLoading } = useOutletDashboard()
-  const { mutate: toggleStatus, isPending } = useToggleOutletStatus()
-  
-  const isOpen = dashboardData?.data?.outlet?.status_buka ?? false
+
+  const outlet = dashboardData?.data?.outlet;
 
   const handleLogout = () => {
     localStorage.removeItem("token")
@@ -251,22 +254,7 @@ export function OutletSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
       <SidebarRail />
       
       <ChangePasswordDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label className="text-base font-semibold">Status Outlet</Label>
-            <p className="text-sm text-gray-500">
-              {isOpen ? "Outlet saat ini sedang Buka" : "Outlet saat ini sedang Tutup"}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Switch
-              checked={isOpen}
-              onCheckedChange={() => toggleStatus()}
-              aria-label="Toggle outlet status"
-              className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-red-500"
-            />
-          </div>
-        </div>
+        {outlet ? <OutletSettingsContent outlet={outlet} /> : null}
       </ChangePasswordDialog>
     </Sidebar>
   )

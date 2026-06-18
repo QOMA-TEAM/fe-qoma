@@ -53,3 +53,33 @@ export function useToggleOutletStatus() {
     },
   });
 }
+
+export function useUpdateOutletGambar() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: outletDashboardService.updateGambar,
+    onSuccess: (data) => {
+      toast.success(data.message);
+      // Update the cache with new image URLs
+      queryClient.setQueryData(OUTLET_DASHBOARD_QUERY_KEY, (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            outlet: {
+              ...old.data.outlet,
+              gambar_icon: data.gambar_icon,
+              gambar_header: data.gambar_header,
+            },
+          },
+        };
+      });
+    },
+    onError: (error: any) => {
+      const msg = error.response?.data?.message || "Gagal mengupdate gambar outlet";
+      toast.error(msg);
+    },
+  });
+}

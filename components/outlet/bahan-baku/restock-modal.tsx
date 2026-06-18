@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useBahanMasterList, useRestockBahanBaku } from "@/hooks/outlet/use-bahan-baku";
+import { useBahanMasterList, useRestockBahanBaku, useAjukanPerubahanHargaBahan } from "@/hooks/outlet/use-bahan-baku";
 import { useDebounce } from "@/hooks/use-debounce";
 
 
@@ -28,15 +28,27 @@ export function RestockModal({ open, onOpenChange }: RestockModalProps) {
   const [jumlah, setJumlah] = useState("");
   const [tanggal, setTanggal] = useState("");
 
-  const { mutate: restock, isPending } = useRestockBahanBaku();
+  const { mutate: restock, isPending: isRestocking } = useRestockBahanBaku();
+  const { mutate: ajukanHarga, isPending: isMengajukan } = useAjukanPerubahanHargaBahan();
 
   const selectedItem = useMemo(() => {
     return items.find((item) => item.id === selectedItemId) || null;
   }, [items, selectedItemId]);
 
   const [pengeluaran, setPengeluaran] = useState("");
-
+  const [alasan, setAlasan] = useState("");
   const [isPengeluaranTouched, setIsPengeluaranTouched] = useState(false);
+
+  const isHargaChanged = useMemo(() => {
+    if (!selectedItem || !jumlah || !pengeluaran) return false;
+    const qty = parseFloat(jumlah);
+    if (qty <= 0) return false;
+    
+    const inputHarga = parseFloat(pengeluaran) / qty;
+    const hargaDefault = parseFloat(selectedItem.harga_default?.toString() || "0");
+    
+    return Math.abs(inputHarga - hargaDefault) > 0.01; // Allow small float precision differences
+  }, [jumlah, pengeluaran, selectedItem]);
 
   useEffect(() => {
     if (!isPengeluaranTouched) {
@@ -58,17 +70,38 @@ export function RestockModal({ open, onOpenChange }: RestockModalProps) {
         total_pengeluaran: pengeluaran ? parseFloat(pengeluaran) : undefined,
       },
       {
-        onSuccess: () => {
-          onOpenChange(false);
-          // reset form
-          setSelectedItemId(null);
-          setJumlah("");
-          setTanggal("");
-          setPengeluaran("");
-          setIsPengeluaranTouched(false);
+        onSuccess: (data) => {
+          if (isHargaChanged) {
+            const newHarga = parseFloat(pengeluaran) / parseFloat(jumlah);
+            // The restock API returns the updated/created BahanOutlet in data.data
+            ajukanHarga(
+              {
+                bahan_outlet_id: data.data.id,
+                harga_baru: Math.round(newHarga),
+                alasan,
+              },
+              {
+                onSuccess: () => {
+                  closeAndReset();
+                },
+              }
+            );
+          } else {
+            closeAndReset();
+          }
         },
       }
     );
+  };
+
+  const closeAndReset = () => {
+    onOpenChange(false);
+    setSelectedItemId(null);
+    setJumlah("");
+    setTanggal("");
+    setPengeluaran("");
+    setAlasan("");
+    setIsPengeluaranTouched(false);
   };
 
   return (
@@ -132,13 +165,30 @@ export function RestockModal({ open, onOpenChange }: RestockModalProps) {
               />
             </div>
 
+            {isHargaChanged && (
+              <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
+                <label className="text-sm font-medium text-gray-700">
+                  Alasan Perubahan Harga <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={alasan}
+                  onChange={(e) => setAlasan(e.target.value)}
+                  placeholder="Tulis alasan perubahan harga minimal 10 karakter..."
+                  className="w-full resize-none h-20 bg-white border border-gray-200 text-gray-900 rounded-lg shadow-sm focus-visible:ring-1 focus-visible:ring-blue-500 p-3 text-sm"
+                />
+                <p className="text-[11px] text-orange-500 font-medium leading-tight mt-1">
+                  Pengeluaran yang dimasukkan menyebabkan perubahan harga satuan. Perubahan ini memerlukan approval dari Owner.
+                </p>
+              </div>
+            )}
+
             <div className="pt-4 mt-auto">
               <Button
                 onClick={handleSubmit}
-                disabled={!selectedItem || !jumlah || !tanggal || isPending}
+                disabled={!selectedItem || !jumlah || !tanggal || isRestocking || isMengajukan || (isHargaChanged && alasan.length < 10)}
                 className="w-full h-12 bg-[#205284] hover:bg-[#1a4269] text-white font-semibold rounded-lg text-base"
               >
-                {isPending ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Submit"}
+                {isRestocking || isMengajukan ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Submit"}
               </Button>
             </div>
           </div>

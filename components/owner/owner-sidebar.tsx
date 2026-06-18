@@ -18,7 +18,14 @@ import {
   FileCheck,
   Settings,
   ListPlus,
+  ChevronRight,
 } from "lucide-react"
+
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 
 import { ChangePasswordDialog } from "@/components/settings/change-password-dialog"
 
@@ -33,6 +40,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
@@ -164,27 +174,41 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         </SidebarGroup>
 
         {/* KELOLA */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-muted-foreground/70 uppercase">
-            Kelola
-          </SidebarGroupLabel>
-          <SidebarMenu>
-            {ownerNav.kelola.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === item.url}
-                  className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
-                >
-                  <Link href={item.url}>
-                    <item.icon className="size-4" />
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
+        <Collapsible
+          asChild
+          defaultOpen={ownerNav.kelola.some(item => pathname.startsWith(item.url))}
+          className="group/collapsible"
+        >
+          <SidebarGroup>
+            <SidebarGroupLabel
+              asChild
+              className="group/label w-full justify-between hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer text-xs font-semibold tracking-wider text-muted-foreground/70 uppercase"
+            >
+              <CollapsibleTrigger>
+                Kelola
+                <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+              </CollapsibleTrigger>
+            </SidebarGroupLabel>
+            <CollapsibleContent>
+              <SidebarMenu>
+                {ownerNav.kelola.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.url}
+                      className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
+                    >
+                      <Link href={item.url}>
+                        <item.icon className="size-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
 
         {/* APPROVAL */}
         <SidebarGroup>
