@@ -6,14 +6,13 @@ import Image from "next/image";
 const navLinks = [
   { name: "Home", href: "/#home" },
   { name: "Feature", href: "/#feature" },
-  { name: "Screenshot", href: "/#screenshot" },
   { name: "Pricing", href: "/#pricing" },
   { name: "Contact", href: "/#contact" },
 ];
 
 export function Navbar() {
   return (
-    <nav className="w-full flex items-center justify-between py-6 px-8 md:px-16 absolute top-0 left-0 z-50">
+    <nav className="w-full flex items-center justify-between py-6 px-8 md:px-16 fixed top-0 left-0 z-50 bg-white/40 backdrop-blur-sm">
       <div className="flex items-center gap-12">
         {/* Logo */}
         <Link href="/" className="flex items-center justify-center">

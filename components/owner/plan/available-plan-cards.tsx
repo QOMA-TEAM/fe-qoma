@@ -3,14 +3,14 @@
 import { useState } from "react"
 import { useAvailablePlans, useActiveSubscription } from "@/hooks/owner/use-subscription"
 import { UpgradePlanDialog } from "@/components/owner/plan/upgrade-plan-dialog"
-import { formatRupiah } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Store, ShieldCheck, Zap } from "lucide-react"
+import { PlanCard } from "@/components/ui/plan-card"
 
 export function AvailablePlanCards() {
   const [upgradeOpen, setUpgradeOpen] = useState(false)
   const [selectedPlanId, setSelectedPlanId] = useState<string>("")
-  
+
   const { data: availablePlans } = useAvailablePlans()
   const { data: activeSub } = useActiveSubscription()
 
@@ -79,10 +79,10 @@ export function AvailablePlanCards() {
           </ul>
         </div>
       ))}
-      <UpgradePlanDialog 
-        open={upgradeOpen} 
-        onOpenChange={setUpgradeOpen} 
-        planId={selectedPlanId} 
+      <UpgradePlanDialog
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        planId={selectedPlanId}
       />
     </>
   )

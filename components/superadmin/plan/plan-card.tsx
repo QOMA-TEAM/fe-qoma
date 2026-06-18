@@ -1,4 +1,3 @@
-// components/superadmin/plan/plan-card.tsx
 "use client";
 
 import { Badge } from "@/components/ui/badge";
@@ -7,17 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle2, Store, XCircle } from "lucide-react";
 import { Plan } from "@/types/superadmin/plan";
-
-function formatRupiah(value: number): string {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  })
-    .format(value)
-    .replace("IDR", "Rp.");
-}
+import { PlanCard as GlobalPlanCard } from "@/components/ui/plan-card";
+import { formatRupiah } from "@/lib/utils";
 
 interface PlanCardProps {
   plan: Plan;
@@ -27,98 +17,62 @@ interface PlanCardProps {
 }
 
 export function PlanCard({ plan, allVariants, onEdit, onDelete }: PlanCardProps) {
-  const isActive = plan.status === "aktif";   // ← sesuai PlanStatus
+  const isActive = plan.status === "aktif";
+
+  const minPrice = allVariants && allVariants.length > 0
+    ? Math.min(...allVariants.map((v) => v.harga))
+    : plan.harga;
 
   return (
-    <Card
-      className={`
-        w-full max-w-[280px] border shadow-sm hover:shadow-md transition-all duration-200
-        rounded-xl overflow-hidden
-        ${isActive
-          ? "border-[#1D5E84]/40 bg-white"           // aktif: border primary blue
-          : "border-gray-200 bg-gray-50 opacity-75"  // tidak aktif: redup
-        }
-      `}
-    >
-
-
-      <CardContent className="p-5 space-y-4">
-        {/* Header: Nama Plan + Status Badge */}
-        <div className="flex items-center justify-between gap-2">
-          <h3
-            className={`text-base font-semibold truncate ${isActive ? "text-gray-800" : "text-gray-400"
-              }`}
-          >
-            {plan.nama_plan}
-          </h3>
-
-          <Badge
-            variant="outline"
-            className={`
-              flex items-center gap-1 shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium
-              ${isActive
-                ? "border-[#1D5E84]/20 text-[#1D5E84] bg-[#1D5E84]/10"
-                : "border-gray-300 text-gray-400 bg-gray-100"
-              }
-            `}
-          >
-            {isActive ? (
-              <CheckCircle2 className="h-3 w-3 text-[#1D5E84]" />
-            ) : (
-              <XCircle className="h-3 w-3 text-gray-400" />
-            )}
-            {isActive ? "Aktif" : "Tidak Aktif"}
-          </Badge>
-        </div>
-
-        {/* Harga */}
-        <div>
-          {allVariants && allVariants.length > 0 ? (
-            <>
-              <p className="text-xs text-gray-400 mb-0.5">Mulai dari</p>
-              <p className={`text-2xl font-bold tracking-tight ${isActive ? "text-gray-900" : "text-gray-400"}`}>
-                {formatRupiah(Math.min(...allVariants.map((v) => v.harga)))}
-              </p>
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {allVariants.map((v) => (
-                  <Badge key={v.id} variant="secondary" className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0 border-none font-semibold">
-                    {v.tagihan}
-                  </Badge>
-                ))}
-              </div>
-            </>
+    <div className="w-[280px] shrink-0">
+    <GlobalPlanCard
+      name={plan.nama_plan}
+      price={minPrice}
+      period={(!allVariants || allVariants.length === 0) ? plan.tagihan : undefined}
+      description={plan.deskripsi || undefined}
+      isActive={isActive}
+      className="h-full"
+      headerBadge={
+        <Badge
+          variant="outline"
+          className={`
+            flex items-center gap-1 shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium border-none
+            ${isActive
+              ? "text-[#1D5E84] bg-[#1D5E84]/10"
+              : "text-gray-400 bg-gray-100"
+            }
+          `}
+        >
+          {isActive ? (
+            <CheckCircle2 className="h-3 w-3 text-[#1D5E84]" />
           ) : (
-            <>
-              <p className={`text-2xl font-bold tracking-tight ${isActive ? "text-gray-900" : "text-gray-400"}`}>
-                {formatRupiah(plan.harga)}
-              </p>
-              <p className="text-xs text-gray-400 mt-0.5">Per {plan.tagihan}</p>
-            </>
+            <XCircle className="h-3 w-3 text-gray-400" />
           )}
-        </div>
-
-        <Separator className={isActive ? "bg-gray-100" : "bg-gray-200"} />
-
-        {/* Features */}
-        <ul className="space-y-1.5">
-          <li className="flex items-center gap-2 text-sm text-gray-600">
-            <Store
-              className={`h-3.5 w-3.5 flex-shrink-0 ${isActive ? "text-[#1D5E84]" : "text-gray-300"
-                }`}
-            />
-            <span className={isActive ? "text-gray-600" : "text-gray-400"}>
-              {plan.batas_outlet} Outlet
-            </span>
-          </li>
-          {plan.deskripsi && (
-            <li className="text-xs text-gray-400 leading-relaxed line-clamp-2">
-              {plan.deskripsi}
-            </li>
-          )}
-        </ul>
-
-        {/* Actions */}
-        <div className="flex gap-2 pt-1">
+          {isActive ? "Aktif" : "Tidak Aktif"}
+        </Badge>
+      }
+      priceSubtext={
+        allVariants && allVariants.length > 0 ? (
+          <div>
+            <p className="text-xs text-gray-400 mb-1">Mulai dari</p>
+            <div className="flex flex-wrap gap-1.5">
+              {allVariants.map((v) => (
+                <Badge key={v.id} variant="secondary" className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0 border-none font-semibold">
+                  {v.tagihan}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        ) : undefined
+      }
+      features={[
+        {
+          icon: <Store className="h-4 w-4" />,
+          text: `${plan.batas_outlet} Outlet`
+        }
+      ]}
+      actionButton={
+        <div className="flex gap-2">
           <Button
             size="sm"
             onClick={() => onEdit(plan)}
@@ -134,8 +88,9 @@ export function PlanCard({ plan, allVariants, onEdit, onDelete }: PlanCardProps)
             Hapus
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      }
+    />
+    </div>
   );
 }
 
@@ -143,23 +98,25 @@ export function PlanCard({ plan, allVariants, onEdit, onDelete }: PlanCardProps)
 
 export function PlanCardSkeleton() {
   return (
-    <Card className="w-full max-w-[280px] border border-gray-200 rounded-xl overflow-hidden">
-      <CardContent className="p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="h-5 w-24 bg-gray-100 rounded animate-pulse" />
-          <div className="h-5 w-16 bg-gray-100 rounded-full animate-pulse" />
-        </div>
-        <div className="space-y-1.5">
-          <div className="h-8 w-32 bg-gray-100 rounded animate-pulse" />
-          <div className="h-3 w-20 bg-gray-100 rounded animate-pulse" />
-        </div>
-        <Separator className="bg-gray-100" />
-        <div className="h-4 w-20 bg-gray-100 rounded animate-pulse" />
-        <div className="flex gap-2">
-          <div className="flex-1 h-8 bg-gray-100 rounded animate-pulse" />
-          <div className="flex-1 h-8 bg-gray-100 rounded animate-pulse" />
-        </div>
-      </CardContent>
-    </Card>
+    <div className="w-[280px] shrink-0">
+      <Card className="w-full border border-gray-200 rounded-2xl overflow-hidden">
+        <CardContent className="p-6 space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="h-6 w-28 bg-gray-100 rounded animate-pulse" />
+            <div className="h-5 w-16 bg-gray-100 rounded-full animate-pulse" />
+          </div>
+          <div className="space-y-2">
+            <div className="h-9 w-36 bg-gray-100 rounded animate-pulse" />
+            <div className="h-3 w-24 bg-gray-100 rounded animate-pulse" />
+          </div>
+          <Separator className="bg-gray-100" />
+          <div className="h-4 w-24 bg-gray-100 rounded animate-pulse" />
+          <div className="flex gap-2">
+            <div className="flex-1 h-8 bg-gray-100 rounded animate-pulse" />
+            <div className="flex-1 h-8 bg-gray-100 rounded animate-pulse" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

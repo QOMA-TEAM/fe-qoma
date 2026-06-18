@@ -15,7 +15,6 @@ export default function PlanPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50/40">
-      {/* Top Bar */}
       <header className="flex h-16 shrink-0 items-center justify-between border-b bg-white px-6 shadow-sm">
         <Breadcrumb>
           <BreadcrumbList>
@@ -31,7 +30,6 @@ export default function PlanPage() {
         <HeaderActions />
       </header>
 
-      {/* Content */}
       <main className="flex-1 p-8 space-y-6">
         {/* Header Text */}
         <div className="pb-4 border-b border-gray-400/50 max-w-full">
