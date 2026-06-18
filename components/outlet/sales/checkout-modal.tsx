@@ -74,10 +74,6 @@ export function CheckoutModal({
   const [selectedMenuForAddon, setSelectedMenuForAddon] = useState<OutletMenu | null>(null);
   const [addonSelections, setAddonSelections] = useState<{ addon_id: string; qty: number; nama: string; harga: number }[]>([]);
 
-  // State for Addon Selection
-  const [selectedMenuForAddon, setSelectedMenuForAddon] = useState<OutletMenu | null>(null);
-  const [addonSelections, setAddonSelections] = useState<{ addon_id: string; qty: number; nama: string; harga: number }[]>([]);
-
   const { data: detailResponse, isLoading } = usePesananDetail(orderId || "");
   const order = detailResponse?.data;
 
@@ -213,7 +209,7 @@ export function CheckoutModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!max-w-[1100px] w-[90vw] p-0 overflow-hidden bg-[#F6F8F9] border-none rounded-3xl h-[85vh] flex flex-col">
+      <DialogContent className="max-w-[1100px]! w-[90vw] p-0 overflow-hidden bg-[#F6F8F9] border-none rounded-3xl h-[85vh] flex flex-col">
         <DialogHeader className="sr-only">
           <DialogTitle>Checkout Pesanan</DialogTitle>
         </DialogHeader>
@@ -651,42 +647,23 @@ export function CheckoutModal({
                             <p className="text-[10px] font-bold text-gray-500">
                               {formatRp(menu.harga)}
                             </p>
-                            <button 
+                            <button
                               onClick={() => handleKlikAddMenu(menu)}
                               disabled={!menu.is_available || isAddingItem || isUpdatingQty}
                               className="mt-2 text-[10px] font-bold text-[#3874BC] border border-[#3874BC] rounded-md px-4 py-1 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              <div className="w-full aspect-square bg-slate-100 relative">
-                                <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-xs font-medium">
-                                  {menu.is_available ? "Gambar Menu" : "Habis"}
-                                </div>
-                              </div>
-                              <div className="px-3 pt-3 flex flex-col items-center text-center space-y-1">
-                                <h4 className="text-[11px] font-bold text-gray-800 line-clamp-2 leading-tight">
-                                  {menu.nama}
-                                </h4>
-                                <p className="text-[10px] font-bold text-gray-500">
-                                  {formatRp(menu.harga)}
-                                </p>
-                                <button
-                                  onClick={() => handleKlikAddMenu(menu)}
-                                  disabled={!menu.is_available || isAddingItem || isUpdatingQty}
-                                  className="mt-2 text-[10px] font-bold text-[#3874BC] border border-[#3874BC] rounded-md px-4 py-1 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                  {isAddingItem || isUpdatingQty ? "..." : "Add"}
-                                </button>
-                              </div>
-                            </div>
-                          ))}
+                              {isAddingItem || isUpdatingQty ? "..." : "Add"}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                         </div>
                       )}
                     </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-        ) : (
+                  </>
+                )}
+              </div>
+            ) : (
               // VIEW: RINGKASAN MENU (saat di layar pembayaran)
               <div className="w-1/2 bg-white flex flex-col h-full rounded-r-3xl border-l border-gray-100">
                 <div className="p-8 pb-4">
@@ -700,8 +677,8 @@ export function CheckoutModal({
                   </div>
                 </div>
                 <div className="flex-1 overflow-y-auto px-8 pb-8 space-y-1">
-                  {order.items?.map((item) => (
-                    <div key={item.id} className="grid grid-cols-12 gap-4 px-4 py-4 border border-gray-100 items-center -mt-[1px] hover:bg-slate-50 transition-colors">
+                  {order?.items?.map((item) => (
+                    <div key={item.id} className="grid grid-cols-12 gap-4 px-4 py-4 border border-gray-100 items-center -mt-px hover:bg-slate-50 transition-colors">
                       <div className="col-span-6 text-xs font-bold text-gray-800 line-clamp-2 leading-tight">
                         {item.nama}
                         {item.addons && item.addons.length > 0 && (
