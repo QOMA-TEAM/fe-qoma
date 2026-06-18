@@ -9,16 +9,16 @@ import { useOutletMenuList } from "@/hooks/outlet/use-menu-outlet";
 import type { PesananDetail } from "@/services/outlet/pesanan-service";
 import type { OutletMenu } from "@/services/outlet/menu-outlet-service";
 
-function QtyInput({ 
-  item, 
-  orderId, 
-  updateQty, 
-  isUpdating 
-}: { 
-  item: PesananDetail; 
-  orderId: string; 
-  updateQty: any; 
-  isUpdating: boolean 
+function QtyInput({
+  item,
+  orderId,
+  updateQty,
+  isUpdating
+}: {
+  item: PesananDetail;
+  orderId: string;
+  updateQty: any;
+  isUpdating: boolean
 }) {
   const [val, setVal] = useState(item.qty.toString());
 
@@ -29,12 +29,12 @@ function QtyInput({
   const handleBlur = () => {
     const newQty = parseInt(val, 10);
     if (!isNaN(newQty) && newQty >= 1 && newQty !== item.qty) {
-      updateQty({ 
-        id: orderId, 
-        detailId: item.id, 
+      updateQty({
+        id: orderId,
+        detailId: item.id,
         qty: newQty,
         currentQty: item.qty,
-        harga: item.harga 
+        harga: item.harga
       });
     } else {
       setVal(item.qty.toString()); // revert jika tidak valid (termasuk jika 0)
@@ -69,6 +69,10 @@ export function CheckoutModal({
   const [isPaying, setIsPaying] = useState(false);
   const [nominal, setNominal] = useState("0");
   const [paymentMethod, setPaymentMethod] = useState<"tunai" | "qris" | "debit" | "transfer">("tunai");
+
+  // State for Addon Selection
+  const [selectedMenuForAddon, setSelectedMenuForAddon] = useState<OutletMenu | null>(null);
+  const [addonSelections, setAddonSelections] = useState<{ addon_id: string; qty: number; nama: string; harga: number }[]>([]);
 
   // State for Addon Selection
   const [selectedMenuForAddon, setSelectedMenuForAddon] = useState<OutletMenu | null>(null);
@@ -162,7 +166,7 @@ export function CheckoutModal({
         detailId: existingItem.id, 
         qty: existingItem.qty + 1,
         currentQty: existingItem.qty,
-        harga: menuHarga 
+        harga: menuHarga
       });
     } else {
       // Jika belum ada atau pakai addon, tambah item baru
@@ -314,11 +318,11 @@ export function CheckoutModal({
                           {item.nama}
                         </div>
                         <div className="col-span-3 flex items-center justify-center gap-1">
-                          <QtyInput 
-                            item={item} 
-                            orderId={orderId!} 
-                            updateQty={updateQty} 
-                            isUpdating={isUpdatingQty} 
+                          <QtyInput
+                            item={item}
+                            orderId={orderId!}
+                            updateQty={updateQty}
+                            isUpdating={isUpdatingQty}
                           />
                           <button
                             onClick={() => handleHapusItem(item.id)}
@@ -333,7 +337,7 @@ export function CheckoutModal({
                           {formatRp(item.subtotal)}
                         </div>
                       </div>
-                      
+
                       {/* Add-ons rendering */}
                       {item.addons && item.addons.length > 0 && (
                         <div className="mt-2 pl-2 border-l-2 border-orange-200 space-y-1">
@@ -413,7 +417,7 @@ export function CheckoutModal({
                 <h2 className="text-[22px] font-bold text-center text-[#1E293B] mb-4">
                   Pembayaran
                 </h2>
-                
+
                 {/* Ringkasan */}
                 <div className="space-y-2 mb-3 px-4 flex-none">
                   <div className="flex justify-between items-center text-sm">
@@ -522,7 +526,7 @@ export function CheckoutModal({
                   >
                     {isPayingOrder ? <Loader2 className="w-5 h-5 animate-spin" /> : "Selesaikan"}
                   </Button>
-                  <Button 
+                  <Button
                     onClick={() => setIsPaying(false)}
                     disabled={isPayingOrder}
                     className="w-[140px] h-12 bg-slate-200 hover:bg-slate-300 rounded-xl text-slate-800 font-semibold shadow-none"
@@ -652,11 +656,30 @@ export function CheckoutModal({
                               disabled={!menu.is_available || isAddingItem || isUpdatingQty}
                               className="mt-2 text-[10px] font-bold text-[#3874BC] border border-[#3874BC] rounded-md px-4 py-1 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              {isAddingItem || isUpdatingQty ? "..." : "Add"}
-                            </button>
-                          </div>
+                              <div className="w-full aspect-square bg-slate-100 relative">
+                                <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-xs font-medium">
+                                  {menu.is_available ? "Gambar Menu" : "Habis"}
+                                </div>
+                              </div>
+                              <div className="px-3 pt-3 flex flex-col items-center text-center space-y-1">
+                                <h4 className="text-[11px] font-bold text-gray-800 line-clamp-2 leading-tight">
+                                  {menu.nama}
+                                </h4>
+                                <p className="text-[10px] font-bold text-gray-500">
+                                  {formatRp(menu.harga)}
+                                </p>
+                                <button
+                                  onClick={() => handleKlikAddMenu(menu)}
+                                  disabled={!menu.is_available || isAddingItem || isUpdatingQty}
+                                  className="mt-2 text-[10px] font-bold text-[#3874BC] border border-[#3874BC] rounded-md px-4 py-1 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  {isAddingItem || isUpdatingQty ? "..." : "Add"}
+                                </button>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      )}
                     </div>
                   )}
                 </div>

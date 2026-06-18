@@ -2,8 +2,8 @@
 
 import { Badge } from "@/components/ui/badge"
 import { useActiveSubscription } from "@/hooks/owner/use-subscription"
-import { Store, CheckCircle2 } from "lucide-react"
-import { PlanCard } from "@/components/ui/plan-card"
+import { formatRupiah } from "@/lib/utils"
+import { Store, CheckCircle2, Star } from "lucide-react"
 
 export function ActivePlanCard() {
   const { data: activeSub } = useActiveSubscription()

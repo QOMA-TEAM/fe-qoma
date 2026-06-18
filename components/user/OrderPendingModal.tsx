@@ -71,8 +71,10 @@ export function OrderPendingPage({
       onConfirmed();
     } else if (orderData?.status === "paid" && onPaid) {
       onPaid();
+    } else if (orderData?.status === "cancelled") {
+      onCancel();
     }
-  }, [orderData?.status, onConfirmed, onPaid]);
+  }, [orderData?.status, onConfirmed, onPaid, onCancel]);
 
   const minutes = Math.floor(secondsLeft / 60)
     .toString()
@@ -89,7 +91,7 @@ export function OrderPendingPage({
           Table Number : {tableNumber}
         </p>
         <p className="text-white/90 text-lg font-medium">
-          ID ORDER : {orderId}
+          ID ORDER : {orderId.substring(0, 8)}
         </p>
 
         <h1 className="text-white font-extrabold text-2xl md:text-3xl mt-2 uppercase tracking-wide">
