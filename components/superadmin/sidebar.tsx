@@ -168,7 +168,6 @@ export function SuperadminSidebar({
             >
               <button type="button" className="w-full cursor-pointer" onClick={handleLogout}>
                 <Avatar className="size-7">
-                  <AvatarImage src="/avatar-placeholder.png" alt="Superadmin" />
                   <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-semibold">
                     SA
                   </AvatarFallback>

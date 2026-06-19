@@ -36,24 +36,49 @@ export function OrderPendingPage({
     );
   };
 
-  // Sync timer with backend sisa_waktu_detik if available
-  const DURATION = 10 * 60; // fallback 10 menit
-  const [secondsLeft, setSecondsLeft] = useState(DURATION);
+  const [secondsLeft, setSecondsLeft] = useState<number | null>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem(`qoma_expire_${orderId}`);
+      if (saved) {
+        const diff = Math.floor((parseInt(saved) - Date.now()) / 1000);
+        return diff > 0 ? diff : 0;
+      }
+    }
+    return null;
+  });
   const [expired, setExpired] = useState(false);
 
   useEffect(() => {
-    if (orderData?.sisa_waktu_detik !== undefined && orderData?.sisa_waktu_detik !== null) {
-      setSecondsLeft(Math.max(0, Math.floor(orderData.sisa_waktu_detik)));
-    }
-  }, [orderData?.sisa_waktu_detik]);
+    if (!orderData?.expired_at) return;
+    
+    const rawDate = orderData.expired_at;
+    const formattedDate = rawDate.replace(" ", "T"); 
+    const expireTime = new Date(formattedDate).getTime();
+    
+    if (isNaN(expireTime)) return;
+    
+    localStorage.setItem(`qoma_expire_${orderId}`, expireTime.toString());
+
+    const diff = Math.floor((expireTime - Date.now()) / 1000);
+    setSecondsLeft(diff > 0 ? diff : 0);
+  }, [orderData?.expired_at, orderId]);
 
   useEffect(() => {
-    if (secondsLeft <= 0) {
+    if (orderData?.status !== "pending") {
+      if (orderData?.status === "cancelled" || orderData?.status === "expired") {
+        setSecondsLeft(0);
+        setExpired(true);
+      }
+      return;
+    }
+
+    if (secondsLeft !== null && secondsLeft <= 0) {
       setExpired(true);
       return;
     }
     const timer = setInterval(() => {
       setSecondsLeft((s) => {
+        if (s === null) return null;
         if (s <= 1) {
           clearInterval(timer);
           setExpired(true);
@@ -63,7 +88,7 @@ export function OrderPendingPage({
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [secondsLeft]);
+  }, [secondsLeft, orderData?.status]);
 
   // Watch status changes
   useEffect(() => {
@@ -71,17 +96,16 @@ export function OrderPendingPage({
       onConfirmed();
     } else if (orderData?.status === "paid" && onPaid) {
       onPaid();
-    } else if (orderData?.status === "cancelled") {
-      onCancel();
     }
-  }, [orderData?.status, onConfirmed, onPaid, onCancel]);
+    // Dihapus auto-redirect onCancel agar user bisa lihat tulisan DIBATALKAN dulu
+  }, [orderData?.status, onConfirmed, onPaid]);
 
-  const minutes = Math.floor(secondsLeft / 60)
-    .toString()
-    .padStart(2, "0");
-  const seconds = Math.floor(secondsLeft % 60)
-    .toString()
-    .padStart(2, "0");
+  const minutes = secondsLeft !== null 
+    ? Math.floor(secondsLeft / 60).toString().padStart(2, "0") 
+    : "--";
+  const seconds = secondsLeft !== null 
+    ? Math.floor(secondsLeft % 60).toString().padStart(2, "0") 
+    : "--";
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-500 to-orange-400 flex flex-col items-center justify-between px-6 py-16">
@@ -95,7 +119,7 @@ export function OrderPendingPage({
         </p>
 
         <h1 className="text-white font-extrabold text-2xl md:text-3xl mt-2 uppercase tracking-wide">
-          {orderData?.status_label || "Show Your ID Order to Cashier"}
+          {orderData?.status === "cancelled" ? "ORDER CANCELED" : (orderData?.status_label || "Show Your ID Order to Cashier")}
         </h1>
 
         {/* Pay Before */}
@@ -212,18 +236,28 @@ export function OrderPendingPage({
       </div>
 
       {/* ── Cancel Button ── */}
-      <Button
-        variant="outline"
-        className="bg-white text-orange-500 border-none font-bold text-base rounded-2xl px-16 py-6 hover:bg-orange-50 shadow-md"
-        onClick={handleCancelClick}
-        disabled={cancelOrder.isPending}
-      >
-        {cancelOrder.isPending ? (
-          <Loader2 className="w-5 h-5 animate-spin mx-auto" />
-        ) : (
-          "CANCEL ORDER"
-        )}
-      </Button>
+      {orderData?.status === "cancelled" ? (
+        <Button
+          variant="outline"
+          className="bg-white text-gray-700 border-none font-bold text-base rounded-2xl px-16 py-6 hover:bg-gray-50 shadow-md"
+          onClick={onCancel}
+        >
+          BACK TO MAIN MENU
+        </Button>
+      ) : (
+        <Button
+          variant="outline"
+          className="bg-white text-orange-500 border-none font-bold text-base rounded-2xl px-16 py-6 hover:bg-orange-50 shadow-md"
+          onClick={handleCancelClick}
+          disabled={cancelOrder.isPending || expired}
+        >
+          {cancelOrder.isPending ? (
+            <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+          ) : (
+            "CANCEL ORDER"
+          )}
+        </Button>
+      )}
     </div>
   );
 }

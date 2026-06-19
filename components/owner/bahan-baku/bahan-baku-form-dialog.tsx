@@ -19,6 +19,7 @@ import {
 import { ImageIcon, Loader2 } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 import { useAddBahanBaku, useUpdateBahanBaku, useDeleteBahanBaku } from "@/hooks/owner/use-bahan-baku"
+import { toast } from "sonner"
 
 const satuanOptions = ["pcs", "kg", "gram", "liter", "porsi", "lusin", "botol", "sachet"]
 
@@ -109,7 +110,7 @@ export function BahanBakuFormDialog({
         },
         onError: (err: any) => {
           console.error("Failed to add:", err)
-          alert(err.response?.data?.message || "Gagal menambahkan bahan baku")
+          toast.error(err.response?.data?.message || "Gagal menambahkan bahan baku")
         }
       })
     } else if (mode === "edit" && initialData?.id) {
@@ -119,7 +120,7 @@ export function BahanBakuFormDialog({
         },
         onError: (err: any) => {
           console.error("Failed to update:", err)
-          alert(err.response?.data?.message || "Gagal mengubah bahan baku")
+          toast.error(err.response?.data?.message || "Gagal mengubah bahan baku")
         }
       })
     }

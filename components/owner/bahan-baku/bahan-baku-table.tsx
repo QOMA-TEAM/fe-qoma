@@ -11,6 +11,7 @@ import { BahanBakuFormDialog } from "@/components/owner/bahan-baku/bahan-baku-fo
 import { useBahanBaku, useDeleteBahanBaku } from "@/hooks/owner/use-bahan-baku"
 import { BahanMaster } from "@/types/owner/bahan-baku"
 import { useDebounce } from "@/hooks/use-debounce"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 
 type SortKey = "id" | "nama" | "satuan" | "harga_default"
 type SortDir = "asc" | "desc"
@@ -24,6 +25,7 @@ export function BahanBakuTable({ search }: BahanBakuTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>("id")
   const [sortDir, setSortDir] = useState<SortDir>("asc")
   const [editItem, setEditItem] = useState<BahanMaster | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<BahanMaster | null>(null)
 
   const debouncedSearch = useDebounce(search, 1000)
   const { mutate: deleteBahan } = useDeleteBahanBaku()
@@ -41,11 +43,10 @@ export function BahanBakuTable({ search }: BahanBakuTableProps) {
     else { setSortKey(key); setSortDir("asc") }
   }
 
-  // Frontend sorting for the current page
   const sorted = useMemo(() => {
     return [...bahanBakuList].sort((a, b) => {
-      let av: string | number = a[sortKey]; 
-      let bv: string | number = b[sortKey];
+      let av: string | number = a[sortKey]
+      let bv: string | number = b[sortKey]
       if (sortKey === "harga_default") {
         av = parseFloat(av as string)
         bv = parseFloat(bv as string)
@@ -85,9 +86,9 @@ export function BahanBakuTable({ search }: BahanBakuTableProps) {
               ].map((col) => {
                 const isSortable = col.key === "id" || col.key === "harga_default"
                 return (
-                  <TableHead 
-                    key={col.key} 
-                    className={cn(col.className, isSortable && "cursor-pointer select-none")} 
+                  <TableHead
+                    key={col.key}
+                    className={cn(col.className, isSortable && "cursor-pointer select-none")}
                     onClick={isSortable ? () => handleSort(col.key) : undefined}
                   >
                     <div className={cn("flex items-center text-gray-600 font-semibold text-sm", col.key === "id" && "justify-center")}>
@@ -116,7 +117,7 @@ export function BahanBakuTable({ search }: BahanBakuTableProps) {
             {!isLoading && !isError && sorted.map((row, index) => (
               <TableRow key={row.id} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
                 <TableCell className="text-gray-500 text-sm text-center">
-                  {sortKey === "id" && sortDir === "desc" 
+                  {sortKey === "id" && sortDir === "desc"
                     ? (meta ? meta.total - ((meta.current_page - 1) * meta.per_page) - index : sorted.length - index)
                     : (meta ? (meta.current_page - 1) * meta.per_page + index + 1 : index + 1)}
                 </TableCell>
@@ -125,20 +126,16 @@ export function BahanBakuTable({ search }: BahanBakuTableProps) {
                 <TableCell className="text-gray-600 text-sm">{formatRupiah(row.harga_default)}</TableCell>
                 <TableCell className="text-center">
                   <div className="flex items-center justify-center gap-2">
-                    <button 
-                      onClick={() => setEditItem(row)} 
+                    <button
+                      onClick={() => setEditItem(row)}
                       className="flex items-center justify-center size-7 bg-[#3874BC] hover:bg-[#2c5b96] text-white rounded-md transition-colors cursor-pointer"
                       title="Edit"
                     >
                       <Pencil className="size-4" />
                     </button>
-                    <button 
-                      onClick={() => {
-                        if (window.confirm("Apakah Anda yakin ingin menghapus bahan baku ini?")) {
-                          deleteBahan(row.id)
-                        }
-                      }} 
-                      className="flex items-center justify-center size-7 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors cursor-pointer"
+                    <button
+                      onClick={() => setDeleteTarget(row)}
+                      className="flex items-center justify-center size-7 bg-[#ff6b00] hover:bg-[#e65a00] text-white rounded-md transition-colors cursor-pointer"
                       title="Hapus"
                     >
                       <Trash2 className="size-4" />
@@ -156,63 +153,54 @@ export function BahanBakuTable({ search }: BahanBakuTableProps) {
         </Table>
       </div>
 
-      {/* Pagination Controls */}
       {meta && meta.total > 0 && (
         <div className="flex items-center justify-between pt-2">
           <p className="text-sm text-gray-500">
             Menampilkan Halaman <span className="font-medium text-gray-900">{meta.current_page}</span> dari <span className="font-medium text-gray-900">{meta.last_page}</span> halaman
           </p>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="h-8 rounded-full px-4 text-xs font-medium cursor-pointer"
-            >
+            <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="h-8 rounded-full px-4 text-xs font-medium cursor-pointer">
               Previous
             </Button>
             <div className="flex items-center gap-1">
               {Array.from({ length: meta.last_page }, (_, i) => i + 1).map((pageNum) => (
-                <button
-                  key={pageNum}
-                  onClick={() => setPage(pageNum)}
-                  className={cn(
-                    "size-8 rounded-full text-xs font-medium transition-colors",
-                    page === pageNum
-                      ? "bg-[#1D5E84] hover:bg-[#154663] text-white"
-                      : "text-gray-600 hover:bg-gray-100 cursor-pointer"
-                  )}
-                >
+                <button key={pageNum} onClick={() => setPage(pageNum)} className={cn("size-8 rounded-full text-xs font-medium transition-colors", page === pageNum ? "bg-[#1D5E84] hover:bg-[#154663] text-white" : "text-gray-600 hover:bg-gray-100 cursor-pointer")}>
                   {pageNum}
                 </button>
               ))}
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage(p => Math.min(meta.last_page, p + 1))}
-              disabled={page === meta.last_page}
-              className="h-8 rounded-full px-4 text-xs font-medium cursor-pointer"
-            >
+            <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(meta.last_page, p + 1))} disabled={page === meta.last_page} className="h-8 rounded-full px-4 text-xs font-medium cursor-pointer">
               Next
             </Button>
           </div>
         </div>
       )}
 
-      {/* Dialog Edit */}
       <BahanBakuFormDialog
         open={!!editItem}
         onOpenChange={(open) => { if (!open) setEditItem(null) }}
         mode="edit"
-        initialData={editItem ? { 
-          id: editItem.id, 
-          namaBahanBaku: editItem.nama, 
-          satuan: editItem.satuan, 
+        initialData={editItem ? {
+          id: editItem.id,
+          namaBahanBaku: editItem.nama,
+          satuan: editItem.satuan,
           hargaDefault: parseFloat(editItem.harga_default),
-          gambarUrl: editItem.gambar ? `http://localhost:8000/storage/${editItem.gambar}` : undefined
+          gambarUrl: editItem.gambar ? (editItem.gambar.startsWith('http') ? editItem.gambar : `http://localhost:8000/storage/${editItem.gambar}`) : undefined
         } : undefined}
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        title="Hapus Bahan Baku"
+        description={`Apakah Anda yakin ingin menghapus bahan baku "${deleteTarget?.nama}"? Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Ya, Hapus"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={() => {
+          if (deleteTarget) deleteBahan(deleteTarget.id)
+          setDeleteTarget(null)
+        }}
       />
     </>
   )

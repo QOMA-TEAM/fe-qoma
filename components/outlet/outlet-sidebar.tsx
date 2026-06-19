@@ -21,9 +21,8 @@ import {
   Settings
 } from "lucide-react"
 
-import { useOutletDashboard } from "@/hooks/outlet/use-dashboard"
 import { ChangePasswordDialog } from "@/components/settings/change-password-dialog"
-import { OutletSettingsContent } from "@/components/outlet/outlet-settings-content"
+import { OutletProfileSettings } from "./outlet-profile-settings"
 
 import {
   Sidebar,
@@ -99,10 +98,6 @@ export function OutletSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
   const pathname = usePathname()
   const router = useRouter()
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const { data: dashboardData, isLoading } = useOutletDashboard()
-
-  const outlet = dashboardData?.data?.outlet;
-
   const handleLogout = () => {
     localStorage.removeItem("token")
     localStorage.removeItem("role")
@@ -238,7 +233,6 @@ export function OutletSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
             <SidebarMenuButton asChild className="hover:bg-red-50 hover:text-red-600 cursor-pointer">
               <button type="button" className="w-full" onClick={handleLogout}>
                 <Avatar className="size-7">
-                  <AvatarImage src="/avatar-placeholder.png" alt="Outlet" />
                   <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-semibold">
                     OU
                   </AvatarFallback>
@@ -254,7 +248,7 @@ export function OutletSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
       <SidebarRail />
       
       <ChangePasswordDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        {outlet ? <OutletSettingsContent outlet={outlet} /> : null}
+        <OutletProfileSettings />
       </ChangePasswordDialog>
     </Sidebar>
   )

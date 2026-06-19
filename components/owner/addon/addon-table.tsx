@@ -24,6 +24,8 @@ import { Addon } from "@/services/owner/addon"
 
 import { useDeleteAddon } from "@/hooks/owner/use-addon"
 import { toast } from "sonner"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
+import { useState } from "react"
 
 interface AddonTableProps {
   data: Addon[]
@@ -35,6 +37,7 @@ interface AddonTableProps {
 
 export function AddonTable({ data, onEdit, meta, page, setPage }: AddonTableProps) {
   const { mutate: deleteAddon } = useDeleteAddon()
+  const [deleteTarget, setDeleteTarget] = useState<Addon | null>(null)
   return (
     <>
       <div className="rounded-xl border border-gray-200 overflow-hidden bg-white mt-4">
@@ -74,15 +77,8 @@ export function AddonTable({ data, onEdit, meta, page, setPage }: AddonTableProp
                         <Pencil className="size-4" />
                       </button>
                       <button 
-                        onClick={() => {
-                          if (window.confirm("Apakah Anda yakin ingin menghapus add on ini?")) {
-                            deleteAddon(addon.id, {
-                              onSuccess: () => toast.success("Add On berhasil dihapus"),
-                              onError: () => toast.error("Gagal menghapus Add On")
-                            })
-                          }
-                        }} 
-                        className="flex items-center justify-center size-7 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors cursor-pointer"
+                        onClick={() => setDeleteTarget(addon)} 
+                        className="flex items-center justify-center size-7 bg-[#ff6b00] hover:bg-[#e65a00] text-white rounded-md transition-colors cursor-pointer"
                         title="Hapus"
                       >
                         <Trash2 className="size-4" />
@@ -136,8 +132,23 @@ export function AddonTable({ data, onEdit, meta, page, setPage }: AddonTableProp
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        title="Hapus Add On"
+        description={`Apakah Anda yakin ingin menghapus add on "${deleteTarget?.nama}"? Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Ya, Hapus"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={() => {
+          if (deleteTarget) deleteAddon(deleteTarget.id, {
+            onSuccess: () => toast.success("Add On berhasil dihapus"),
+            onError: () => toast.error("Gagal menghapus Add On")
+          })
+          setDeleteTarget(null)
+        }}
+      />
     </>
   )
 }
-
-

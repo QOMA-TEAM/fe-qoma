@@ -11,6 +11,7 @@ import { KategoriFormDialog } from "@/components/owner/kategori/kategori-form-di
 import { useKategori, useDeleteKategori } from "@/hooks/owner/use-kategori"
 import { KategoriMaster } from "@/types/owner/kategori"
 import { useDebounce } from "@/hooks/use-debounce"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 
 type SortKey = "id" | "nama"
 type SortDir = "asc" | "desc"
@@ -24,6 +25,7 @@ export function KategoriTable({ search }: KategoriTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>("id")
   const [sortDir, setSortDir] = useState<SortDir>("asc")
   const [editItem, setEditItem] = useState<KategoriMaster | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<KategoriMaster | null>(null)
   
   const { mutate: deleteKategori } = useDeleteKategori()
   const debouncedSearch = useDebounce(search, 1000)
@@ -117,13 +119,9 @@ export function KategoriTable({ search }: KategoriTableProps) {
                     >
                       <Pencil className="size-4" />
                     </button>
-                    <button 
-                      onClick={() => {
-                        if (window.confirm("Apakah Anda yakin ingin menghapus kategori ini?")) {
-                          deleteKategori(row.id)
-                        }
-                      }} 
-                      className="flex items-center justify-center size-7 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors cursor-pointer"
+                    <button
+                      onClick={() => setDeleteTarget(row)}
+                      className="flex items-center justify-center size-7 bg-[#ff6b00] hover:bg-[#e65a00] text-white rounded-md transition-colors cursor-pointer"
                       title="Hapus"
                     >
                       <Trash2 className="size-4" />
@@ -187,6 +185,20 @@ export function KategoriTable({ search }: KategoriTableProps) {
         onOpenChange={(open) => { if (!open) setEditItem(null) }}
         mode="edit"
         initialData={editItem ? { id: editItem.id, nama: editItem.nama } : undefined}
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        title="Hapus Kategori"
+        description={`Apakah Anda yakin ingin menghapus kategori "${deleteTarget?.nama}"? Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Ya, Hapus"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={() => {
+          if (deleteTarget) deleteKategori(deleteTarget.id)
+          setDeleteTarget(null)
+        }}
       />
     </>
   )

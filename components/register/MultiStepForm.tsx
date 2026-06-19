@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Navbar } from "@/components/landing-page/Navbar";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Zap, Star, CreditCard, Wallet, Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
 
 type Plan = "free" | "pro" | null;
 
@@ -28,7 +29,7 @@ export function MultiStepForm() {
     if (step < TOTAL_STEPS) {
       setStep(step + 1);
     } else {
-      alert("Form submitted! Menunggu konfirmasi superadmin.");
+      toast.success("Pendaftaran berhasil! Menunggu konfirmasi superadmin.");
       router.push("/");
     }
   };

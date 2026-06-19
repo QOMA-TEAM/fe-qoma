@@ -2,6 +2,8 @@ export interface OutletInfo {
   id: string;
   nama_outlet: string;
   alamat: string;
+  gambar_icon?: string | null;
+  gambar_header?: string | null;
 }
 
 export interface MejaInfo {

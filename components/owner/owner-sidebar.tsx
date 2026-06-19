@@ -296,7 +296,6 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
             <SidebarMenuButton asChild className="hover:bg-red-50 hover:text-red-600 cursor-pointer">
               <button type="button" className="w-full cursor-pointer" onClick={handleLogout}>
                 <Avatar className="size-7">
-                  <AvatarImage src="/avatar-placeholder.png" alt="Owner" />
                   <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-semibold">
                     OW
                   </AvatarFallback>

@@ -22,6 +22,8 @@ import { useState, useRef, useEffect } from "react"
 import { useKategori } from "@/hooks/owner/use-kategori"
 import { useBahanBaku } from "@/hooks/owner/use-bahan-baku"
 import { useAddMenu, useUpdateMenu, useDeleteMenu } from "@/hooks/owner/use-menu"
+import { toast } from "sonner"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 
 interface BahanBakuItem {
   bahan_master_id: string
@@ -74,6 +76,7 @@ export function MenuFormDialog({
   const [keterangan, setKeterangan] = useState("")
   const [bahanBaku, setBahanBaku] = useState<BahanBakuItem[]>([])
   const [searchBahan, setSearchBahan] = useState("")
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   useEffect(() => {
     if (open && mode === "edit" && initialData) {
@@ -131,7 +134,7 @@ export function MenuFormDialog({
     e.preventDefault()
     
     if (!kategoriId) {
-      alert("Pilih kategori terlebih dahulu.")
+      toast.error("Pilih kategori terlebih dahulu.")
       return
     }
 
@@ -154,24 +157,26 @@ export function MenuFormDialog({
     if (mode === "tambah") {
       addMutation.mutate(formData, {
         onSuccess: () => onOpenChange(false),
-        onError: (err: any) => alert(err.response?.data?.message || "Gagal menambahkan menu")
+        onError: (err: any) => toast.error(err.response?.data?.message || "Gagal menambahkan menu")
       })
     } else if (mode === "edit" && initialData?.id) {
       updateMutation.mutate({ id: initialData.id, data: formData }, {
         onSuccess: () => onOpenChange(false),
-        onError: (err: any) => alert(err.response?.data?.message || "Gagal memperbarui menu")
+        onError: (err: any) => toast.error(err.response?.data?.message || "Gagal memperbarui menu")
       })
     }
   }
 
   const handleDelete = () => {
     if (!initialData?.id) return
-    const confirmed = window.confirm(`Hapus menu ${initialData.namaMenu}?`)
-    if (!confirmed) return
+    setShowDeleteConfirm(true)
+  }
 
+  const confirmDelete = () => {
+    if (!initialData?.id) return
     deleteMutation.mutate(initialData.id, {
       onSuccess: () => onOpenChange(false),
-      onError: (err: any) => alert(err.response?.data?.message || "Gagal menghapus menu")
+      onError: (err: any) => toast.error(err.response?.data?.message || "Gagal menghapus menu")
     })
   }
 
@@ -180,7 +185,8 @@ export function MenuFormDialog({
   const title = mode === "tambah" ? "Tambah Menu" : "Edit Menu"
 
   return (
-    <Dialog open={open} onOpenChange={isPending ? undefined : onOpenChange}>
+    <>
+      <Dialog open={open} onOpenChange={isPending ? undefined : onOpenChange}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-gray-800">{title}</DialogTitle>
@@ -259,7 +265,7 @@ export function MenuFormDialog({
                             <div className="w-full aspect-square bg-gray-100 flex items-center justify-center p-1 cursor-pointer">
                               {bahan.gambar ? (
                                 <img 
-                                  src={`http://localhost:8000/storage/${bahan.gambar}`} 
+                                  src={bahan.gambar?.startsWith('http') ? bahan.gambar : `http://localhost:8000/storage/${bahan.gambar}`} 
                                   alt={bahan.nama}
                                   className="w-full h-full object-cover rounded-lg"
                                 />
@@ -369,6 +375,18 @@ export function MenuFormDialog({
           </div>
         </form>
       </DialogContent>
-    </Dialog>
+      </Dialog>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title="Hapus Menu"
+        description={`Apakah Anda yakin ingin menghapus menu "${initialData?.namaMenu}"? Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Ya, Hapus"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={confirmDelete}
+      />
+    </>
   )
 }

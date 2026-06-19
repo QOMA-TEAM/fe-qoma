@@ -8,11 +8,13 @@ import { RejectTenantDialog } from "@/components/superadmin/new-tenant/reject-te
 import { useTenant } from "@/hooks/superadmin/use-tenant";
 import type { Tenant } from "@/types/superadmin/tenant";
 import { cn } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export function PendingTenantContent() {
   const [page, setPage] = useState(1);
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
   const [tenantToReject, setTenantToReject] = useState<Tenant | null>(null);
+  const [tenantToApprove, setTenantToApprove] = useState<Tenant | null>(null);
 
   const { tenants, loading, meta, approveTenant, rejectTenant } = useTenant({
     status: "pending",
@@ -20,13 +22,7 @@ export function PendingTenantContent() {
   });
 
   const handleApprove = async (tenant: Tenant) => {
-    if (
-      window.confirm(
-        `Apakah Anda yakin ingin menyetujui pendaftaran tenant ${tenant.nama_usaha}?`
-      )
-    ) {
-      await approveTenant(tenant.id);
-    }
+    setTenantToApprove(tenant);
   };
 
   return (
@@ -110,6 +106,22 @@ export function PendingTenantContent() {
           if (!open) setTenantToReject(null);
         }}
         onConfirm={rejectTenant}
+      />
+
+      <ConfirmDialog
+        open={!!tenantToApprove}
+        onOpenChange={(open) => { if (!open) setTenantToApprove(null); }}
+        title="Setujui Pendaftaran Tenant"
+        description={`Apakah Anda yakin ingin menyetujui pendaftaran tenant "${tenantToApprove?.nama_usaha}"?`}
+        confirmLabel="Ya, Setujui"
+        cancelLabel="Batal"
+        variant="success"
+        onConfirm={async () => {
+          if (tenantToApprove) {
+            await approveTenant(tenantToApprove.id);
+            setTenantToApprove(null);
+          }
+        }}
       />
     </>
   );

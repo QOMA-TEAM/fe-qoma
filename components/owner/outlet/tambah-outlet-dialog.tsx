@@ -13,6 +13,7 @@ import { useState } from "react"
 import { useAddOutlet } from "@/hooks/owner/use-outlets"
 import { useUsaha } from "@/hooks/use-usaha"
 import { Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 interface TambahOutletDialogProps {
   open: boolean
@@ -40,13 +41,13 @@ export function TambahOutletDialog({ open, onOpenChange }: TambahOutletDialogPro
     e.preventDefault()
 
     if (form.password !== form.konfirmasiPassword) {
-      alert("Password dan Konfirmasi Password tidak cocok!")
+      toast.error("Password dan Konfirmasi Password tidak cocok!")
       return
     }
 
     const usahaId = usahaData?.data?.[0]?.id
     if (!usahaId) {
-      alert("Data usaha tidak ditemukan. Silakan reload halaman.")
+      toast.error("Data usaha tidak ditemukan. Silakan reload halaman.")
       return
     }
 
@@ -64,7 +65,7 @@ export function TambahOutletDialog({ open, onOpenChange }: TambahOutletDialogPro
         setForm({ namaOutlet: "", alamatOutlet: "", emailOutlet: "", username: "", password: "", konfirmasiPassword: "" })
       },
       onError: (err: any) => {
-        alert(err.response?.data?.message || "Gagal menambahkan outlet")
+        toast.error(err.response?.data?.message || "Gagal menambahkan outlet")
       }
     })
   }

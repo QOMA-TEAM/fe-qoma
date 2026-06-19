@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ArrowLeft, Plus, Edit2, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Edit2, Loader2, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +27,8 @@ interface CheckoutModalProps {
   onBack: () => void;
   onAddItem: () => void;
   onEditItem: (item: OrderItem) => void;
+  onUpdateQty: (itemId: string, newQty: number) => void;
+  onRemoveItem: (itemId: string) => void;
   onAddRecommended: (menu: MenuItem) => void;
   onPayment: (customerName: string, phoneNumber: string) => void;
   isLoading?: boolean;
@@ -39,6 +41,8 @@ export function CheckoutModal({
   onBack,
   onAddItem,
   onEditItem,
+  onUpdateQty,
+  onRemoveItem,
   onAddRecommended,
   onPayment,
   isLoading = false,
@@ -104,8 +108,13 @@ export function CheckoutModal({
                       className="flex-shrink-0 w-32 border border-gray-100 rounded-xl overflow-hidden shadow-sm cursor-pointer hover:shadow-md transition"
                       onClick={() => onAddRecommended(item)}
                     >
-                      <div className="relative w-full aspect-square">
-                        <Image src={item.image} alt={item.name} fill className="object-cover" />
+                      <div className="relative w-full aspect-square bg-slate-50 flex items-center justify-center">
+                        <Image 
+                          src={item.image || "/logoqoma.svg"} 
+                          alt={item.name} 
+                          fill 
+                          className={item.image ? "object-cover" : "object-contain p-4 opacity-30"} 
+                        />
                       </div>
                       <div className="p-2">
                         <p className="font-semibold text-gray-800 text-xs truncate">{item.name}</p>
@@ -147,9 +156,14 @@ export function CheckoutModal({
               ) : (
                 <div className="flex flex-col gap-3">
                   {orderItems.map((item) => (
-                    <div key={item.id} className="flex items-center gap-3 border border-gray-100 rounded-xl p-3">
-                      <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                        <Image src={item.menu.image} alt={item.menu.name} fill className="object-cover" />
+                    <div key={item.id} className="flex items-center gap-3 border-2 border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow rounded-xl p-3">
+                      <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-slate-50 flex items-center justify-center">
+                        <Image 
+                          src={item.menu.image || "/logoqoma.svg"} 
+                          alt={item.menu.name} 
+                          fill 
+                          className={item.menu.image ? "object-cover" : "object-contain p-2 opacity-30"} 
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-gray-800 text-sm">{item.menu.name}</p>
@@ -157,7 +171,7 @@ export function CheckoutModal({
                         <p className="text-gray-700 text-xs font-medium mt-1">
                           {item.qty > 1 && <span className="text-gray-500 mr-1">{item.qty}x</span>}
                           Rp. {(item.totalPrice / item.qty).toLocaleString("id-ID")}
-                          {item.qty > 1 && <span className="font-bold ml-2">= Rp. {item.totalPrice.toLocaleString("id-ID")}</span>}
+                          {item.qty > 1 && <span className="font-bold ml-2 text-orange-500">= Rp. {item.totalPrice.toLocaleString("id-ID")}</span>}
                         </p>
                         {item.selectedToppingsData && item.selectedToppingsData.length > 0 && (
                           <p className="text-gray-400 text-xs mt-0.5">
@@ -165,15 +179,35 @@ export function CheckoutModal({
                           </p>
                         )}
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-xs border-gray-300 hover:border-orange-400 hover:text-orange-500 flex-shrink-0 gap-1 rounded-xl"
-                        onClick={() => onEditItem(item)}
-                      >
-                        <Edit2 className="w-3 h-3" />
-                        Edit
-                      </Button>
+                      <div className="flex flex-col gap-2 items-end flex-shrink-0">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs border-gray-300 hover:border-orange-400 hover:text-orange-500 gap-1 rounded-lg w-full h-7 px-2"
+                          onClick={() => onEditItem(item)}
+                        >
+                          <Edit2 className="w-3 h-3" />
+                          Edit
+                        </Button>
+                        <div className="flex items-center gap-2 mt-1">
+                          <button
+                            onClick={() => {
+                              if (item.qty <= 1) onRemoveItem(item.id);
+                              else onUpdateQty(item.id, item.qty - 1);
+                            }}
+                            className="w-7 h-7 rounded-full bg-slate-100 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-colors text-gray-600"
+                          >
+                            <Minus className="w-3.5 h-3.5" />
+                          </button>
+                          <span className="w-4 text-center font-bold text-sm text-gray-800">{item.qty}</span>
+                          <button
+                            onClick={() => onUpdateQty(item.id, item.qty + 1)}
+                            className="w-7 h-7 rounded-full bg-[#ff6b00]/10 hover:bg-[#ff6b00]/20 text-[#ff6b00] flex items-center justify-center transition-colors"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>

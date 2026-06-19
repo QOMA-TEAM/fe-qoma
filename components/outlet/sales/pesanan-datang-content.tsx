@@ -13,9 +13,9 @@ export function PesananDatangContent() {
   // Ambil semua pesanan (kecuali expired)
   const { data: pesananResponse, isLoading, isError } = usePesananList();
 
-  // Filter yang belum lunas (pending atau confirmed) dan urutkan dari yang terlama (pertama muncul)
+  // Filter yang aktif (pending, confirmed, expired) - disamakan dengan dashboard
   const activeOrders = pesananResponse?.data
-    ?.filter((o) => o.status === "pending" || o.status === "confirmed")
+    ?.filter((o) => o.status === "pending" || o.status === "confirmed" || o.status === "expired")
     ?.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) || [];
 
   return (

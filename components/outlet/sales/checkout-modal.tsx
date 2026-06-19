@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { User, Table2, Minus, Plus, Delete, Loader2, CheckCircle2, X, CreditCard, QrCode, Banknote, Building } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { User, Table2, Minus, Plus, Loader2, CheckCircle2, X, CreditCard, QrCode, Banknote, Building, DeleteIcon } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { usePesananDetail, useKonfirmasiPesanan, useBayarPesanan, useTambahItem, useUpdateQtyItem, useHapusItem, useUpdateTipePesanan } from "@/hooks/outlet/use-pesanan";
@@ -9,48 +9,60 @@ import { useOutletMenuList } from "@/hooks/outlet/use-menu-outlet";
 import type { PesananDetail } from "@/services/outlet/pesanan-service";
 import type { OutletMenu } from "@/services/outlet/menu-outlet-service";
 
-function QtyInput({
-  item,
-  orderId,
-  updateQty,
-  isUpdating
-}: {
+interface QtyControlsProps {
   item: PesananDetail;
   orderId: string;
   updateQty: any;
-  isUpdating: boolean
-}) {
-  const [val, setVal] = useState(item.qty.toString());
+  hapusItem: any;
+  isUpdating: boolean;
+  isDeleting: boolean;
+}
 
-  useEffect(() => {
-    setVal(item.qty.toString());
-  }, [item.qty]);
-
-  const handleBlur = () => {
-    const newQty = parseInt(val, 10);
-    if (!isNaN(newQty) && newQty >= 1 && newQty !== item.qty) {
+function QtyControls({ item, orderId, updateQty, hapusItem, isUpdating, isDeleting }: QtyControlsProps) {
+  const handleMinus = () => {
+    if (item.qty <= 1) {
+      hapusItem({ id: orderId, detailId: item.id });
+    } else {
       updateQty({
         id: orderId,
         detailId: item.id,
-        qty: newQty,
+        qty: item.qty - 1,
         currentQty: item.qty,
-        harga: item.harga
+        harga: item.harga,
       });
-    } else {
-      setVal(item.qty.toString()); // revert jika tidak valid (termasuk jika 0)
     }
   };
 
+  const handlePlus = () => {
+    updateQty({
+      id: orderId,
+      detailId: item.id,
+      qty: item.qty + 1,
+      currentQty: item.qty,
+      harga: item.harga,
+    });
+  };
+
+  const isBusy = isUpdating || isDeleting;
+
   return (
-    <input
-      type="number"
-      min="1"
-      value={val}
-      onChange={(e) => setVal(e.target.value)}
-      onBlur={handleBlur}
-      disabled={isUpdating}
-      className="w-12 text-center text-sm font-semibold border border-gray-200 rounded-md py-1 outline-none focus:border-[#3874BC] focus:ring-1 focus:ring-[#3874BC] disabled:opacity-50 transition-colors"
-    />
+    <div className="flex items-center gap-1.5">
+      <button
+        onClick={handleMinus}
+        disabled={isBusy}
+        className="w-6 h-6 rounded-full bg-slate-100 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-colors disabled:opacity-50 text-gray-600"
+      >
+        <Minus className="w-3 h-3" />
+      </button>
+      <span className="w-5 text-center text-sm font-semibold text-gray-800">{item.qty}</span>
+      <button
+        onClick={handlePlus}
+        disabled={isBusy}
+        className="w-6 h-6 rounded-full bg-[#ff6b00]/10 hover:bg-[#ff6b00]/20 text-[#ff6b00] flex items-center justify-center transition-colors disabled:opacity-50"
+      >
+        <Plus className="w-3 h-3" />
+      </button>
+    </div>
   );
 }
 
@@ -97,6 +109,13 @@ export function CheckoutModal({
       setAddonSelections([]);
     }
   }, [open]);
+
+  // Auto redirect to payment step if order is already confirmed
+  useEffect(() => {
+    if (open && order?.status === "confirmed") {
+      setIsPaying(true);
+    }
+  }, [open, order?.status]);
 
   if (!open) return null;
 
@@ -212,6 +231,7 @@ export function CheckoutModal({
       <DialogContent className="max-w-[1100px]! w-[90vw] p-0 overflow-hidden bg-[#F6F8F9] border-none rounded-3xl h-[85vh] flex flex-col">
         <DialogHeader className="sr-only">
           <DialogTitle>Checkout Pesanan</DialogTitle>
+          <DialogDescription>Detail dan pembayaran pesanan</DialogDescription>
         </DialogHeader>
 
         {isLoading || !order ? (
@@ -314,20 +334,14 @@ export function CheckoutModal({
                           {item.nama}
                         </div>
                         <div className="col-span-3 flex items-center justify-center gap-1">
-                          <QtyInput
+                          <QtyControls
                             item={item}
                             orderId={orderId!}
                             updateQty={updateQty}
+                            hapusItem={hapusItem}
                             isUpdating={isUpdatingQty}
+                            isDeleting={isDeletingItem}
                           />
-                          <button
-                            onClick={() => handleHapusItem(item.id)}
-                            disabled={isDeletingItem}
-                            title="Hapus Menu"
-                            className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
                         </div>
                         <div className="col-span-4 text-sm font-bold text-gray-800 text-center whitespace-nowrap">
                           {formatRp(item.subtotal)}
@@ -495,7 +509,7 @@ export function CheckoutModal({
                         onClick={handleBackspace}
                         className="bg-white border border-slate-200 hover:bg-slate-50 text-red-500 shadow-sm text-xl font-medium rounded-xl py-2 transition-colors flex items-center justify-center"
                       >
-                        <Delete className="w-5 h-5" />
+                        <DeleteIcon className="w-5 h-5" />
                       </button>
                     </div>
                   </>
@@ -635,11 +649,29 @@ export function CheckoutModal({
                                 menu.is_available ? "border-gray-100 hover:shadow-md" : "border-gray-200 opacity-60 grayscale"
                               )}
                             >
-                          <div className="w-full aspect-square bg-slate-100 relative">
-                            <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-xs font-medium">
-                              {menu.is_available ? "Gambar Menu" : "Habis"}
+                      <div className="w-full aspect-square bg-slate-100 relative overflow-hidden">
+                          {menu.gambar ? (
+                            <img
+                              src={menu.gambar?.startsWith('http') ? menu.gambar : `http://localhost:8000/storage/${menu.gambar}`}
+                              alt={menu.nama}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-orange-50 to-orange-100">
+                              <span className="text-orange-300 text-xs font-semibold text-center px-1">
+                                {menu.is_available ? menu.nama.charAt(0) : "Habis"}
+                              </span>
                             </div>
-                          </div>
+                          )}
+                          {!menu.is_available && (
+                            <div className="absolute inset-0 bg-gray-900/40 flex items-center justify-center">
+                              <span className="text-white text-xs font-bold">Habis</span>
+                            </div>
+                          )}
+                        </div>
                           <div className="px-3 pt-3 flex flex-col items-center text-center space-y-1">
                             <h4 className="text-[11px] font-bold text-gray-800 line-clamp-2 leading-tight">
                               {menu.nama}

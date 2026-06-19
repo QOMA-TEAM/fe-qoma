@@ -22,6 +22,11 @@ export default function UsahaChart({
   filter,
   onFilter,
   loading = false,
+}: {
+  mrrData?: any[];
+  filter: string;
+  onFilter: (filter: string) => void;
+  loading?: boolean;
 }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-5">
@@ -98,10 +103,10 @@ export default function UsahaChart({
   );
 }
 
-function ChartBody({ data, dataKey, loading }) {
+function ChartBody({ data, dataKey, loading }: { data: any[]; dataKey: string; loading: boolean }) {
   if (loading) return <Skeleton className="h-52 w-full rounded-xl" />;
 
-  const chartData = data.map((item) => ({
+  const chartData = data.map((item: any) => ({
     label: item.bulan ?? item.tanggal ?? "",
     value: Number(item[dataKey] ?? 0),
   }));

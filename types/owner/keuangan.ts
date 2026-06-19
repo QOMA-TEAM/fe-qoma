@@ -23,6 +23,7 @@ export interface KeuanganTransaction {
   keterangan: string
   nominal: number
   tanggal: string
+  waktu?: string
 }
 
 export interface KeuanganListResponse {

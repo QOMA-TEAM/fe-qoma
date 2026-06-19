@@ -28,6 +28,7 @@ import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export function StockOpnameContent() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -36,6 +37,9 @@ export function StockOpnameContent() {
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
   const [historyPage, setHistoryPage] = useState(1);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [showFinalisasiConfirm, setShowFinalisasiConfirm] = useState(false);
+  const [showTutupSesiConfirm, setShowTutupSesiConfirm] = useState(false);
 
   const { data: sesiResponse, isLoading: isLoadingSesi } = useSesiHariIni();
   const { data: historyResponse, isLoading: isLoadingHistory } = useHistorySesi(historyPage);
@@ -79,21 +83,15 @@ export function StockOpnameContent() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus item ini?")) {
-      deleteDraft(id);
-    }
+    setConfirmDeleteId(id);
   };
 
   const handleSimpanSemua = () => {
-    if (confirm("Perhatian: Finalisasi akan memotong stok bahan baku Anda secara permanen. Lanjutkan?")) {
-      simpanSemua();
-    }
+    setShowFinalisasiConfirm(true);
   };
 
   const handleTutupSesi = () => {
-    if (confirm("Apakah Anda yakin ingin menutup sesi hari ini? Anda tidak bisa menambah draft lagi setelah sesi ditutup, dan draft yang belum difinalisasi akan dihapus.")) {
-      tutupSesi();
-    }
+    setShowTutupSesiConfirm(true);
   };
 
   const handleViewPhoto = (url: string) => {
@@ -393,6 +391,48 @@ export function StockOpnameContent() {
           )}
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={!!confirmDeleteId}
+        onOpenChange={(open) => { if (!open) setConfirmDeleteId(null); }}
+        title="Hapus Item Draft"
+        description="Apakah Anda yakin ingin menghapus item draft ini? Tindakan ini tidak dapat dibatalkan."
+        confirmLabel="Ya, Hapus"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={() => {
+          if (confirmDeleteId) deleteDraft(confirmDeleteId);
+          setConfirmDeleteId(null);
+        }}
+      />
+
+      <ConfirmDialog
+        open={showFinalisasiConfirm}
+        onOpenChange={setShowFinalisasiConfirm}
+        title="Finalisasi Stock Opname"
+        description="Perhatian: Finalisasi akan memotong stok bahan baku Anda secara permanen. Tindakan ini tidak dapat dibalik. Lanjutkan?"
+        confirmLabel="Ya, Finalisasi"
+        cancelLabel="Batal"
+        variant="warning"
+        onConfirm={() => {
+          simpanSemua();
+          setShowFinalisasiConfirm(false);
+        }}
+      />
+
+      <ConfirmDialog
+        open={showTutupSesiConfirm}
+        onOpenChange={setShowTutupSesiConfirm}
+        title="Tutup Sesi Hari Ini"
+        description="Apakah Anda yakin ingin menutup sesi hari ini? Anda tidak bisa menambah draft lagi setelah sesi ditutup, dan draft yang belum difinalisasi akan dihapus."
+        confirmLabel="Ya, Tutup Sesi"
+        cancelLabel="Batal"
+        variant="warning"
+        onConfirm={() => {
+          tutupSesi();
+          setShowTutupSesiConfirm(false);
+        }}
+      />
     </div>
   );
 }

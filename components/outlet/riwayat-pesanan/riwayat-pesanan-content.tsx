@@ -78,14 +78,27 @@ export function RiwayatPesananContent() {
     }
   };
 
-  const getTipeBadge = (tipe?: string) => {
-    if (tipe === "dine_in") {
-      return <span className="text-blue-600 dark:text-blue-400 font-medium text-xs border border-blue-200 dark:border-blue-900 px-2 py-1 rounded-full whitespace-nowrap">Dine In</span>;
-    }
-    if (tipe === "take_away") {
-      return <span className="text-purple-600 dark:text-purple-400 font-medium text-xs border border-purple-200 dark:border-purple-900 px-2 py-1 rounded-full whitespace-nowrap">Take Away</span>;
-    }
-    return <span className="text-gray-500">-</span>;
+  const getTipeBadge = (row: Pesanan) => {
+    const tipe = row.tipe_pesanan;
+    const metode = row.pembayaran?.metode;
+    
+    return (
+      <div className="flex flex-col gap-1 items-center">
+        {tipe === "dine_in" ? (
+          <span className="text-blue-600 dark:text-blue-400 font-medium text-[10px] border border-blue-200 dark:border-blue-900 px-2 py-0.5 rounded-full whitespace-nowrap">Dine In</span>
+        ) : tipe === "take_away" ? (
+          <span className="text-purple-600 dark:text-purple-400 font-medium text-[10px] border border-purple-200 dark:border-purple-900 px-2 py-0.5 rounded-full whitespace-nowrap">Take Away</span>
+        ) : (
+          <span className="text-gray-400 text-xs">-</span>
+        )}
+        
+        {metode && (
+          <span className="text-emerald-600 dark:text-emerald-400 font-bold text-[10px] bg-emerald-50 border border-emerald-100 dark:bg-emerald-900/20 px-2 py-0.5 rounded whitespace-nowrap uppercase">
+            {metode}
+          </span>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -179,8 +192,8 @@ export function RiwayatPesananContent() {
                           {row.nomor_meja || "-"}
                         </span>
                       </TableCell>
-                      <TableCell className="text-center py-3">
-                        {getTipeBadge(row.tipe_pesanan)}
+                      <TableCell className="text-center py-3 align-middle">
+                        {getTipeBadge(row)}
                       </TableCell>
                       <TableCell className="text-center text-gray-600 text-sm py-3">
                         {formatRupiah(row.total_harga)}

@@ -94,6 +94,7 @@ export function UserDashboardContent() {
     ...OUTLET_INFO,
     name: validasiData?.outlet.nama_outlet || OUTLET_INFO.name,
     address: validasiData?.outlet.alamat || OUTLET_INFO.address,
+    logo: menuResponse?.outlet?.gambar_icon || OUTLET_INFO.logo,
   };
 
   useEffect(() => {
@@ -153,6 +154,22 @@ export function UserDashboardContent() {
   const handleEditItem = (item: OrderItem) => {
     setEditingItem(item);
     setSelectedMenu(item.menu);
+  };
+
+  const handleUpdateQty = (itemId: string, newQty: number) => {
+    setOrderItems((prev) =>
+      prev.map((o) => {
+        if (o.id === itemId) {
+          const unitPrice = o.totalPrice / o.qty;
+          return { ...o, qty: newQty, totalPrice: unitPrice * newQty };
+        }
+        return o;
+      })
+    );
+  };
+
+  const handleRemoveItem = (itemId: string) => {
+    setOrderItems((prev) => prev.filter((o) => o.id !== itemId));
   };
 
   // ── Handlers: Checkout Flow ──
@@ -216,6 +233,15 @@ export function UserDashboardContent() {
     setView("main");
   };
 
+  // ── Render: Loading or Error ──────────────────────────────────────
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 text-center px-4">
+        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+      </div>
+    );
+  }
+
   // ── Render: Non-main views (full-screen replacements) ──
   if (view === "checkout") {
     return (
@@ -227,6 +253,8 @@ export function UserDashboardContent() {
           onBack={() => setView("main")}
           onAddItem={() => setView("main")}
           onEditItem={handleEditItem}
+          onUpdateQty={handleUpdateQty}
+          onRemoveItem={handleRemoveItem}
           onAddRecommended={(menu) => setSelectedMenu(menu)}
           onPayment={handlePayment}
           isLoading={submitOrder.isPending}
@@ -283,14 +311,7 @@ export function UserDashboardContent() {
     );
   }
 
-  // ── Render: Loading or Error ──────────────────────────────────────
-  if (!isMounted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 text-center px-4">
-        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
-      </div>
-    );
-  }
+
 
   if (!outletId || !mejaId) {
     return (
@@ -370,21 +391,18 @@ export function UserDashboardContent() {
               </button>
               <div className="w-9 h-9 rounded-full overflow-hidden bg-amber-50 border">
                 <Image
-                  src="/images/coffee-cat-logo.png"
+                  src={menuResponse?.outlet?.gambar_icon || "/images/coffee-cat-logo.png"}
                   alt="logo"
                   width={36}
                   height={36}
-                  className="object-cover"
+                  className="object-cover w-full h-full"
                 />
               </div>
               <div>
                 <p className="font-bold text-gray-900 text-sm leading-none">
                   {outletName}
                 </p>
-                <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  Open today, 10:00 - 22:00
-                </p>
+
               </div>
             </div>
 
@@ -395,16 +413,6 @@ export function UserDashboardContent() {
 
             {/* Right actions */}
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-gray-500 hover:text-orange-500 text-xs gap-1"
-                onClick={() => setShowOutletInfo(true)}
-              >
-                <MapPin className="w-4 h-4" />
-                <span className="hidden md:inline">Outlet Info</span>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
               <Button
                 variant="outline"
                 size="icon"
@@ -434,7 +442,7 @@ export function UserDashboardContent() {
           {/* ── Hero Banner ── */}
           <div className="relative w-full h-48 sm:h-64 md:h-80 lg:h-96">
             <Image
-              src="/images/pizza-mizna.jpg"
+              src={menuResponse?.outlet?.gambar_header || "/images/pizza-mizna.jpg"}
               alt="hero"
               fill
               className="object-cover"

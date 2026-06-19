@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Loader2 } from "lucide-react"
 import { useUpdateAvailabilityMenu, useAjukanPerubahanHarga } from "@/hooks/outlet/use-menu"
 import type { OutletMenu } from "@/services/outlet/menu-outlet-service"
+import { toast } from "sonner"
 
 interface EditMenuDialogProps {
   menu: OutletMenu | null
@@ -71,7 +72,7 @@ export function EditMenuDialog({ menu, onClose }: EditMenuDialogProps) {
     const newHarga = parseInt(harga)
     if (!isNaN(newHarga) && newHarga !== menu.harga) {
       if (alasan.length < 10) {
-        alert("Alasan perubahan harga harus diisi minimal 10 karakter.")
+        toast.error("Alasan perubahan harga harus diisi minimal 10 karakter.")
         return
       }
       ajukanHarga({ menuId: menu.id, hargaBaru: newHarga, alasan })

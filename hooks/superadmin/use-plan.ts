@@ -95,7 +95,6 @@ export function usePlan() {
         err?.response?.data?.errors
           ? Object.values<string[]>(err.response.data.errors)[0]?.[0]
           : err?.response?.data?.message;
-      alert("DEBUG ERROR: " + JSON.stringify(err?.response?.data || err?.message));
       toast.error(message ?? "Gagal memperbarui plan");
       return false;
     }

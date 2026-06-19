@@ -11,6 +11,7 @@ import { MenuFormDialog } from "@/components/owner/menu/menu-form-dialog"
 import { useMenu, useDeleteMenu } from "@/hooks/owner/use-menu"
 import { MenuMaster } from "@/types/owner/menu"
 import { useDebounce } from "@/hooks/use-debounce"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 
 type SortKey = "id" | "harga"
 type SortDir = "asc" | "desc"
@@ -25,6 +26,7 @@ export function MenuTable({ search, selectedCategoryId }: MenuTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>("id")
   const [sortDir, setSortDir] = useState<SortDir>("asc")
   const [editItem, setEditItem] = useState<MenuMaster | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<MenuMaster | null>(null)
 
   const debouncedSearch = useDebounce(search, 1000)
   const { mutate: deleteMenu } = useDeleteMenu()
@@ -122,12 +124,8 @@ export function MenuTable({ search, selectedCategoryId }: MenuTableProps) {
                         <Pencil className="size-4" />
                       </button>
                       <button 
-                        onClick={() => {
-                          if (window.confirm("Apakah Anda yakin ingin menghapus menu ini?")) {
-                            deleteMenu(row.id)
-                          }
-                        }} 
-                        className="flex items-center justify-center size-7 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors cursor-pointer"
+                        onClick={() => setDeleteTarget(row)} 
+                        className="flex items-center justify-center size-7 bg-[#ff6b00] hover:bg-[#e65a00] text-white rounded-md transition-colors cursor-pointer"
                         title="Hapus"
                       >
                         <Trash2 className="size-4" />
@@ -203,8 +201,22 @@ export function MenuTable({ search, selectedCategoryId }: MenuTableProps) {
             jumlah: Number(b.pivot.jumlah_pakai),
             satuan: b.satuan
           })) || [],
-          gambarUrl: editItem.gambar ? `http://localhost:8000/storage/${editItem.gambar}` : undefined,
+          gambarUrl: editItem.gambar ? (editItem.gambar.startsWith('http') ? editItem.gambar : `http://localhost:8000/storage/${editItem.gambar}`) : undefined,
         } : undefined}
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        title="Hapus Menu"
+        description={`Apakah Anda yakin ingin menghapus menu "${deleteTarget?.nama}"? Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Ya, Hapus"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={() => {
+          if (deleteTarget) deleteMenu(deleteTarget.id)
+          setDeleteTarget(null)
+        }}
       />
     </>
   )

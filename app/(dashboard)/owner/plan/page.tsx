@@ -33,10 +33,6 @@ export default function PlanPage() {
       <main className="flex-1 p-8 space-y-6">
         {/* Header Text */}
         <div className="pb-4 border-b border-gray-400/50 max-w-full">
-
-        {/* Header Text */}
-        <div className="pb-4 border-b border-gray-400/50 max-w-full">
-
           <h2 className="text-2xl font-bold text-gray-800">Plan</h2>
           <p className="text-sm text-gray-500 mt-0.5">Mengelola subscription tenant</p>
         </div>
@@ -47,9 +43,6 @@ export default function PlanPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-full">
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-full">
-
             <ActivePlanCard />
             <AvailablePlanCards />
           </div>
