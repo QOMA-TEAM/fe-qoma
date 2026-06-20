@@ -1,56 +1,56 @@
 # QOMA Frontend
 
-Frontend application for **QOMA (QR Order Management Application)**, a SaaS Point of Sale (POS) platform designed for food and beverage businesses. This application provides interfaces for Customers, Outlets, Owners, and Super Admins to manage ordering, inventory, financial reporting, and subscription services.
+Aplikasi frontend untuk **QOMA (QR Order Management Application)**, sebuah platform SaaS Point of Sale (POS) yang dirancang untuk membantu bisnis makanan dan minuman dalam mengelola pemesanan, inventaris, laporan keuangan, dan layanan subscription.
 
 ---
 
-## 🚀 Features
+## 🚀 Fitur
 
 ### Landing Page
 
-* Business introduction
-* Pricing plans
-* Owner registration
-* Subscription upgrade
+* Pengenalan bisnis
+* Paket harga (pricing plan)
+* Registrasi owner
+* Upgrade subscription
 
-### Customer
+### Pelanggan
 
-* QR Code ordering
-* Browse menu categories
-* Add menu to cart
-* Add-on customization
-* Order confirmation without login
+* Pemesanan melalui QR Code
+* Melihat kategori menu
+* Menambahkan menu ke keranjang
+* Kustomisasi add-on
+* Konfirmasi pesanan tanpa login
 
 ### Outlet
 
-* Order management
-* Payment confirmation
-* Inventory monitoring
-* Stock opname management
-* QR table management
-* Revenue monitoring
-* Activity logs
+* Manajemen pesanan
+* Konfirmasi pembayaran
+* Monitoring inventaris
+* Manajemen stock opname
+* Manajemen QR meja
+* Monitoring pendapatan
+* Activity log
 
 ### Owner
 
-* Multi-outlet management
-* Menu management
-* Ingredient management
-* Financial dashboard
-* Subscription management
-* Business analytics
+* Manajemen multi-outlet
+* Manajemen menu
+* Manajemen bahan baku
+* Dashboard keuangan
+* Manajemen subscription
+* Analitik bisnis
 
 ### Super Admin
 
-* SaaS monitoring dashboard
-* Subscription management
-* Monthly Recurring Revenue (MRR) analytics
-* Customer management
-* Notifications management
+* Dashboard monitoring SaaS
+* Manajemen subscription
+* Analitik Monthly Recurring Revenue (MRR)
+* Manajemen pelanggan
+* Manajemen notifikasi
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Teknologi yang Digunakan
 
 ### Framework
 
@@ -74,7 +74,7 @@ Frontend application for **QOMA (QR Order Management Application)**, a SaaS Poin
 * React Hook Form
 * Zod Validation
 
-### API Integration
+### Integrasi API
 
 * Axios
 * Laravel REST API
@@ -86,7 +86,7 @@ Frontend application for **QOMA (QR Order Management Application)**, a SaaS Poin
 
 ---
 
-## 📂 Project Structure
+## 📂 Struktur Project
 
 ```bash
 src/
@@ -104,26 +104,26 @@ src/
 
 ---
 
-## ⚙️ Getting Started
+## ⚙️ Memulai Project
 
-### Prerequisites
+### Prasyarat
 
-Make sure you have installed:
+Pastikan sudah menginstal:
 
 * Node.js 20+
 * npm / pnpm / yarn
 
 ---
 
-### Installation
+### Instalasi
 
-Clone the repository:
+Clone repository:
 
 ```bash
 git clone https://github.com/your-username/qoma-frontend.git
 ```
 
-Move to project directory:
+Masuk ke direktori project:
 
 ```bash
 cd qoma-frontend
@@ -139,24 +139,24 @@ npm install
 
 ### Environment Variables
 
-Create a `.env.local` file in the root directory:
+Buat file `.env.local` pada root project:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000/api
 NEXT_PUBLIC_APP_NAME=QOMA
 ```
 
-Adjust the API URL according to your backend configuration.
+Sesuaikan URL API dengan konfigurasi backend yang digunakan.
 
 ---
 
-### Run Development Server
+### Menjalankan Development Server
 
 ```bash
 npm run dev
 ```
 
-Open:
+Buka:
 
 ```bash
 http://localhost:3000
@@ -164,11 +164,11 @@ http://localhost:3000
 
 ---
 
-## 🔗 Backend Repository
+## 🔗 Repository Backend
 
-QOMA Frontend communicates with a Laravel REST API backend connected to Supabase PostgreSQL.
+QOMA Frontend terhubung dengan backend Laravel REST API yang menggunakan database Supabase PostgreSQL.
 
-Backend Features:
+Fitur Backend:
 
 * Authentication
 * QR Ordering
@@ -179,27 +179,27 @@ Backend Features:
 
 ---
 
-## 👥 User Roles
+## 👥 Role Pengguna
 
-### Customer
+### Pelanggan
 
-Access ordering system through QR Code without authentication.
+Mengakses sistem pemesanan melalui QR Code tanpa perlu login.
 
 ### Outlet
 
-Manage orders, inventory, stock opname, and local financial reports.
+Mengelola pesanan, inventaris, stock opname, dan laporan keuangan cabang.
 
 ### Owner
 
-Manage outlets, menus, ingredients, subscriptions, and business analytics.
+Mengelola outlet, menu, bahan baku, subscription, dan analitik bisnis.
 
 ### Super Admin
 
-Manage SaaS platform, subscriptions, and overall business metrics.
+Mengelola platform SaaS, subscription, dan metrik bisnis secara keseluruhan.
 
 ---
 
-## 📊 Core Modules
+## 📊 Modul Utama
 
 * Authentication & Authorization
 * QR Ordering System
@@ -214,15 +214,15 @@ Manage SaaS platform, subscriptions, and overall business metrics.
 
 ---
 
-## 🎯 Project Goal
+## 🎯 Tujuan Project
 
-QOMA aims to digitalize restaurant and café operations by combining QR-based ordering, inventory management, financial monitoring, and multi-outlet administration into a single SaaS platform.
+QOMA bertujuan untuk mendigitalisasi operasional restoran dan kafe dengan menggabungkan sistem pemesanan berbasis QR Code, manajemen inventaris, monitoring keuangan, dan administrasi multi-outlet dalam satu platform SaaS.
 
 ---
 
 ## 👨‍💻 Developer
 
-Developed as a Full Stack SaaS POS project using:
+Dikembangkan sebagai project Full Stack SaaS POS menggunakan:
 
 * Frontend: Next.js + TypeScript
 * Backend: Laravel
