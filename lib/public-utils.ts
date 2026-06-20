@@ -49,6 +49,7 @@ export function mapToMenuItem(p: PublicMenuItem): MenuItem {
     price: p.harga,
     description: p.keterangan || "",
     image: getImageUrl(p.gambar),
+    is_available: p.is_available,
     addOnToppings: [],
     specialForYou: [],
   };

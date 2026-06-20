@@ -35,7 +35,7 @@ export function BahanBakuContent() {
   const [search, setSearch] = useState("");
   const [satuan, setSatuan] = useState("all");
   const [page, setPage] = useState(1);
-  const [sortKey, setSortKey] = useState<SortKey>("id");
+  const [sortKey, setSortKey] = useState<SortKey>("tanggal_kadaluarsa");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [restockOpen, setRestockOpen] = useState(false);
   const [detailItem, setDetailItem] = useState<BahanOutlet | null>(null);
@@ -58,17 +58,66 @@ export function BahanBakuContent() {
     }
   };
 
+  const flatBahanList = useMemo(() => {
+    let flattened: any[] = [];
+    
+    bahanList.forEach((bahan) => {
+      const validBatches = bahan.batch_aktif?.filter((b: any) => !b.sudah_expired) || [];
+      
+      if (validBatches.length > 0) {
+        validBatches.forEach((batch: any) => {
+          flattened.push({
+            ...bahan,
+            _rowId: batch.id,
+            _stok: batch.sisa,
+            _tanggal_masuk: batch.tanggal_masuk,
+            _tanggal_kadaluarsa: batch.expired_date,
+            _mendekati_expired: batch.mendekati_expired,
+            stok: batch.sisa,
+            is_sudah_expired: batch.sudah_expired,
+            is_mendekati_expired: batch.mendekati_expired,
+            batch_terdekat_expired: {
+              tanggal_masuk: batch.tanggal_masuk,
+              expired_date: batch.expired_date,
+              sisa: batch.sisa,
+            }
+          });
+        });
+      } else {
+        flattened.push({
+          ...bahan,
+          _rowId: bahan.id + '-empty',
+          _stok: 0,
+          _tanggal_masuk: null,
+          _tanggal_kadaluarsa: null,
+          _mendekati_expired: false,
+          stok: 0,
+          is_sudah_expired: false,
+          is_mendekati_expired: false,
+          batch_terdekat_expired: null,
+        });
+      }
+    });
+
+    return flattened;
+  }, [bahanList]);
+
   const sortedList = useMemo(() => {
-    return [...bahanList].sort((a, b) => {
+    return [...flatBahanList].sort((a, b) => {
       let av: string | number | null = "";
       let bv: string | number | null = "";
 
-      if (sortKey === "id") { av = a.id; bv = b.id; }
+      if (sortKey === "id") { av = a._rowId; bv = b._rowId; }
       else if (sortKey === "nama") { av = a.bahan_master?.nama || ""; bv = b.bahan_master?.nama || ""; }
-      else if (sortKey === "stok") { av = a.stok; bv = b.stok; }
+      else if (sortKey === "stok") { av = a._stok; bv = b._stok; }
       else if (sortKey === "satuan") { av = a.bahan_master?.satuan || ""; bv = b.bahan_master?.satuan || ""; }
-      else if (sortKey === "tanggal_masuk") { av = a.batch_terdekat_expired?.tanggal_masuk || ""; bv = b.batch_terdekat_expired?.tanggal_masuk || ""; }
-      else if (sortKey === "tanggal_kadaluarsa") { av = a.batch_terdekat_expired?.expired_date || ""; bv = b.batch_terdekat_expired?.expired_date || ""; }
+      else if (sortKey === "tanggal_masuk") { av = a._tanggal_masuk || ""; bv = b._tanggal_masuk || ""; }
+      else if (sortKey === "tanggal_kadaluarsa") { av = a._tanggal_kadaluarsa || ""; bv = b._tanggal_kadaluarsa || ""; }
+
+      if (sortKey === "tanggal_kadaluarsa") {
+        if (!av) av = "9999-12-31"; // Push null dates to bottom
+        if (!bv) bv = "9999-12-31";
+      }
 
       if (av === null) av = "";
       if (bv === null) bv = "";
@@ -77,7 +126,7 @@ export function BahanBakuContent() {
       if (av > bv) return sortDir === "asc" ? 1 : -1;
       return 0;
     });
-  }, [bahanList, sortKey, sortDir]);
+  }, [flatBahanList, sortKey, sortDir]);
 
   const SortIcon = ({ col }: { col: SortKey }) => {
     if (sortKey !== col) return <ChevronsUpDown className="w-3 h-3 ml-1 opacity-40" />;
@@ -190,7 +239,7 @@ export function BahanBakuContent() {
                 ? (meta ? meta.total - ((meta.current_page - 1) * meta.per_page) - index : sortedList.length - index)
                 : (meta ? (meta.current_page - 1) * meta.per_page + index + 1 : index + 1);
               return (
-                <TableRow key={row.id} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
+                <TableRow key={row._rowId} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
                   <TableCell className="text-gray-500 text-sm text-center py-3">
                     {actualIndex}
                   </TableCell>
@@ -198,20 +247,19 @@ export function BahanBakuContent() {
                     {row.bahan_master?.nama || "-"}
                   </TableCell>
                   <TableCell className="text-gray-600 text-sm text-center py-3">
-                    {row.stok}
+                    {row._stok}
                   </TableCell>
                   <TableCell className="text-gray-600 text-sm text-center py-3">
                     {row.bahan_master?.satuan || "-"}
                   </TableCell>
                   <TableCell className="text-gray-600 text-sm text-center py-3">
-                    {formatDate(row.batch_terdekat_expired?.tanggal_masuk || null)}
+                    {formatDate(row._tanggal_masuk || null)}
                   </TableCell>
                   <TableCell className="text-gray-600 text-sm text-center py-3">
                     <span className={cn(
-                      row.is_sudah_expired ? "text-red-600 font-bold" : 
-                      row.is_mendekati_expired ? "text-orange-500 font-semibold" : ""
+                      row._mendekati_expired ? "text-orange-500 font-semibold" : ""
                     )}>
-                      {formatDate(row.batch_terdekat_expired?.expired_date || null)}
+                      {formatDate(row._tanggal_kadaluarsa || null)}
                     </span>
                   </TableCell>
                   <TableCell className="text-center py-3">

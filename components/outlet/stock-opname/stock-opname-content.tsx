@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Search, Loader2, Pencil, Trash2, CheckCircle, Image as ImageIcon, Save, Lock } from "lucide-react";
+import { Plus, Search, Loader2, Pencil, Trash2, CheckCircle, Image as ImageIcon, Save, Lock, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -23,7 +23,8 @@ import {
   useTutupSesi 
 } from "@/hooks/outlet/use-stock-opname";
 import { DraftOpnameModal } from "./draft-opname-modal";
-import type { StockOpname } from "@/services/outlet/stock-opname-service";
+import { DetailHistoryModal } from "./detail-history-modal";
+import type { StockOpname, StockOpnameSession } from "@/services/outlet/stock-opname-service";
 import {
   Dialog,
   DialogContent,
@@ -40,6 +41,8 @@ export function StockOpnameContent() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [showFinalisasiConfirm, setShowFinalisasiConfirm] = useState(false);
   const [showTutupSesiConfirm, setShowTutupSesiConfirm] = useState(false);
+  
+  const [selectedHistory, setSelectedHistory] = useState<StockOpnameSession | null>(null);
 
   const { data: sesiResponse, isLoading: isLoadingSesi } = useSesiHariIni();
   const { data: historyResponse, isLoading: isLoadingHistory } = useHistorySesi(historyPage);
@@ -273,6 +276,7 @@ export function StockOpnameContent() {
                   <TableHead className="text-gray-600 font-semibold text-sm py-3 text-center">Item Draft</TableHead>
                   <TableHead className="text-gray-600 font-semibold text-sm py-3 text-center">Item Final</TableHead>
                   <TableHead className="text-gray-600 font-semibold text-sm py-3 text-center">Total Kerugian</TableHead>
+                  <TableHead className="w-24 text-center text-gray-600 font-semibold text-sm py-3">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -312,6 +316,15 @@ export function StockOpnameContent() {
                       </TableCell>
                       <TableCell className="text-red-600 text-sm font-semibold text-center py-3">
                         Rp {new Intl.NumberFormat('id-ID').format(row.total_kerugian || 0)}
+                      </TableCell>
+                      <TableCell className="text-center py-3">
+                        <button 
+                          onClick={() => setSelectedHistory(row as any)}
+                          className="bg-[#3874BC] hover:bg-[#2c5b96] text-white flex items-center justify-center w-7 h-7 rounded-full mx-auto transition-colors cursor-pointer"
+                          title="Lihat Detail"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </button>
                       </TableCell>
                     </TableRow>
                   );
@@ -378,6 +391,13 @@ export function StockOpnameContent() {
         open={modalOpen} 
         onOpenChange={setModalOpen} 
         draftToEdit={draftToEdit}
+      />
+
+      <DetailHistoryModal
+        open={!!selectedHistory}
+        onOpenChange={(open) => { if (!open) setSelectedHistory(null); }}
+        session={selectedHistory}
+        onViewPhoto={handleViewPhoto}
       />
 
       <Dialog open={photoModalOpen} onOpenChange={setPhotoModalOpen}>

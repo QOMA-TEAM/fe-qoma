@@ -28,6 +28,7 @@ export interface MenuItem {
   price: number;
   description: string;
   image: string;
+  is_available?: boolean;
   addOnToppings?: ToppingOption[]; // checkbox, max 3
   specialForYou?: ToppingOption[]; // radio, max 1
 }
