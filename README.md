@@ -1,36 +1,230 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# QOMA Frontend
 
-## Getting Started
+Frontend application for **QOMA (QR Order Management Application)**, a SaaS Point of Sale (POS) platform designed for food and beverage businesses. This application provides interfaces for Customers, Outlets, Owners, and Super Admins to manage ordering, inventory, financial reporting, and subscription services.
 
-First, run the development server:
+---
+
+## 🚀 Features
+
+### Landing Page
+
+* Business introduction
+* Pricing plans
+* Owner registration
+* Subscription upgrade
+
+### Customer
+
+* QR Code ordering
+* Browse menu categories
+* Add menu to cart
+* Add-on customization
+* Order confirmation without login
+
+### Outlet
+
+* Order management
+* Payment confirmation
+* Inventory monitoring
+* Stock opname management
+* QR table management
+* Revenue monitoring
+* Activity logs
+
+### Owner
+
+* Multi-outlet management
+* Menu management
+* Ingredient management
+* Financial dashboard
+* Subscription management
+* Business analytics
+
+### Super Admin
+
+* SaaS monitoring dashboard
+* Subscription management
+* Monthly Recurring Revenue (MRR) analytics
+* Customer management
+* Notifications management
+
+---
+
+## 🛠️ Tech Stack
+
+### Framework
+
+* Next.js 15
+* React 19
+* TypeScript
+
+### Styling
+
+* Tailwind CSS
+* Shadcn/UI
+* Lucide React Icons
+
+### State Management
+
+* React Context API
+* TanStack Query
+
+### Form Handling
+
+* React Hook Form
+* Zod Validation
+
+### API Integration
+
+* Axios
+* Laravel REST API
+
+### Authentication
+
+* JWT Authentication
+* Role-Based Access Control (RBAC)
+
+---
+
+## 📂 Project Structure
+
+```bash
+src/
+├── app/
+├── components/
+├── hooks/
+├── lib/
+├── services/
+├── types/
+├── providers/
+├── context/
+├── constants/
+└── utils/
+```
+
+---
+
+## ⚙️ Getting Started
+
+### Prerequisites
+
+Make sure you have installed:
+
+* Node.js 20+
+* npm / pnpm / yarn
+
+---
+
+### Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/your-username/qoma-frontend.git
+```
+
+Move to project directory:
+
+```bash
+cd qoma-frontend
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+---
+
+### Environment Variables
+
+Create a `.env.local` file in the root directory:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+NEXT_PUBLIC_APP_NAME=QOMA
+```
+
+Adjust the API URL according to your backend configuration.
+
+---
+
+### Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🔗 Backend Repository
 
-To learn more about Next.js, take a look at the following resources:
+QOMA Frontend communicates with a Laravel REST API backend connected to Supabase PostgreSQL.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Backend Features:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+* Authentication
+* QR Ordering
+* Inventory Management
+* Financial Management
+* Subscription Management
+* Multi-Tenant Architecture
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 👥 User Roles
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Customer
+
+Access ordering system through QR Code without authentication.
+
+### Outlet
+
+Manage orders, inventory, stock opname, and local financial reports.
+
+### Owner
+
+Manage outlets, menus, ingredients, subscriptions, and business analytics.
+
+### Super Admin
+
+Manage SaaS platform, subscriptions, and overall business metrics.
+
+---
+
+## 📊 Core Modules
+
+* Authentication & Authorization
+* QR Ordering System
+* Shopping Cart
+* Order Management
+* Inventory Management
+* Stock Opname
+* Financial Dashboard
+* Subscription Management
+* Activity Logs
+* Notification System
+
+---
+
+## 🎯 Project Goal
+
+QOMA aims to digitalize restaurant and café operations by combining QR-based ordering, inventory management, financial monitoring, and multi-outlet administration into a single SaaS platform.
+
+---
+
+## 👨‍💻 Developer
+
+Developed as a Full Stack SaaS POS project using:
+
+* Frontend: Next.js + TypeScript
+* Backend: Laravel
+* Database: Supabase PostgreSQL
+* UI: Tailwind CSS + Shadcn/UI
