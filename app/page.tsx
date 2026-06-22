@@ -2,7 +2,7 @@ import { Navbar } from "@/components/landing-page/Navbar";
 import Image from "next/image";
 import Link from "next/link";
 import { PricingSection } from "@/components/landing-page/pricing-card";
-
+import { ReviewMarquee } from "@/components/landing-page/review-modal";
 
 export default function Home() {
   return (
@@ -54,10 +54,10 @@ export default function Home() {
               {/* Feature 1 */}
               <div className="bg-[#2a201a] text-white p-8 rounded-2xl relative z-10 shadow-xl border border-[#ff6b00]/30 transform hover:-translate-y-2 transition-transform">
                 <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <span>1.</span> Manajemen Multi-Outlet
+                  <span>1.</span> POS & Manajemen Pesanan
                 </h3>
                 <p className="text-gray-300 text-sm leading-relaxed">
-                  Pantau performa, atur menu, dan kelola akses karyawan untuk ribuan outlet berbeda hanya dari satu dashboard utama.
+                  Atur Menu, Harga, dan Diskon
                 </p>
               </div>
 
@@ -80,12 +80,27 @@ export default function Home() {
                   Bandingkan performa antar cabang dan ambil keputusan strategis berdasarkan data yang akurat.
                 </p>
               </div>
+
+              {/* Feature 4 */}
+              <div className="bg-[#2a201a] text-white p-8 rounded-2xl relative z-10 shadow-xl border border-[#ff6b00]/30 transform hover:-translate-y-2 transition-transform">
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <span>4.</span> Multienant
+                </h3>
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  Pantau performa, atur menu, dan kelola akses karyawan untuk ribuan outlet berbeda hanya dari satu dashboard utama.
+                </p>
+              </div>
             </div>
           </div>
         </section>
 
         {/* --- Pricing Section --- */}
         <PricingSection />
+
+        {/* --- Reviews Section --- */}
+        <section id="reviews" className="w-full">
+          <ReviewMarquee />
+        </section>
 
         {/* --- Contact / Footer --- */}
         <footer id="contact" className="w-full bg-white pt-16 pb-8 border-t border-gray-200">
