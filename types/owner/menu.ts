@@ -27,6 +27,7 @@ export interface MenuMaster {
   updated_at: string
   kategori: MenuKategori
   bahan_masters: MenuBahan[]
+  addons?: { id: string, nama: string, harga: string | number }[]
   menu_outlets_count: number
 }
 
