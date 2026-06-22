@@ -85,7 +85,7 @@ export function ChangePasswordDialog({ open, onOpenChange, children }: ChangePas
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Pengaturan</DialogTitle>
+          <DialogTitle className="text-xl font-bold text-gray-900">Pengaturan</DialogTitle>
         </DialogHeader>
 
         {success ? (
@@ -102,7 +102,7 @@ export function ChangePasswordDialog({ open, onOpenChange, children }: ChangePas
             <Loader2 className="size-5 animate-spin text-gray-400 mt-2" />
           </div>
         ) : (
-          <div className="space-y-6 pt-4">
+          <div className="space-y-4 pt-2">
             {children}
             
             {children && <div className="border-t border-gray-200" />}

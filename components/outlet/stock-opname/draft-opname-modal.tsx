@@ -139,9 +139,9 @@ export function DraftOpnameModal({ open, onOpenChange, draftToEdit }: Props) {
               <Label>Jumlah <span className="text-red-500">*</span></Label>
               <Input
                 type="number"
-                step="0.01"
-                min="0.01"
-                placeholder="0.00"
+                step="1"
+                min="1"
+                placeholder="1"
                 value={jumlah}
                 onChange={(e) => setJumlah(e.target.value)}
                 required

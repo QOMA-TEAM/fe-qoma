@@ -196,8 +196,13 @@ export function useUpdateTipePesanan() {
       const previousPesanan = queryClient.getQueryData<any>(PESANAN_DETAIL_QUERY_KEY(variables.id));
       
       if (previousPesanan) {
-        const newPesanan = { ...previousPesanan };
-        newPesanan.data.tipe_pesanan = variables.tipe_pesanan;
+        const newPesanan = {
+          ...previousPesanan,
+          data: {
+            ...previousPesanan.data,
+            tipe_pesanan: variables.tipe_pesanan
+          }
+        };
         queryClient.setQueryData(PESANAN_DETAIL_QUERY_KEY(variables.id), newPesanan);
       }
       

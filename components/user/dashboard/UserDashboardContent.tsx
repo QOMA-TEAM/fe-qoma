@@ -467,13 +467,37 @@ export function UserDashboardContent() {
               </div>
             ) : (
               <>
+                {/* ── Category List (Buttons) ── */}
+                <section className="mb-8">
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4">
+                    List Kategori
+                  </h2>
+                  <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-hide snap-x">
+                    {menuResponse?.kategoris.filter((kat: KategoriInfo) => {
+                       const group = menuResponse?.menu_per_kategori.find((g) => g.kategori === kat.nama);
+                       return group && group.items.length > 0;
+                    }).map((kat: KategoriInfo) => (
+                      <button
+                        key={kat.id}
+                        onClick={() => {
+                          const el = document.getElementById(`category-${kat.id}`);
+                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }}
+                        className="snap-start whitespace-nowrap px-6 py-3 rounded-full border border-orange-500 bg-orange-500 text-white text-base font-bold hover:bg-orange-600 hover:border-orange-600 transition-colors shadow-md flex-shrink-0"
+                      >
+                        {kat.nama}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
                 {/* ── Menu Sections ── */}
                 {menuResponse?.kategoris.map((kat: KategoriInfo) => {
                   const group = menuResponse?.menu_per_kategori.find((g) => g.kategori === kat.nama);
                   if (!group || group.items.length === 0) return null;
 
                   return (
-                    <section key={kat.id}>
+                    <section key={kat.id} id={`category-${kat.id}`} className="scroll-mt-24">
                       <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg sm:text-xl font-bold text-gray-800">
                           {kat.nama}
@@ -486,9 +510,9 @@ export function UserDashboardContent() {
                           <ChevronRight className="w-4 h-4" />
                         </button>
                       </div>
-                      <div className="flex overflow-x-auto gap-3 sm:gap-4 pb-2 snap-x">
+                      <div className="flex overflow-x-auto gap-3 sm:gap-4 pb-2 snap-x items-stretch">
                         {group.items.slice(0, 5).map((item) => (
-                          <div className="flex-shrink-0 w-40 snap-start" key={item.id}>
+                          <div className="flex-shrink-0 w-40 snap-start flex flex-col" key={item.id}>
                             <MenuCard
                               item={mapToMenuItem(item)}
                               onClick={setSelectedMenu}
@@ -500,19 +524,7 @@ export function UserDashboardContent() {
                   );
                 })}
 
-                {/* ── Category List ── */}
-                <section>
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg sm:text-xl font-bold text-gray-800">
-                      Category List
-                    </h2>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    {menuResponse?.kategoris.map((cat: KategoriInfo) => (
-                      <CategoryCard key={cat.id} name={cat.nama} onClick={handleOpenCategory} />
-                    ))}
-                  </div>
-                </section>
+
               </>
             )}
           </main>

@@ -1,16 +1,18 @@
 "use client"
 
 import { useState } from "react"
-import { useUpdateOutletGambar, useOutletDashboard } from "@/hooks/outlet/use-dashboard"
+import { useUpdateOutletGambar, useOutletDashboard, useToggleOutletStatus } from "@/hooks/outlet/use-dashboard"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
 import { Loader2, Upload, ImageIcon, Image as ImageIcon2 } from "lucide-react"
 
 export function OutletProfileSettings() {
   const { data, isLoading: isDashboardLoading } = useOutletDashboard()
   const { mutate: updateGambar, isPending } = useUpdateOutletGambar()
-  
+  const { mutate: toggleStatus } = useToggleOutletStatus()
+
   const [iconFile, setIconFile] = useState<File | null>(null)
   const [headerFile, setHeaderFile] = useState<File | null>(null)
 
@@ -48,30 +50,46 @@ export function OutletProfileSettings() {
   }
 
   return (
-    <div className="space-y-4 mb-6">
-      <h3 className="font-semibold text-gray-900 text-sm">Profil Outlet</h3>
-      
-      <div className="space-y-4">
-        <div className="space-y-2">
+    <div className="space-y-1.5 mb-1">
+
+
+      {/* Toggle Status */}
+      <div className="flex items-center justify-between pb-1.5 border-b border-gray-100">
+        <div className="space-y-0.5">
+          <Label className="text-base font-semibold">Status Outlet</Label>
+          <p className="text-sm text-gray-500">
+            {outlet?.status_buka ? "Outlet saat ini sedang Buka" : "Outlet saat ini sedang Tutup"}
+          </p>
+        </div>
+        <Switch
+          checked={outlet?.status_buka}
+          onCheckedChange={() => toggleStatus()}
+          className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-red-500"
+        />
+      </div>
+
+      <div className="space-y-1">
+        <div className="space-y-1">
+          <h3 className="font-semibold text-gray-900 text-sm">Profil Outlet</h3>
           <Label>Icon Outlet</Label>
-          <div className="flex items-center gap-4">
-            <div className="size-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="size-10 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border shrink-0">
               {iconFile ? (
                 <img src={URL.createObjectURL(iconFile)} alt="Icon preview" className="w-full h-full object-cover" />
               ) : outlet?.gambar_icon ? (
                 <img src={outlet.gambar_icon} alt="Icon outlet" className="w-full h-full object-cover" />
               ) : (
-                <ImageIcon className="size-6 text-gray-400" />
+                <ImageIcon className="size-5 text-gray-400" />
               )}
             </div>
             <Input type="file" accept="image/*" onChange={handleIconChange} className="flex-1 cursor-pointer" />
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1">
           <Label>Header Outlet</Label>
-          <div className="flex flex-col gap-2">
-            <div className="w-full h-24 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border">
+          <div className="flex flex-col gap-1.5">
+            <div className="w-full h-16 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border">
               {headerFile ? (
                 <img src={URL.createObjectURL(headerFile)} alt="Header preview" className="w-full h-full object-cover" />
               ) : outlet?.gambar_header ? (
@@ -85,11 +103,11 @@ export function OutletProfileSettings() {
         </div>
 
         {(iconFile || headerFile) && (
-          <Button 
-            type="button" 
-            onClick={handleUpload} 
+          <Button
+            type="button"
+            onClick={handleUpload}
             disabled={isPending}
-            className="w-full bg-[#1D5E84] hover:bg-[#154663] text-white"
+            className="w-full bg-[#1D5E84] hover:bg-[#154663] text-white h-9"
           >
             {isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
             Upload Gambar

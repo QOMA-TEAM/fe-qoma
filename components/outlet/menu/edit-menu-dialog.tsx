@@ -153,6 +153,28 @@ export function EditMenuDialog({ menu, onClose }: EditMenuDialogProps) {
               </p>
             </div>
           )}
+
+          {/* Bahan Baku yang Digunakan (Read Only) */}
+          <div className="space-y-1.5 pt-2">
+            <label className="text-sm font-medium text-gray-700">Bahan Baku yang Digunakan</label>
+            {menu.bahan_baku && menu.bahan_baku.length > 0 ? (
+              <div className="bg-gray-50 border border-gray-100 rounded-lg p-3 max-h-32 overflow-y-auto space-y-2">
+                {menu.bahan_baku.map((bahan, idx) => (
+                  <div key={idx} className="flex items-center justify-between text-sm">
+                    <span className="font-medium text-gray-700 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#1D5E84]"></div>
+                      {bahan.nama}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="h-11 w-full bg-gray-50 border border-gray-100 text-gray-400 rounded-lg shadow-sm flex items-center px-3 text-sm italic">
+                Tidak ada bahan baku yang terhubung
+              </div>
+            )}
+            <p className="text-[11px] text-gray-500 font-medium mt-1">Bahan baku hanya bisa diubah oleh Owner.</p>
+          </div>
         </div>
 
         {/* Buttons */}
