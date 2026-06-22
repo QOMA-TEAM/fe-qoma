@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { PlanCard } from '@/components/ui/plan-card'
 import {
     Zap,
     Star,
@@ -15,49 +15,210 @@ import {
     ChevronRight,
     ArrowRight,
 } from 'lucide-react'
+import { landingService, type PlanFromBE } from '@/services/public/landing'
 
-const PLANS = [
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type PlanVariant = 'free' | 'pro' | 'enterprise'
+
+interface LocalPlan {
+    id: string
+    name: string
+    price: number | React.ReactNode   // pakai number agar PlanCard bisa formatRupiah
+    period: string
+    description: string
+    features: Array<{ text: string; icon?: React.ReactNode }>
+    headerBadge?: React.ReactNode
+    actionButton?: React.ReactNode
+    variant: PlanVariant
+    href: string
+    cta: string
+}
+
+// ─── Variant helpers ──────────────────────────────────────────────────────────
+
+const VARIANT_ORDER: PlanVariant[] = ['free', 'pro', 'enterprise']
+
+const BADGE_ICONS: Record<PlanVariant, React.ComponentType<{ size?: number }>> = {
+    free: Zap,
+    pro: Star,
+    enterprise: Building2,
+}
+
+const BADGE_LABELS: Record<PlanVariant, string> = {
+    free: 'Starter',
+    pro: 'Pro',
+    enterprise: 'Enterprise',
+}
+
+const CTA_LABELS: Record<PlanVariant, string> = {
+    free: 'Mulai gratis',
+    pro: 'Upgrade ke Pro',
+    enterprise: 'Hubungi kami',
+}
+
+const CTA_HREF: Record<PlanVariant, string> = {
+    free: '/register',
+    pro: '/register',
+    enterprise: '/contact',
+}
+
+const BADGE_COLORS: Record<PlanVariant, string> = {
+    free: 'bg-[#FB6300]/10 text-[#FB6300] border-0',
+    pro: 'bg-[#1D5E84]/10 text-[#1D5E84] border-0',
+    enterprise: 'bg-[#26180B]/10 text-[#26180B] border-0',
+}
+
+function detectVariant(nama: string, idx: number): PlanVariant {
+    const lower = nama.toLowerCase()
+    if (lower.includes('enterprise') || lower.includes('custom')) return 'enterprise'
+    if (lower.includes('pro') || lower.includes('premium')) return 'pro'
+    if (lower.includes('free') || lower.includes('gratis') || lower.includes('basic')) return 'free'
+    return VARIANT_ORDER[idx % 3]
+}
+
+function buildHeaderBadge(variant: PlanVariant) {
+    const Icon = BADGE_ICONS[variant]
+    return (
+        <Badge className={cn('gap-1.5 text-[11px] font-medium rounded-full px-3 py-1', BADGE_COLORS[variant])}>
+            <Icon size={11} />
+            {BADGE_LABELS[variant]}
+        </Badge>
+    )
+}
+
+function buildFeatures(plan: PlanFromBE): Array<{ text: string; icon: React.ReactNode }> {
+    const feats: Array<{ text: string; icon: React.ReactNode }> = []
+    const icon = <CircleCheck size={14} className="text-[#FB6300]" />
+
+    if (plan.batas_outlet === 0) {
+        feats.push({ text: 'Outlet tak terbatas', icon })
+    } else {
+        feats.push({ text: `${plan.batas_outlet} Outlet`, icon })
+    }
+
+    if (plan.durasi_hari > 0 && !plan.is_lifetime) {
+        feats.push({ text: `${plan.durasi_hari} hari akses`, icon })
+    } else if (plan.is_lifetime) {
+        feats.push({ text: 'Akses selamanya', icon })
+    }
+
+    if (plan.deskripsi) {
+        feats.push({ text: plan.deskripsi, icon })
+    }
+
+    return feats
+}
+
+function mapBEPlanToLocal(plan: PlanFromBE, idx: number): LocalPlan {
+    const variant = detectVariant(plan.nama_plan, idx)
+    const cta = CTA_LABELS[variant]
+    const href = CTA_HREF[variant]
+
+    return {
+        id: plan.id,
+        name: plan.nama_plan,
+        price: plan.harga,   // number → PlanCard akan formatRupiah otomatis
+        period: plan.is_lifetime ? 'selamanya' : `${plan.durasi_hari} hari`,
+        description: plan.deskripsi ?? '',
+        features: buildFeatures(plan),
+        headerBadge: buildHeaderBadge(variant),
+        actionButton: (
+            <Link href={href}>
+                <Button className={cn(
+                    'w-full rounded-xl text-sm font-medium h-10 border-0',
+                    variant === 'pro'
+                        ? 'bg-[#1D5E84] hover:bg-[#174d6e] text-white'
+                        : variant === 'enterprise'
+                            ? 'bg-[#FB6300] hover:bg-[#e05700] text-white'
+                            : 'bg-[#FB6300] hover:bg-[#e05700] text-white'
+                )}>
+                    {cta}
+                </Button>
+            </Link>
+        ),
+        variant,
+        href,
+        cta,
+    }
+}
+
+// ─── Static fallback data ─────────────────────────────────────────────────────
+
+const STATIC_PLANS: LocalPlan[] = [
     {
         id: 'free',
         name: 'Free',
-        price: 'Rp 0',
-        period: '/ 30 hari',
+        price: 0,
+        period: '30 hari',
         description: 'Baru mulai? Kelola outlet pertamamu tanpa biaya apapun.',
-        badge: { label: 'Starter', icon: Zap },
-        features: ['1 Outlet', '3 Pengguna', 'Laporan bulanan', 'Stock dasar'],
-        cta: 'Mulai gratis',
+        features: [
+            { text: '1 Outlet', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
+            { text: '3 Pengguna', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
+            { text: 'Laporan bulanan', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
+            { text: 'Stock dasar', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
+        ],
+        headerBadge: buildHeaderBadge('free'),
+        actionButton: (
+            <Link href="/register">
+                <Button className="w-full rounded-xl text-sm font-medium h-10 border-0 bg-[#FB6300] hover:bg-[#e05700] text-white">
+                    Mulai gratis
+                </Button>
+            </Link>
+        ),
+        variant: 'free',
         href: '/register',
-        variant: 'free' as const,
+        cta: 'Mulai gratis',
     },
     {
         id: 'pro',
         name: 'Pro',
-        price: 'Rp 100.000',
-        period: '/ 30 hari',
+        price: 100000,
+        period: '30 hari',
         description: 'Untuk bisnis berkembang dengan banyak outlet dan tim yang besar.',
-        badge: { label: 'Pro', icon: Star },
-        features: ['3 Outlet', '20 Pengguna', 'Laporan real-time', 'Stock opname', 'Multi-kasir'],
-        cta: 'Upgrade ke Pro',
+        features: [
+            { text: '3 Outlet', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
+            { text: '20 Pengguna', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
+            { text: 'Laporan real-time', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
+            { text: 'Stock opname', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
+            { text: 'Multi-kasir', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
+        ],
+        headerBadge: buildHeaderBadge('pro'),
+        actionButton: (
+            <Link href="/register">
+                <Button className="w-full rounded-xl text-sm font-medium h-10 border-0 bg-[#1D5E84] hover:bg-[#174d6e] text-white">
+                    Upgrade ke Pro
+                </Button>
+            </Link>
+        ),
+        variant: 'pro',
         href: '/register',
-        variant: 'pro' as const,
+        cta: 'Upgrade ke Pro',
     },
     {
         id: 'enterprise',
         name: 'Enterprise',
-        price: 'Custom',
-        period: '/ sesuai kebutuhan',
+        price: <span className="text-4xl font-bold text-gray-900">Custom</span>,
+        period: 'sesuai kebutuhan',
         description: 'Skalakan bisnis franchise dan chain resto besar kamu tanpa batas.',
-        badge: { label: 'Enterprise', icon: Building2 },
         features: [
-            'Outlet tak terbatas',
-            'Pengguna tak terbatas',
-            'Dashboard pusat',
-            'Integrasi API',
-            'Dedicated support',
+            { text: 'Outlet tak terbatas', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
+            { text: 'Pengguna tak terbatas', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
+            { text: 'Dashboard pusat', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
+            { text: 'Integrasi API', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
+            { text: 'Dedicated support', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
         ],
-        cta: 'Hubungi kami',
+        headerBadge: buildHeaderBadge('enterprise'),
+        actionButton: (
+            <Link href="/contact">
+                <Button className="w-full rounded-xl text-sm font-medium h-10 border-0 bg-[#FB6300] hover:bg-[#e05700] text-white">
+                    Hubungi kami
+                </Button>
+            </Link>
+        ),
+        variant: 'enterprise',
         href: '/contact',
-        variant: 'enterprise' as const,
+        cta: 'Hubungi kami',
     },
 ]
 
@@ -66,50 +227,15 @@ const STATS = [
     { num: '30 hr', label: 'Coba gratis' },
 ]
 
-type PlanVariant = 'free' | 'pro' | 'enterprise'
+// ─── Carousel card wrapper (animasi tetap sama) ───────────────────────────────
 
-const cardStyles: Record<PlanVariant, { card: string; badge: string; text: string; sub: string; divider: string; feature: string; icon: string; btn: string }> = {
-    free: {
-        card: 'bg-white border border-[#1D5E84]/10',
-        badge: 'bg-[#FB6300]/10 text-[#FB6300] border-0',
-        text: 'text-[#1D5E84]',
-        sub: 'text-[#26180B]/60',
-        divider: 'bg-[#1D5E84]/10',
-        feature: 'text-[#26180B]',
-        icon: 'text-[#FB6300]',
-        btn: 'bg-[#FB6300] hover:bg-[#e05700] text-white',
-    },
-    pro: {
-        card: 'bg-[#1D5E84] border border-[#1D5E84]',
-        badge: 'bg-white/20 text-white border-0',
-        text: 'text-white',
-        sub: 'text-white/65',
-        divider: 'bg-white/15',
-        feature: 'text-white',
-        icon: 'text-[#FCFEF1]',
-        btn: 'bg-[#FCFEF1] hover:bg-white text-[#1D5E84]',
-    },
-    enterprise: {
-        card: 'bg-[#FB6300] border border-[#FB6300]',
-        badge: 'bg-white/25 text-white border-0',
-        text: 'text-white',
-        sub: 'text-white/70',
-        divider: 'bg-white/20',
-        feature: 'text-white',
-        icon: 'text-white',
-        btn: 'bg-white hover:bg-white/90 text-[#FB6300]',
-    },
-}
-
-interface PlanCardProps {
-    plan: (typeof PLANS)[number]
+interface CarouselCardProps {
+    plan: LocalPlan
     position: 'prev' | 'cur' | 'next'
     onClick: () => void
 }
 
-function PlanCard({ plan, position, onClick }: PlanCardProps) {
-    const s = cardStyles[plan.variant]
-    const BadgeIcon = plan.badge.icon
+function CarouselCard({ plan, position, onClick }: CarouselCardProps) {
     const isCurrent = position === 'cur'
 
     return (
@@ -122,53 +248,43 @@ function PlanCard({ plan, position, onClick }: PlanCardProps) {
                 position === 'next' && 'translate-x-[155px] opacity-50 blur-[3px] scale-[.88] z-10 cursor-pointer',
             )}
         >
-            <Card className={cn('rounded-[18px] border shadow-none', s.card)}>
-                <CardContent className="p-6">
-                    <Badge className={cn('mb-4 gap-1.5 text-[11px] font-medium rounded-full px-3 py-1', s.badge)}>
-                        <BadgeIcon size={11} />
-                        {plan.badge.label}
-                    </Badge>
-
-                    <p className={cn('text-xl font-medium mb-1', s.text)}>{plan.name}</p>
-                    <p className={cn('text-2xl font-medium mb-0.5', s.text)}>{plan.price}</p>
-                    <p className={cn('text-xs mb-3', s.sub)}>{plan.period}</p>
-                    <p className={cn('text-xs leading-relaxed mb-4', s.sub)}>{plan.description}</p>
-
-                    <div className={cn('h-px mb-4', s.divider)} />
-
-                    <ul className="space-y-2 mb-5">
-                        {plan.features.map((feat) => (
-                            <li key={feat} className={cn('flex items-center gap-2 text-xs', s.feature)}>
-                                <CircleCheck size={14} className={cn('shrink-0', s.icon)} />
-                                {feat}
-                            </li>
-                        ))}
-                    </ul>
-
-                    <Link href={plan.href}>
-                        <Button
-                            className={cn(
-                                'w-full rounded-xl text-sm font-medium h-10 transition-opacity border-0',
-                                s.btn,
-                            )}
-                        >
-                            {plan.cta}
-                        </Button>
-                    </Link>
-                </CardContent>
-            </Card>
+            <PlanCard
+                name={plan.name}
+                price={plan.price}
+                period={plan.period}
+                description={plan.description}
+                features={plan.features}
+                headerBadge={plan.headerBadge}
+                actionButton={plan.actionButton}
+                isActive={isCurrent}
+            />
         </div>
     )
 }
 
+// ─── PricingSection (main export) ────────────────────────────────────────────
+
 export function PricingSection() {
     const [current, setCurrent] = useState(1)
     const [mounted, setMounted] = useState(false)
-    const total = PLANS.length
+    const [plans, setPlans] = useState<LocalPlan[]>(STATIC_PLANS)
+    const total = plans.length
 
     useEffect(() => {
         const t = setTimeout(() => setMounted(true), 50)
         return () => clearTimeout(t)
+    }, [])
+
+    useEffect(() => {
+        landingService.getPlans()
+            .then((data) => {
+                if (data && data.length > 0) {
+                    setPlans(data.map(mapBEPlanToLocal))
+                }
+            })
+            .catch(() => {
+                // Gagal fetch → tetap pakai STATIC_PLANS
+            })
     }, [])
 
     const prev = (current - 1 + total) % total
@@ -281,8 +397,8 @@ export function PricingSection() {
                             </button>
 
                             {/* Cards */}
-                            {PLANS.map((plan, idx) => (
-                                <PlanCard
+                            {plans.map((plan, idx) => (
+                                <CarouselCard
                                     key={plan.id}
                                     plan={plan}
                                     position={getPosition(idx)}
@@ -306,7 +422,7 @@ export function PricingSection() {
 
                         {/* Dots */}
                         <div className="flex gap-2 mt-4">
-                            {PLANS.map((_, idx) => (
+                            {plans.map((_, idx) => (
                                 <button
                                     key={idx}
                                     aria-label={`Kartu ${idx + 1}`}

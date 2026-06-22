@@ -5,6 +5,8 @@ import { Navbar } from "@/components/landing-page/Navbar";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Zap, Star, CreditCard, Wallet, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { PlanCard } from '@/components/ui/plan-card'
+import { landingService, type PlanFromBE } from '@/services/public/landing'
 
 type Plan = "free" | "pro" | null;
 
@@ -69,10 +71,10 @@ export function MultiStepForm() {
                   <div className="flex flex-col items-center gap-1.5">
                     <div
                       className={`w-11 h-11 rounded-full flex items-center justify-center text-base font-semibold transition-colors duration-300 ${isActive
-                          ? "bg-[#ff6b00] text-white shadow-md shadow-orange-200"
-                          : isCompleted
-                            ? "bg-[#ff6b00]/20 text-[#ff6b00]"
-                            : "bg-[#eef2f6] text-gray-400"
+                        ? "bg-[#ff6b00] text-white shadow-md shadow-orange-200"
+                        : isCompleted
+                          ? "bg-[#ff6b00]/20 text-[#ff6b00]"
+                          : "bg-[#eef2f6] text-gray-400"
                         }`}
                     >
                       {isCompleted ? <CheckCircle2 size={20} /> : num}
@@ -116,8 +118,8 @@ export function MultiStepForm() {
                     type="button"
                     onClick={() => { setSelectedPlan("free"); if (step > TOTAL_STEPS) setStep(3); }}
                     className={`text-left rounded-2xl border-2 p-6 transition-all duration-200 cursor-pointer ${selectedPlan === "free"
-                        ? "border-[#ff6b00] bg-[#fff4ec] shadow-md shadow-orange-100"
-                        : "border-gray-200 bg-white hover:border-[#ff6b00]/40"
+                      ? "border-[#ff6b00] bg-[#fff4ec] shadow-md shadow-orange-100"
+                      : "border-gray-200 bg-white hover:border-[#ff6b00]/40"
                       }`}
                   >
                     <div className="flex items-center justify-between mb-4">
@@ -146,8 +148,8 @@ export function MultiStepForm() {
                     type="button"
                     onClick={() => setSelectedPlan("pro")}
                     className={`text-left rounded-2xl border-2 p-6 transition-all duration-200 cursor-pointer ${selectedPlan === "pro"
-                        ? "border-[#3874BC] bg-[#dde8f7] shadow-md shadow-blue-100"
-                        : "border-gray-200 bg-white hover:border-[#3874BC]/40"
+                      ? "border-[#3874BC] bg-[#dde8f7] shadow-md shadow-blue-100"
+                      : "border-gray-200 bg-white hover:border-[#3874BC]/40"
                       }`}
                   >
                     <div className="flex items-center justify-between mb-4">
@@ -260,8 +262,8 @@ export function MultiStepForm() {
                       type="button"
                       onClick={() => setPaymentMethod("card")}
                       className={`flex items-center gap-2 px-5 py-3 rounded-xl border-2 text-sm font-medium transition-all ${paymentMethod === "card"
-                          ? "border-[#ff6b00] bg-[#fff4ec] text-[#ff6b00]"
-                          : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
+                        ? "border-[#ff6b00] bg-[#fff4ec] text-[#ff6b00]"
+                        : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
                         }`}
                     >
                       <CreditCard size={16} /> Kartu
@@ -270,8 +272,8 @@ export function MultiStepForm() {
                       type="button"
                       onClick={() => setPaymentMethod("gopay")}
                       className={`flex items-center gap-2 px-5 py-3 rounded-xl border-2 text-sm font-medium transition-all ${paymentMethod === "gopay"
-                          ? "border-[#ff6b00] bg-[#fff4ec] text-[#ff6b00]"
-                          : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
+                        ? "border-[#ff6b00] bg-[#fff4ec] text-[#ff6b00]"
+                        : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
                         }`}
                     >
                       <Wallet size={16} /> GoPay
@@ -379,8 +381,8 @@ export function MultiStepForm() {
               onClick={handleNext}
               disabled={step === 1 && !selectedPlan}
               className={`px-10 py-3.5 rounded-xl font-medium text-base transition-colors ${step === 1 && !selectedPlan
-                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                  : "bg-[#ff6b00] text-white hover:bg-[#e65a00]"
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-[#ff6b00] text-white hover:bg-[#e65a00]"
                 }`}
             >
               {step === TOTAL_STEPS ? (isFreePlan ? "Daftar Sekarang" : "Langganan") : "Lanjut →"}
