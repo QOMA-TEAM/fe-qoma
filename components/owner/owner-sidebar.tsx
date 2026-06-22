@@ -149,29 +149,43 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="gap-0">
         {/* OVERVIEW */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-muted-foreground/70 uppercase">
-            Overview
-          </SidebarGroupLabel>
-          <SidebarMenu>
-            {ownerNav.overview.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === item.url}
-                  className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
-                >
-                  <Link href={item.url}>
-                    <item.icon className="size-4" />
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
+        <Collapsible
+          asChild
+          defaultOpen={ownerNav.overview.some(item => pathname.startsWith(item.url))}
+          className="group/collapsible"
+        >
+          <SidebarGroup>
+            <SidebarGroupLabel
+              asChild
+              className="group/label w-full justify-between hover:bg-sidebar-accent cursor-pointer text-xs font-semibold tracking-wider text-black uppercase"
+            >
+              <CollapsibleTrigger>
+                Overview
+                <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+              </CollapsibleTrigger>
+            </SidebarGroupLabel>
+            <CollapsibleContent>
+              <SidebarMenu>
+                {ownerNav.overview.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.url}
+                      className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
+                    >
+                      <Link href={item.url}>
+                        <item.icon className="size-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
 
         {/* KELOLA */}
         <Collapsible
@@ -182,7 +196,7 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
           <SidebarGroup>
             <SidebarGroupLabel
               asChild
-              className="group/label w-full justify-between hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer text-xs font-semibold tracking-wider text-muted-foreground/70 uppercase"
+              className="group/label w-full justify-between hover:bg-sidebar-accent cursor-pointer text-xs font-semibold tracking-wider text-black uppercase"
             >
               <CollapsibleTrigger>
                 Kelola
@@ -211,74 +225,116 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         </Collapsible>
 
         {/* APPROVAL */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-muted-foreground/70 uppercase">
-            Approval
-          </SidebarGroupLabel>
-          <SidebarMenu>
-            {ownerNav.approval.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === item.url}
-                  className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
-                >
-                  <Link href={item.url}>
-                    <item.icon className="size-4" />
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
+        <Collapsible
+          asChild
+          defaultOpen={ownerNav.approval.some(item => pathname.startsWith(item.url))}
+          className="group/collapsible"
+        >
+          <SidebarGroup>
+            <SidebarGroupLabel
+              asChild
+              className="group/label w-full justify-between hover:bg-sidebar-accent cursor-pointer text-xs font-semibold tracking-wider text-black uppercase"
+            >
+              <CollapsibleTrigger>
+                Approval
+                <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+              </CollapsibleTrigger>
+            </SidebarGroupLabel>
+            <CollapsibleContent>
+              <SidebarMenu>
+                {ownerNav.approval.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.url}
+                      className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
+                    >
+                      <Link href={item.url}>
+                        <item.icon className="size-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
 
 
         {/* KEUANGAN */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-muted-foreground/70 uppercase">
-            Keuangan
-          </SidebarGroupLabel>
-          <SidebarMenu>
-            {ownerNav.keuangan.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === item.url}
-                  className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
-                >
-                  <Link href={item.url}>
-                    <item.icon className="size-4" />
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
+        <Collapsible
+          asChild
+          defaultOpen={ownerNav.keuangan.some(item => pathname.startsWith(item.url))}
+          className="group/collapsible"
+        >
+          <SidebarGroup>
+            <SidebarGroupLabel
+              asChild
+              className="group/label w-full justify-between hover:bg-sidebar-accent cursor-pointer text-xs font-semibold tracking-wider text-black uppercase"
+            >
+              <CollapsibleTrigger>
+                Keuangan
+                <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+              </CollapsibleTrigger>
+            </SidebarGroupLabel>
+            <CollapsibleContent>
+              <SidebarMenu>
+                {ownerNav.keuangan.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.url}
+                      className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
+                    >
+                      <Link href={item.url}>
+                        <item.icon className="size-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
 
         {/* LAPORAN */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-muted-foreground/70 uppercase">
-            Laporan
-          </SidebarGroupLabel>
-          <SidebarMenu>
-            {ownerNav.laporan.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === item.url}
-                  className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
-                >
-                  <Link href={item.url}>
-                    <item.icon className="size-4" />
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
+        <Collapsible
+          asChild
+          defaultOpen={ownerNav.laporan.some(item => pathname.startsWith(item.url))}
+          className="group/collapsible"
+        >
+          <SidebarGroup>
+            <SidebarGroupLabel
+              asChild
+              className="group/label w-full justify-between hover:bg-sidebar-accent cursor-pointer text-xs font-semibold tracking-wider text-black uppercase"
+            >
+              <CollapsibleTrigger>
+                Laporan
+                <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+              </CollapsibleTrigger>
+            </SidebarGroupLabel>
+            <CollapsibleContent>
+              <SidebarMenu>
+                {ownerNav.laporan.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.url}
+                      className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
+                    >
+                      <Link href={item.url}>
+                        <item.icon className="size-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
       </SidebarContent>
 
       {/* FOOTER: Logout & Settings */}
