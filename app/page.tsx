@@ -7,6 +7,7 @@ import { PricingSection } from "@/components/landing-page/pricing-card";
 import { ReviewMarquee } from "@/components/landing-page/review-modal";
 import { motion } from "motion/react";
 import { use } from "react";
+import FeaturesSection from "@/components/landing-page/features-modal";
 
 export default function Home() {
   return (
@@ -67,59 +68,7 @@ export default function Home() {
         </section>
 
         {/* --- Features Section --- */}
-        <section id="feature" className="w-full bg-white relative py-24">
-          {/* subtle grid background */}
-          <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-[0.03]"></div>
-
-          <div className="w-full max-w-6xl mx-auto px-6 relative z-10">
-            <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">Features</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-              {/* Connecting line */}
-              <div className="hidden md:block absolute top-1/2 left-0 w-full h-[2px] bg-[#ff6b00] -translate-y-1/2 z-0"></div>
-
-              {/* Feature 1 */}
-              <div className="bg-[#2a201a] text-white p-8 rounded-2xl relative z-10 shadow-xl border border-[#ff6b00]/30 transform hover:-translate-y-2 transition-transform">
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <span>1.</span> POS & Manajemen Pesanan
-                </h3>
-                <p className="text-gray-300 text-sm leading-relaxed">
-                  Atur Menu, Harga, dan Diskon
-                </p>
-              </div>
-
-              {/* Feature 2 */}
-              <div className="bg-[#2a201a] text-white p-8 rounded-2xl relative z-10 shadow-xl border border-[#ff6b00]/30 transform hover:-translate-y-2 transition-transform mt-0 md:mt-12">
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <span>2.</span> Sistem Inventaris
-                </h3>
-                <p className="text-gray-300 text-sm leading-relaxed">
-                  Lacak stok bahan baku secara real-time. Cegah out-of-stock dengan peringatan otomatis sebelum bahan habis.
-                </p>
-              </div>
-
-              {/* Feature 3 */}
-              <div className="bg-[#2a201a] text-white p-8 rounded-2xl relative z-10 shadow-xl border border-[#ff6b00]/30 transform hover:-translate-y-2 transition-transform">
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <span>3.</span> Laporan & Analitik Terintegrasi
-                </h3>
-                <p className="text-gray-300 text-sm leading-relaxed">
-                  Bandingkan performa antar cabang dan ambil keputusan strategis berdasarkan data yang akurat.
-                </p>
-              </div>
-
-              {/* Feature 4 */}
-              <div className="bg-[#2a201a] text-white p-8 rounded-2xl relative z-10 shadow-xl border border-[#ff6b00]/30 transform hover:-translate-y-2 transition-transform">
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <span>4.</span> Multienant
-                </h3>
-                <p className="text-gray-300 text-sm leading-relaxed">
-                  Pantau performa, atur menu, dan kelola akses karyawan untuk ribuan outlet berbeda hanya dari satu dashboard utama.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+        <FeaturesSection />
 
         {/* --- Pricing Section --- */}
         <PricingSection />

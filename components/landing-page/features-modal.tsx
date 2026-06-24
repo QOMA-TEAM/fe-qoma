@@ -1,392 +1,423 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import {
-    QrCode,
-    ShoppingCart,
-    Sliders,
-    CheckCircle2,
-    ClipboardList,
-    CreditCard,
-    Package,
-    ScanBarcode,
-    LayoutDashboard,
-    TrendingUp,
-    Utensils,
-    Boxes,
-    BarChart3,
-    CreditCard as CardIcon,
-    Users,
-    BellRing,
-    Activity,
-    Globe,
-} from 'lucide-react'
 
 /* ─────────────────────────────────────────────
    Types
 ───────────────────────────────────────────── */
-interface Feature {
-    icon: React.ReactNode
-    label: string
-}
-
-interface RoleTab {
-    key: string
-    label: string
-    badge: string
-    badgeColor: string
-    description: string
-    image: string        // path relatif dari /public
+interface FeatureBlock {
+    id: string
+    eyebrow: string
+    headline: string
+    body: string
+    image: string
     imageAlt: string
-    accentColor: string  // tailwind bg class for tab active state
-    features: Feature[]
+    imagePos: 'left' | 'right'
+    accent: string
+    bgTint: string
+    pills: string[]
 }
 
 /* ─────────────────────────────────────────────
-   Data
+   Data — sesuaikan path image setelah copy ke /public/features/
 ───────────────────────────────────────────── */
-const roles: RoleTab[] = [
+const features: FeatureBlock[] = [
     {
-        key: 'pelanggan',
-        label: 'Pelanggan',
-        badge: 'Self-Order',
-        badgeColor: 'bg-orange-100 text-orange-700',
-        description:
-            'Pelanggan scan QR → pilih menu → bayar. Tidak perlu install app, tidak perlu login.',
-        image: '/features/qr-order.png',   // ganti path sesuai struktur public mu
-        imageAlt: 'Self-order via QR Code',
-        accentColor: '#FB6300',
-        features: [
-            { icon: <QrCode size={15} />, label: 'Pemesanan via QR Code' },
-            { icon: <Sliders size={15} />, label: 'Melihat kategori menu' },
-            { icon: <ShoppingCart size={15} />, label: 'Tambah menu ke keranjang' },
-            { icon: <Sliders size={15} />, label: 'Kustomisasi add-on' },
-            { icon: <CheckCircle2 size={15} />, label: 'Konfirmasi pesanan tanpa login' },
-        ],
+        id: 'owner-dashboard',
+        eyebrow: 'Owner · Multi-Outlet',
+        headline: 'Pantau semua cabang dari satu layar',
+        body:
+            'Dashboard owner menampilkan performa setiap outlet secara real-time — profit, jumlah transaksi, kerugian, dan notifikasi stok rendah. Tidak perlu tanya kasir satu per satu.',
+        image: '/features/owner-dashboard.png',   // → screenshot 2.png
+        imageAlt: 'Dashboard owner multi-outlet dengan ringkasan profit dan transaksi',
+        imagePos: 'right',
+        accent: '#FB6300',
+        bgTint: '#FCFEF1',
+        pills: ['Profit & Loss real-time', 'Notifikasi stok otomatis', 'Analitik pelanggan', 'Multi-outlet'],
     },
     {
-        key: 'outlet',
-        label: 'Outlet / Kasir',
-        badge: 'Operasional',
-        badgeColor: 'bg-blue-100 text-blue-700',
-        description:
-            'Semua yang kasir dan manajer outlet butuhkan — dari terima pesanan sampai laporan harian.',
-        image: '/features/stock-opname.png',  // screenshot 44.png → taruh di public/features/
-        imageAlt: 'Manajemen Stock Opname',
-        accentColor: '#1D5E84',
-        features: [
-            { icon: <ClipboardList size={15} />, label: 'Manajemen pesanan masuk' },
-            { icon: <CreditCard size={15} />, label: 'Konfirmasi pembayaran' },
-            { icon: <Package size={15} />, label: 'Monitoring inventaris real-time' },
-            { icon: <ScanBarcode size={15} />, label: 'Manajemen stock opname' },
-            { icon: <QrCode size={15} />, label: 'Manajemen QR meja' },
-            { icon: <TrendingUp size={15} />, label: 'Monitoring pendapatan harian' },
-            { icon: <Activity size={15} />, label: 'Activity log transaksi' },
-        ],
+        id: 'detail-keuangan',
+        eyebrow: 'Keuangan · Laporan',
+        headline: 'Riwayat transaksi yang tidak menyembunyikan apa-apa',
+        body:
+            'Setiap pengeluaran restock, setiap pendapatan pesanan, tercatat lengkap dengan timestamp dan ID unik. Filter berdasarkan tipe dan rentang waktu, ekspor kapan saja.',
+        image: '/features/detail-keuangan.png',   // → screenshot 5.png
+        imageAlt: 'Halaman detail keuangan dengan tabel riwayat transaksi',
+        imagePos: 'left',
+        accent: '#1D5E84',
+        bgTint: '#F0F6FA',
+        pills: ['Total pendapatan & pengeluaran', 'Filter 7 / 30 hari', 'Paginasi transaksi', 'Alert kerugian otomatis'],
     },
     {
-        key: 'owner',
-        label: 'Owner',
-        badge: 'Multi-Outlet',
-        badgeColor: 'bg-emerald-100 text-emerald-700',
-        description:
-            'Pantau semua outlet dari satu dashboard. Bandingkan performa, kelola menu, analisis bisnis.',
-        image: '/features/owner-dashboard.png',  // screenshot 2.png
-        imageAlt: 'Dashboard Owner Multi-Outlet',
-        accentColor: '#26180B',
-        features: [
-            { icon: <Globe size={15} />, label: 'Manajemen multi-outlet' },
-            { icon: <Utensils size={15} />, label: 'Manajemen menu & harga' },
-            { icon: <Boxes size={15} />, label: 'Manajemen bahan baku' },
-            { icon: <LayoutDashboard size={15} />, label: 'Dashboard keuangan terintegrasi' },
-            { icon: <CardIcon size={15} />, label: 'Manajemen subscription' },
-            { icon: <BarChart3 size={15} />, label: 'Analitik bisnis mendalam' },
-        ],
+        id: 'restock',
+        eyebrow: 'Inventaris · Bahan Baku',
+        headline: 'Restock bahan baku dalam hitungan detik',
+        body:
+            'Pilih bahan dari grid visual bergambar, isi jumlah dan tanggal kadaluarsa, catat pengeluaran — selesai. Sistem langsung memperbarui stok dan mencatat di laporan keuangan.',
+        image: '/features/restock-bahan.png',     // → screenshot 3.png
+        imageAlt: 'Modal restock bahan baku dengan grid pilih item bergambar',
+        imagePos: 'right',
+        accent: '#FB6300',
+        bgTint: '#FCFEF1',
+        pills: ['Pilih item via visual grid', 'Catat tanggal kadaluarsa', 'Otomatis update stok', 'Terintegrasi laporan'],
     },
     {
-        key: 'superadmin',
-        label: 'Super Admin',
-        badge: 'SaaS',
-        badgeColor: 'bg-purple-100 text-purple-700',
-        description:
-            'Monitor seluruh ekosistem SaaS — tenant, revenue, notifikasi, dan pertumbuhan platform.',
-        image: '/features/detail-keuangan.png',  // screenshot 5.png
-        imageAlt: 'Detail Keuangan & MRR',
-        accentColor: '#7C3AED',
-        features: [
-            { icon: <LayoutDashboard size={15} />, label: 'Dashboard monitoring SaaS' },
-            { icon: <CardIcon size={15} />, label: 'Manajemen subscription tenant' },
-            { icon: <TrendingUp size={15} />, label: 'Analitik MRR & pertumbuhan' },
-            { icon: <Users size={15} />, label: 'Manajemen pelanggan' },
-            { icon: <BellRing size={15} />, label: 'Manajemen notifikasi platform' },
-        ],
+        id: 'stock-opname',
+        eyebrow: 'Stock Opname · Audit',
+        headline: 'Audit stok dengan bukti foto langsung',
+        body:
+            'Kasir bisa tambah draft penyesuaian stok — catat bahan rusak, jumlah yang hilang, lengkap dengan foto bukti. Owner tinggal review dan approve dari dashboard.',
+        image: '/features/stock-opname.png',      // → screenshot 44.png
+        imageAlt: 'Form tambah draft stock opname dengan upload foto bukti',
+        imagePos: 'left',
+        accent: '#1D5E84',
+        bgTint: '#F0F6FA',
+        pills: ['Draft → Review → Approved', 'Upload foto bukti', 'Tipe: Rusak / Hilang / Lebih', 'Blokir edit setelah approved'],
     },
 ]
 
 /* ─────────────────────────────────────────────
-   Component
+   Pill badge
 ───────────────────────────────────────────── */
-export default function FeaturesSection() {
-    const [activeKey, setActiveKey] = useState<string>('outlet')
-    const [animating, setAnimating] = useState(false)
-    const [visibleFeatures, setVisibleFeatures] = useState<boolean[]>([])
-    const sectionRef = useRef<HTMLDivElement>(null)
-    const [sectionVisible, setSectionVisible] = useState(false)
+function Pill({ label, accent }: { label: string; accent: string }) {
+    return (
+        <span
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+            style={{
+                background: `${accent}12`,
+                color: accent,
+                border: `1px solid ${accent}25`,
+            }}
+        >
+            <span
+                className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                style={{ background: accent }}
+            />
+            {label}
+        </span>
+    )
+}
 
-    const active = roles.find((r) => r.key === activeKey)!
+/* ─────────────────────────────────────────────
+   Single feature row with scroll-reveal
+───────────────────────────────────────────── */
+function FeatureRow({ block }: { block: FeatureBlock }) {
+    const ref = useRef<HTMLDivElement>(null)
+    const [visible, setVisible] = useState(false)
 
-    /* Intersection Observer — trigger entrance animation */
     useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) setSectionVisible(true)
-            },
+        const el = ref.current
+        if (!el) return
+        const obs = new IntersectionObserver(
+            ([entry]) => { if (entry.isIntersecting) setVisible(true) },
             { threshold: 0.15 },
         )
-        if (sectionRef.current) observer.observe(sectionRef.current)
-        return () => observer.disconnect()
+        obs.observe(el)
+        return () => obs.disconnect()
     }, [])
 
-    /* Stagger feature list on tab change */
-    useEffect(() => {
-        setAnimating(true)
-        setVisibleFeatures([])
-        const timer = setTimeout(() => setAnimating(false), 250)
-        return () => clearTimeout(timer)
-    }, [activeKey])
-
-    useEffect(() => {
-        if (animating) return
-        const timers: ReturnType<typeof setTimeout>[] = []
-        active.features.forEach((_, i) => {
-            timers.push(
-                setTimeout(() => {
-                    setVisibleFeatures((prev) => {
-                        const next = [...prev]
-                        next[i] = true
-                        return next
-                    })
-                }, i * 80),
-            )
-        })
-        return () => timers.forEach(clearTimeout)
-    }, [animating, active.features])
-
-    const handleTabChange = (key: string) => {
-        if (key === activeKey) return
-        setActiveKey(key)
-    }
+    const isLeft = block.imagePos === 'left'
 
     return (
-        <section
-            id="feature"
-            ref={sectionRef}
-            className="w-full bg-[#FCFEF1] relative py-24 overflow-hidden"
+        <div
+            style={{ background: block.bgTint }}
+            className="w-full py-20 md:py-28 relative overflow-hidden"
         >
-            {/* ── Decorative blobs ── */}
-            <div
-                className="pointer-events-none absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full opacity-[0.06] blur-3xl"
-                style={{ background: '#FB6300' }}
-            />
-            <div
-                className="pointer-events-none absolute -bottom-32 -right-32 w-[400px] h-[400px] rounded-full opacity-[0.08] blur-3xl"
-                style={{ background: '#1D5E84' }}
-            />
-
-            <div className="w-full max-w-6xl mx-auto px-6 relative z-10">
-
-                {/* ── Heading ── */}
-                <div
-                    className={cn(
-                        'text-center mb-14 transition-all duration-700',
-                        sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8',
-                    )}
-                >
-                    <span
-                        className="inline-block text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full mb-4"
-                        style={{ background: '#FB630015', color: '#FB6300' }}
+            {/* Dot grid texture */}
+            <svg
+                aria-hidden
+                className="pointer-events-none absolute inset-0 w-full h-full opacity-[0.04]"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <defs>
+                    <pattern
+                        id={`dots-${block.id}`}
+                        x="0" y="0" width="28" height="28"
+                        patternUnits="userSpaceOnUse"
                     >
-                        Platform Features
-                    </span>
-                    <h2 className="text-4xl md:text-5xl font-bold text-[#26180B] leading-tight">
-                        Satu platform,<br />
-                        <span style={{ color: '#FB6300' }}>semua kebutuhan</span> F&B-mu
-                    </h2>
-                    <p className="mt-4 text-gray-500 max-w-xl mx-auto text-base">
-                        Dari pelanggan yang scan QR hingga owner yang pantau MRR — semua terhubung dalam satu ekosistem.
-                    </p>
-                </div>
+                        <circle cx="2" cy="2" r="1.8" fill={block.accent} />
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill={`url(#dots-${block.id})`} />
+            </svg>
 
-                {/* ── Role Tabs ── */}
+            {/* Ghost letter bg */}
+            <span
+                aria-hidden
+                className="pointer-events-none select-none absolute -bottom-4 font-black opacity-[0.04] text-[220px] leading-none"
+                style={{
+                    color: block.accent,
+                    right: isLeft ? 'auto' : '-0.02em',
+                    left: isLeft ? '-0.02em' : 'auto',
+                }}
+            >
+                {block.id === 'owner-dashboard' ? 'O'
+                    : block.id === 'detail-keuangan' ? 'K'
+                        : block.id === 'restock' ? 'R'
+                            : 'S'}
+            </span>
+
+            <div
+                ref={ref}
+                className={cn(
+                    'relative z-10 w-full max-w-6xl mx-auto px-6',
+                    'grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center',
+                    !isLeft && 'lg:[direction:rtl]',
+                )}
+            >
+                {/* ── Image side ── */}
                 <div
                     className={cn(
-                        'flex flex-wrap justify-center gap-2 mb-12 transition-all duration-700 delay-150',
-                        sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8',
+                        '[direction:ltr] transition-all duration-700 ease-out',
+                        visible
+                            ? 'opacity-100 translate-x-0'
+                            : isLeft
+                                ? 'opacity-0 -translate-x-14'
+                                : 'opacity-0 translate-x-14',
                     )}
                 >
-                    {roles.map((role) => {
-                        const isActive = role.key === activeKey
-                        return (
-                            <button
-                                key={role.key}
-                                onClick={() => handleTabChange(role.key)}
-                                className={cn(
-                                    'relative px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 border',
-                                    isActive
-                                        ? 'text-white shadow-lg scale-105'
-                                        : 'text-gray-600 bg-white border-gray-200 hover:border-gray-400 hover:scale-102',
-                                )}
-                                style={
-                                    isActive
-                                        ? {
-                                            backgroundColor: role.accentColor,
-                                            borderColor: role.accentColor,
-                                            boxShadow: `0 4px 20px ${role.accentColor}40`,
-                                        }
-                                        : {}
-                                }
-                            >
-                                {role.label}
-                                {isActive && (
-                                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white" />
-                                )}
-                            </button>
-                        )
-                    })}
-                </div>
-
-                {/* ── Main Card ── */}
-                <div
-                    className={cn(
-                        'grid grid-cols-1 lg:grid-cols-2 gap-8 items-center',
-                        'bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100',
-                        'transition-all duration-700 delay-200',
-                        sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12',
-                    )}
-                >
-                    {/* Left — Screenshot mockup */}
+                    {/* Tablet frame */}
                     <div
-                        className={cn(
-                            'relative h-72 lg:h-full min-h-[360px] overflow-hidden transition-all duration-300',
-                            animating ? 'opacity-0 scale-[0.97]' : 'opacity-100 scale-100',
-                        )}
-                        style={{ background: `${active.accentColor}08` }}
+                        className="relative rounded-[28px] p-[10px] ring-1 ring-black/20"
+                        style={{
+                            background: '#1c1c1e',
+                            boxShadow: `0 32px 64px -12px ${block.accent}30, 0 0 0 1px rgba(0,0,0,0.12)`,
+                        }}
                     >
-                        {/* Decorative top bar */}
-                        <div
-                            className="absolute top-0 left-0 right-0 h-1 z-20"
-                            style={{ background: active.accentColor }}
-                        />
-
-                        {/* Laptop frame hint */}
-                        <div className="absolute inset-4 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-black/10">
+                        {/* Camera notch */}
+                        <div className="absolute top-[13px] left-1/2 -translate-x-1/2 w-[6px] h-[6px] rounded-full bg-[#2c2c2e] ring-1 ring-black/40 z-10" />
+                        {/* Screen */}
+                        <div className="relative w-full overflow-hidden rounded-[20px] bg-white aspect-[4/3]">
                             <Image
-                                src={active.image}
-                                alt={active.imageAlt}
+                                src={block.image}
+                                alt={block.imageAlt}
                                 fill
                                 className="object-cover object-top"
                                 sizes="(max-width: 1024px) 100vw, 50vw"
-                                priority
                             />
-                            {/* Overlay gradient */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
                         </div>
-
-                        {/* Badge overlay */}
-                        <div className="absolute bottom-8 left-8 z-10">
-                            <span
-                                className="px-3 py-1.5 rounded-full text-xs font-bold text-white backdrop-blur-sm"
-                                style={{ background: `${active.accentColor}cc` }}
-                            >
-                                {active.badge}
-                            </span>
+                        {/* Home bar */}
+                        <div className="flex justify-center mt-2">
+                            <div className="w-12 h-[3px] rounded-full bg-white/15" />
                         </div>
                     </div>
 
-                    {/* Right — Feature list */}
+                    {/* Floating badge below frame */}
                     <div
                         className={cn(
-                            'p-8 lg:p-10 transition-all duration-300',
-                            animating ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0',
+                            'mt-5 inline-flex items-center gap-3 pl-3 pr-5 py-2.5 rounded-2xl bg-white',
+                            'ring-1 ring-black/[0.06]',
+                            isLeft ? 'ml-0' : 'ml-auto mr-0 float-right',
                         )}
+                        style={{ boxShadow: `0 8px 24px -6px ${block.accent}20` }}
                     >
-                        {/* Role badge */}
-                        <span
-                            className={cn(
-                                'inline-block text-xs font-semibold px-3 py-1 rounded-full mb-3',
-                                active.badgeColor,
-                            )}
+                        <div
+                            className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-base font-bold flex-shrink-0"
+                            style={{ background: block.accent }}
                         >
-                            {active.badge}
-                        </span>
-
-                        <h3 className="text-2xl font-bold text-[#26180B] mb-2">
-                            {active.label}
-                        </h3>
-                        <p className="text-gray-500 text-sm leading-relaxed mb-7">
-                            {active.description}
-                        </p>
-
-                        {/* Feature pills */}
-                        <ul className="space-y-2.5">
-                            {active.features.map((feat, i) => (
-                                <li
-                                    key={feat.label}
-                                    className={cn(
-                                        'flex items-center gap-3 px-4 py-2.5 rounded-xl border text-sm font-medium',
-                                        'transition-all duration-300',
-                                        visibleFeatures[i]
-                                            ? 'opacity-100 translate-x-0'
-                                            : 'opacity-0 -translate-x-4',
-                                    )}
-                                    style={{
-                                        borderColor: visibleFeatures[i] ? `${active.accentColor}30` : 'transparent',
-                                        background: visibleFeatures[i] ? `${active.accentColor}08` : 'transparent',
-                                        color: '#26180B',
-                                        transitionDelay: `${i * 50}ms`,
-                                    }}
-                                >
-                                    <span
-                                        className="flex-shrink-0 p-1.5 rounded-lg text-white"
-                                        style={{ background: active.accentColor }}
-                                    >
-                                        {feat.icon}
-                                    </span>
-                                    {feat.label}
-                                </li>
-                            ))}
-                        </ul>
+                            ✓
+                        </div>
+                        <div>
+                            <p className="text-[12px] font-bold text-[#26180B] leading-none mb-0.5">{block.eyebrow.split(' · ')[0]}</p>
+                            <p className="text-[11px] text-gray-400 leading-none">Sync otomatis · No reload</p>
+                        </div>
                     </div>
                 </div>
 
-                {/* ── Bottom stats strip ── */}
+                {/* ── Copy side ── */}
                 <div
                     className={cn(
-                        'mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 transition-all duration-700 delay-300',
-                        sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8',
+                        '[direction:ltr] transition-all duration-700 delay-[160ms] ease-out',
+                        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10',
                     )}
                 >
-                    {[
-                        { value: '4', label: 'Role pengguna', accent: '#FB6300' },
-                        { value: '30+', label: 'Fitur terintegrasi', accent: '#1D5E84' },
-                        { value: 'Real-time', label: 'Update stok & pesanan', accent: '#26180B' },
-                        { value: 'Multi-outlet', label: 'Satu dashboard utama', accent: '#7C3AED' },
-                    ].map((stat) => (
+                    {/* Eyebrow line + label */}
+                    <div className="flex items-center gap-3 mb-5">
                         <div
-                            key={stat.label}
-                            className="bg-white rounded-2xl p-5 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
+                            className="w-8 h-[2.5px] rounded-full flex-shrink-0"
+                            style={{ background: block.accent }}
+                        />
+                        <span
+                            className="text-[11px] font-bold tracking-[0.16em] uppercase"
+                            style={{ color: block.accent }}
                         >
-                            <div className="text-2xl font-bold mb-1" style={{ color: stat.accent }}>
-                                {stat.value}
-                            </div>
-                            <div className="text-xs text-gray-500 font-medium">{stat.label}</div>
-                        </div>
-                    ))}
+                            {block.eyebrow}
+                        </span>
+                    </div>
+
+                    {/* Headline */}
+                    <h3 className="text-3xl md:text-[2.6rem] font-extrabold text-[#26180B] leading-[1.15] mb-6">
+                        {block.headline}
+                    </h3>
+
+                    {/* Body */}
+                    <p className="text-gray-500 text-[1.0625rem] leading-[1.75] mb-9">
+                        {block.body}
+                    </p>
+
+                    {/* Pills */}
+                    <div className="flex flex-wrap gap-2">
+                        {block.pills.map((p) => (
+                            <Pill key={p} label={p} accent={block.accent} />
+                        ))}
+                    </div>
                 </div>
             </div>
+        </div>
+    )
+}
+
+/* ─────────────────────────────────────────────
+   Section header — dark branded intro
+───────────────────────────────────────────── */
+function SectionHeader() {
+    const ref = useRef<HTMLDivElement>(null)
+    const [visible, setVisible] = useState(false)
+
+    useEffect(() => {
+        const el = ref.current
+        if (!el) return
+        const obs = new IntersectionObserver(
+            ([entry]) => { if (entry.isIntersecting) setVisible(true) },
+            { threshold: 0.25 },
+        )
+        obs.observe(el)
+        return () => obs.disconnect()
+    }, [])
+
+    return (
+        <div
+            ref={ref}
+            className="w-full py-24 md:py-32 relative overflow-hidden"
+            style={{ background: '#26180B' }}
+        >
+            {/* Concentric rings */}
+            {[280, 480, 680, 900].map((size, i) => (
+                <div
+                    key={size}
+                    aria-hidden
+                    className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border"
+                    style={{
+                        width: size,
+                        height: size,
+                        borderColor: i % 2 === 0 ? '#FB630016' : '#1D5E8410',
+                    }}
+                />
+            ))}
+
+            {/* Orange glow */}
+            <div
+                aria-hidden
+                className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full opacity-10 blur-3xl"
+                style={{ background: '#FB6300' }}
+            />
+
+            <div
+                className={cn(
+                    'relative z-10 max-w-6xl mx-auto px-6 text-center',
+                    'transition-all duration-700',
+                    visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8',
+                )}
+            >
+                {/* Eyebrow pill */}
+                <div
+                    className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[11px] font-bold tracking-[0.14em] uppercase mb-8"
+                    style={{ background: '#FB630018', color: '#FB6300', border: '1px solid #FB630030' }}
+                >
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#FB6300] animate-pulse" />
+                    Platform Features
+                </div>
+
+                <h2 className="text-4xl md:text-5xl lg:text-[3.5rem] font-extrabold text-white leading-[1.15] mb-6">
+                    Satu platform,
+                    <br />
+                    <span style={{ color: '#FB6300' }}>semua yang kamu butuhkan</span>
+                </h2>
+
+                <p className="text-white/45 text-lg max-w-lg mx-auto leading-relaxed">
+                    Dirancang khusus per role — kasir, owner, hingga super admin — agar setiap pengguna punya alur kerja yang intuitif.
+                </p>
+
+                {/* Scroll cue */}
+                <div className="mt-14 flex flex-col items-center gap-2">
+                    <span className="text-white/25 text-xs font-medium tracking-widest uppercase">Jelajahi fitur</span>
+                    <div className="relative w-px h-10">
+                        <div className="absolute inset-0 bg-white/15" />
+                        <div
+                            className="absolute top-0 left-0 right-0 bg-[#FB6300]"
+                            style={{
+                                height: '40%',
+                                animation: 'scrollCue 1.8s ease-in-out infinite',
+                            }}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <style>{`
+        @keyframes scrollCue {
+          0%   { transform: translateY(0);   opacity: 1; }
+          100% { transform: translateY(250%); opacity: 0; }
+        }
+      `}</style>
+        </div>
+    )
+}
+
+/* ─────────────────────────────────────────────
+   Wave divider between sections
+───────────────────────────────────────────── */
+function WaveDivider({ fromColor, toColor, accent }: { fromColor: string; toColor: string; accent: string }) {
+    return (
+        <div aria-hidden className="w-full -my-px overflow-hidden leading-[0]" style={{ background: fromColor }}>
+            <svg
+                viewBox="0 0 1200 48"
+                xmlns="http://www.w3.org/2000/svg"
+                preserveAspectRatio="none"
+                className="w-full h-12"
+                style={{ display: 'block' }}
+            >
+                <path
+                    d="M0,24 C200,48 400,0 600,24 C800,48 1000,0 1200,24 L1200,48 L0,48 Z"
+                    fill={toColor}
+                />
+                <path
+                    d="M0,24 C200,48 400,0 600,24 C800,48 1000,0 1200,24"
+                    fill="none"
+                    stroke={accent}
+                    strokeWidth="1"
+                    strokeOpacity="0.2"
+                />
+            </svg>
+        </div>
+    )
+}
+
+/* ─────────────────────────────────────────────
+   Main export
+───────────────────────────────────────────── */
+export default function FeaturesSection() {
+    return (
+        <section id="feature" className="w-full">
+            <SectionHeader />
+
+            {features.map((block, i) => {
+                const next = features[i + 1]
+                return (
+                    <div key={block.id}>
+                        <FeatureRow block={block} />
+                        {next && (
+                            <WaveDivider
+                                fromColor={block.bgTint}
+                                toColor={next.bgTint}
+                                accent={next.accent}
+                            />
+                        )}
+                    </div>
+                )
+            })}
         </section>
     )
 }
