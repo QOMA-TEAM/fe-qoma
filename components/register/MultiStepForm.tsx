@@ -8,6 +8,82 @@ import { toast } from "sonner";
 import { PlanCard } from '@/components/ui/plan-card'
 import { landingService, type PlanFromBE } from '@/services/public/landing'
 import { authService } from '@/services/auth'
+import { motion } from "motion/react";
+
+const BLOBS = [
+  {
+    id: 1,
+    size: 920,
+    style: { top: "-8%", right: "-14%" } as React.CSSProperties,
+    opacity: 0.88,
+    blur: 6,
+    x: [0, 80, -50, 100, -30, 0],
+    y: [0, -50, 80, -40, 60, 0],
+    borderRadius: [
+      "30% 70% 70% 30%",
+      "60% 40% 30% 70%",
+      "40% 60% 70% 30%",
+      "70% 30% 40% 60%",
+      "30% 70% 70% 30%",
+    ],
+    duration: 20,
+    delay: 0,
+  },
+  {
+    id: 2,
+    size: 700,
+    style: { top: "24%", left: "-16%" } as React.CSSProperties,
+    opacity: 0.13,
+    blur: 90,
+    x: [0, -60, 80, -40, 70, 0],
+    y: [0, 100, -70, 90, -50, 0],
+    borderRadius: [
+      "60% 40% 30% 70%",
+      "30% 70% 70% 30%",
+      "70% 30% 40% 60%",
+      "40% 60% 70% 30%",
+      "60% 40% 30% 70%",
+    ],
+    duration: 28,
+    delay: 3,
+  },
+  {
+    id: 3,
+    size: 600,
+    style: { top: "50%", right: "-8%" } as React.CSSProperties,
+    opacity: 0.11,
+    blur: 100,
+    x: [0, 60, -80, 50, -60, 0],
+    y: [0, 70, -50, 80, -30, 0],
+    borderRadius: [
+      "40% 60% 70% 30%",
+      "70% 30% 40% 60%",
+      "30% 70% 70% 30%",
+      "60% 40% 30% 70%",
+      "40% 60% 70% 30%",
+    ],
+    duration: 24,
+    delay: 6,
+  },
+  {
+    id: 4,
+    size: 520,
+    style: { top: "74%", left: "12%" } as React.CSSProperties,
+    opacity: 0.08,
+    blur: 120,
+    x: [0, 50, -60, 40, -50, 0],
+    y: [0, -70, 60, -50, 70, 0],
+    borderRadius: [
+      "70% 30% 40% 60%",
+      "40% 60% 70% 30%",
+      "60% 40% 30% 70%",
+      "30% 70% 70% 30%",
+      "70% 30% 40% 60%",
+    ],
+    duration: 32,
+    delay: 9,
+  },
+];
 
 export function MultiStepForm() {
   const [step, setStep] = useState(1);
@@ -121,19 +197,49 @@ export function MultiStepForm() {
   const planPeriod = selectedPlan?.is_lifetime ? "Lifetime" : `/ ${selectedPlan?.durasi_hari || 30} Hari`;
   const planFeatures = selectedPlan
     ? [
-        `${selectedPlan.batas_outlet} Outlet`,
-        isFreePlan ? "3 Pengguna" : "Pengguna Tak Terbatas",
-        isFreePlan ? "Laporan bulanan" : "Laporan real-time",
-        isFreePlan ? "Stock dasar" : "Stock opname & Multi-kasir"
-      ]
+      `${selectedPlan.batas_outlet} Outlet`,
+      isFreePlan ? "3 Pengguna" : "Pengguna Tak Terbatas",
+      isFreePlan ? "Laporan bulanan" : "Laporan real-time",
+      isFreePlan ? "Stock dasar" : "Stock opname & Multi-kasir"
+    ]
     : [];
 
   return (
-    <div className="min-h-screen bg-[#fff4ec] relative font-sans flex flex-col">
+    <div className="min-h-screen bg-[#fff4ec] relative font-sans flex flex-col overflow-x-hidden">
       <Navbar />
 
-      {/* Background decoration */}
-      <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-[#ff6b00] rounded-full blur-[2px] opacity-90 z-0" />
+      {/* ── Animated Blob Background ─────────────────────────────────────────── */}
+      <div
+        className="absolute inset-0 pointer-events-none overflow-hidden"
+        style={{ zIndex: 1 }}
+      >
+        {BLOBS.map((blob) => (
+          <motion.div
+            key={blob.id}
+            animate={{
+              x: blob.x,
+              y: blob.y,
+              borderRadius: blob.borderRadius,
+            }}
+            transition={{
+              duration: blob.duration,
+              repeat: Infinity,
+              ease: "easeInOut",
+              repeatType: "mirror",
+              delay: blob.delay,
+            }}
+            style={{
+              position: "absolute",
+              width: blob.size,
+              height: blob.size,
+              background: "#ff6b00",
+              opacity: blob.opacity,
+              filter: `blur(${blob.blur}px)`,
+              ...blob.style,
+            }}
+          />
+        ))}
+      </div>
 
       <main className="relative z-10 flex-1 flex items-center justify-center pt-24 pb-12 px-4">
         <div className="bg-white rounded-3xl shadow-xl w-full max-w-4xl p-10 md:p-14 min-h-[560px] flex flex-col relative">
@@ -203,7 +309,7 @@ export function MultiStepForm() {
 
                         const isFree = Number(activePlanInGroup.harga) === 0;
                         const isSelected = selectedPlan ? groupPlans.some(p => p.id === selectedPlan.id) : false;
-                        
+
                         const Icon = isFree ? Zap : Star;
                         const activeClass = isFree ? "border-[#ff6b00] bg-[#fff4ec] ring-2 ring-[#ff6b00]" : "border-[#3874BC] bg-[#dde8f7] ring-2 ring-[#3874BC]";
                         const iconClass = isFree ? "text-gray-400" : "text-[#3874BC]";
@@ -217,13 +323,13 @@ export function MultiStepForm() {
                         ];
 
                         return (
-                          <div 
-                            key={groupName} 
-                            onClick={() => { 
-                              setSelectedPlan(activePlanInGroup); 
+                          <div
+                            key={groupName}
+                            onClick={() => {
+                              setSelectedPlan(activePlanInGroup);
                               const newTotalSteps = Number(activePlanInGroup.harga) === 0 ? 3 : 4;
-                              if (step > newTotalSteps) setStep(3); 
-                            }} 
+                              if (step > newTotalSteps) setStep(3);
+                            }}
                             className="cursor-pointer h-full"
                           >
                             <PlanCard
@@ -292,24 +398,24 @@ export function MultiStepForm() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Nama Lengkap</label>
-                    <input type="text" value={formData.ownerName} onChange={(e) => setFormData(p => ({...p, ownerName: e.target.value}))} placeholder="Nama Lengkap" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                    <input type="text" value={formData.ownerName} onChange={(e) => setFormData(p => ({ ...p, ownerName: e.target.value }))} placeholder="Nama Lengkap" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Email</label>
-                    <input type="email" value={formData.ownerEmail} onChange={(e) => setFormData(p => ({...p, ownerEmail: e.target.value}))} placeholder="nama@email.com" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                    <input type="email" value={formData.ownerEmail} onChange={(e) => setFormData(p => ({ ...p, ownerEmail: e.target.value }))} placeholder="nama@email.com" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Username</label>
-                    <input type="text" value={formData.ownerUsername} onChange={(e) => setFormData(p => ({...p, ownerUsername: e.target.value}))} placeholder="username" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                    <input type="text" value={formData.ownerUsername} onChange={(e) => setFormData(p => ({ ...p, ownerUsername: e.target.value }))} placeholder="username" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Nomor Telepon</label>
-                    <input type="tel" value={formData.ownerPhone} onChange={(e) => setFormData(p => ({...p, ownerPhone: e.target.value}))} placeholder="+62 8xx xxxx xxxx" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                    <input type="tel" value={formData.ownerPhone} onChange={(e) => setFormData(p => ({ ...p, ownerPhone: e.target.value }))} placeholder="+62 8xx xxxx xxxx" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Password</label>
                     <div className="relative">
-                      <input type={showPassword ? "text" : "password"} value={formData.ownerPassword} onChange={(e) => setFormData(p => ({...p, ownerPassword: e.target.value}))} placeholder="Minimal 8 karakter" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 pr-11 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                      <input type={showPassword ? "text" : "password"} value={formData.ownerPassword} onChange={(e) => setFormData(p => ({ ...p, ownerPassword: e.target.value }))} placeholder="Minimal 8 karakter" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 pr-11 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                       <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
@@ -318,7 +424,7 @@ export function MultiStepForm() {
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Konfirmasi Password</label>
                     <div className="relative">
-                      <input type={showConfirm ? "text" : "password"} value={formData.ownerConfirmPassword} onChange={(e) => setFormData(p => ({...p, ownerConfirmPassword: e.target.value}))} placeholder="Ulangi password" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 pr-11 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                      <input type={showConfirm ? "text" : "password"} value={formData.ownerConfirmPassword} onChange={(e) => setFormData(p => ({ ...p, ownerConfirmPassword: e.target.value }))} placeholder="Ulangi password" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 pr-11 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                       <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                         {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
@@ -337,19 +443,19 @@ export function MultiStepForm() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Nama Perusahaan</label>
-                    <input type="text" value={formData.companyName} onChange={(e) => setFormData(p => ({...p, companyName: e.target.value}))} placeholder="PT / CV / Nama Usaha" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                    <input type="text" value={formData.companyName} onChange={(e) => setFormData(p => ({ ...p, companyName: e.target.value }))} placeholder="PT / CV / Nama Usaha" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Telepon Perusahaan</label>
-                    <input type="tel" value={formData.companyPhone} onChange={(e) => setFormData(p => ({...p, companyPhone: e.target.value}))} placeholder="+62 2x xxxx xxxx" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                    <input type="tel" value={formData.companyPhone} onChange={(e) => setFormData(p => ({ ...p, companyPhone: e.target.value }))} placeholder="+62 2x xxxx xxxx" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                   </div>
                   <div className="md:col-span-2 flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Alamat</label>
-                    <input type="text" value={formData.companyAddress} onChange={(e) => setFormData(p => ({...p, companyAddress: e.target.value}))} placeholder="Jl. Contoh No. 1, Kota, Provinsi" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                    <input type="text" value={formData.companyAddress} onChange={(e) => setFormData(p => ({ ...p, companyAddress: e.target.value }))} placeholder="Jl. Contoh No. 1, Kota, Provinsi" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                   </div>
                   <div className="md:col-span-2 flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Deskripsi Perusahaan</label>
-                    <textarea rows={4} value={formData.companyDescription} onChange={(e) => setFormData(p => ({...p, companyDescription: e.target.value}))} placeholder="Ceritakan sedikit tentang bisnis kamu..." className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm resize-none" />
+                    <textarea rows={4} value={formData.companyDescription} onChange={(e) => setFormData(p => ({ ...p, companyDescription: e.target.value }))} placeholder="Ceritakan sedikit tentang bisnis kamu..." className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm resize-none" />
                   </div>
                 </div>
               </div>
