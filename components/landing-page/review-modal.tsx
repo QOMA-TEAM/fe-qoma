@@ -239,18 +239,20 @@ interface MarqueeRowProps {
 }
 
 function MarqueeRow({ reviews, direction }: MarqueeRowProps) {
-    // Duplicate array so the loop is seamless
     const doubled = [...reviews, ...reviews]
 
-    const animationClass =
-        direction === 'left'
-            ? 'animate-[marquee-left_38s_linear_infinite]'
-            : 'animate-[marquee-right_42s_linear_infinite]'
+    // Hapus animationClass sama sekali, pakai inline style
+    const animStyle: React.CSSProperties = {
+        animation: direction === 'left'
+            ? 'marquee-left 38s linear infinite'
+            : 'marquee-right 42s linear infinite',
+    }
 
     return (
         <div className="overflow-hidden w-full">
             <div
-                className={`flex gap-4 w-max hover:[animation-play-state:paused] ${animationClass}`}
+                className="flex gap-4 w-max"
+                style={animStyle}   // ← pakai ini
             >
                 {doubled.map((review, i) => (
                     <ReviewCard key={i} {...review} />
@@ -264,7 +266,7 @@ function MarqueeRow({ reviews, direction }: MarqueeRowProps) {
 
 export function ReviewMarquee() {
     return (
-        <section className="bg-[#FCFEF1] py-14 overflow-hidden w-full">
+        <section className="bg-white py-14 overflow-hidden w-full">
             {/* Heading */}
             <div className="text-center mb-10 px-8">
                 <p className="text-[#FB6300] text-xs uppercase tracking-widest font-medium mb-1">

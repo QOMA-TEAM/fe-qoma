@@ -56,7 +56,7 @@ const features: FeatureBlock[] = [
         headline: 'Restock bahan baku dalam hitungan detik',
         body:
             'Pilih bahan dari grid visual bergambar, isi jumlah dan tanggal kadaluarsa, catat pengeluaran — selesai. Sistem langsung memperbarui stok dan mencatat di laporan keuangan.',
-        image: '/features/restock-bahan.png',     // → screenshot 3.png
+        image: '/features/restock.png',
         imageAlt: 'Modal restock bahan baku dengan grid pilih item bergambar',
         imagePos: 'right',
         accent: '#FB6300',
