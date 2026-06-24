@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/landing-page/Navbar";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Zap, Star, CreditCard, Wallet, Eye, EyeOff } from "lucide-react";
@@ -8,17 +8,27 @@ import { toast } from "sonner";
 import { PlanCard } from '@/components/ui/plan-card'
 import { landingService, type PlanFromBE } from '@/services/public/landing'
 
-type Plan = "free" | "pro" | null;
-
 export function MultiStepForm() {
   const [step, setStep] = useState(1);
-  const [selectedPlan, setSelectedPlan] = useState<Plan>(null);
+  const [selectedPlan, setSelectedPlan] = useState<PlanFromBE | null>(null);
+  const [plans, setPlans] = useState<PlanFromBE[]>([]);
+  const [isLoadingPlans, setIsLoadingPlans] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "gopay">("card");
+
+  useEffect(() => {
+    landingService.getPlans()
+      .then(data => setPlans(data.filter(p => p.status)))
+      .catch(err => {
+        console.error("Gagal memuat paket", err);
+        toast.error("Gagal memuat paket");
+      })
+      .finally(() => setIsLoadingPlans(false));
+  }, []);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const router = useRouter();
 
-  const isFreePlan = selectedPlan === "free";
+  const isFreePlan = selectedPlan?.harga === 0;
   const TOTAL_STEPS = isFreePlan ? 3 : 4;
 
   const allStepLabels = ["Pilih Paket", "Buat Akun", "Data Perusahaan", "Pembayaran"];
@@ -43,12 +53,17 @@ export function MultiStepForm() {
   // ── Plan card colours ─────────────────────────────────────────────────────
   const planAccent = isFreePlan ? "#ff6b00" : "#3874BC";
   const planBg = isFreePlan ? "#fff4ec" : "#dde8f7";
-  const planName = isFreePlan ? "Free" : "Pro";
-  const planPrice = isFreePlan ? "Rp 0" : "Rp 100.000";
-  const planPeriod = "/ 30 Hari";
-  const planFeatures = isFreePlan
-    ? ["1 Outlet", "3 Pengguna", "Laporan bulanan", "Stock dasar"]
-    : ["3 Outlet", "20 Pengguna", "Laporan real-time", "Stock opname", "Multi-kasir"];
+  const planName = selectedPlan?.nama_plan || (isFreePlan ? "Free" : "Pro");
+  const planPrice = `Rp ${selectedPlan?.harga?.toLocaleString('id-ID') || 0}`;
+  const planPeriod = selectedPlan?.is_lifetime ? "Lifetime" : `/ ${selectedPlan?.durasi_hari || 30} Hari`;
+  const planFeatures = selectedPlan
+    ? [
+        `${selectedPlan.batas_outlet} Outlet`,
+        isFreePlan ? "3 Pengguna" : "Pengguna Tak Terbatas",
+        isFreePlan ? "Laporan bulanan" : "Laporan real-time",
+        isFreePlan ? "Stock dasar" : "Stock opname & Multi-kasir"
+      ]
+    : [];
 
   return (
     <div className="min-h-screen bg-[#fff4ec] relative font-sans flex flex-col">
@@ -112,66 +127,54 @@ export function MultiStepForm() {
                 <h2 className="text-2xl font-bold text-gray-800 mb-1">Pilih Paket</h2>
                 <p className="text-gray-500 text-sm mb-8">Mulai gratis, upgrade kapan saja sesuai kebutuhan bisnismu.</p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
-                  {/* Free Card */}
-                  <button
-                    type="button"
-                    onClick={() => { setSelectedPlan("free"); if (step > TOTAL_STEPS) setStep(3); }}
-                    className={`text-left rounded-2xl border-2 p-6 transition-all duration-200 cursor-pointer ${selectedPlan === "free"
-                      ? "border-[#ff6b00] bg-[#fff4ec] shadow-md shadow-orange-100"
-                      : "border-gray-200 bg-white hover:border-[#ff6b00]/40"
-                      }`}
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-gray-100 text-gray-500 border border-gray-200">
-                        <Zap size={11} /> Starter
-                      </span>
-                      {selectedPlan === "free" && <span className="text-[#ff6b00]"><CheckCircle2 size={20} /></span>}
-                    </div>
-                    <p className="text-2xl font-bold text-gray-900 mb-0.5">Free</p>
-                    <p className="text-sm text-gray-400 mb-4">Rp 0 <span className="text-xs">/ 30 Hari</span></p>
-                    <p className="text-xs text-gray-500 mb-5">Cocok untuk kamu yang baru mulai mengelola bisnis F&B pertama.</p>
-                    <div className="mb-3">
-                      <span className="inline-block text-[10px] font-medium text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">3 langkah saja</span>
-                    </div>
-                    <ul className="space-y-2">
-                      {["1 Outlet", "3 Pengguna", "Laporan bulanan", "Stock dasar"].map((f) => (
-                        <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
-                          <CheckCircle2 size={14} className="text-gray-400 flex-shrink-0" /> {f}
-                        </li>
-                      ))}
-                    </ul>
-                  </button>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
+                  {isLoadingPlans ? (
+                    <div className="col-span-full text-center py-10 text-gray-500">Memuat paket...</div>
+                  ) : (
+                    plans.map((plan) => {
+                      const isFree = plan.harga === 0;
+                      const isSelected = selectedPlan?.id === plan.id;
+                      const Icon = isFree ? Zap : Star;
+                      const activeClass = isFree ? "border-[#ff6b00] bg-[#fff4ec] ring-2 ring-[#ff6b00]" : "border-[#3874BC] bg-[#dde8f7] ring-2 ring-[#3874BC]";
+                      const iconClass = isFree ? "text-gray-400" : "text-[#3874BC]";
 
-                  {/* Pro Card */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedPlan("pro")}
-                    className={`text-left rounded-2xl border-2 p-6 transition-all duration-200 cursor-pointer ${selectedPlan === "pro"
-                      ? "border-[#3874BC] bg-[#dde8f7] shadow-md shadow-blue-100"
-                      : "border-gray-200 bg-white hover:border-[#3874BC]/40"
-                      }`}
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-[#3874BC] text-white">
-                        <Star size={11} /> Pro
-                      </span>
-                      {selectedPlan === "pro" && <span className="text-[#3874BC]"><CheckCircle2 size={20} /></span>}
-                    </div>
-                    <p className="text-2xl font-bold text-gray-900 mb-0.5">Pro</p>
-                    <p className="text-sm text-gray-400 mb-4">Rp 100.000 <span className="text-xs">/ 30 Hari</span></p>
-                    <p className="text-xs text-gray-500 mb-5">Untuk bisnis yang berkembang dengan kebutuhan lebih dari satu outlet.</p>
-                    <div className="mb-3">
-                      <span className="inline-block text-[10px] font-medium text-[#3874BC] bg-[#3874BC]/10 px-2 py-0.5 rounded-full">Termasuk langkah pembayaran</span>
-                    </div>
-                    <ul className="space-y-2">
-                      {["3 Outlet", "20 Pengguna", "Laporan real-time", "Stock opname", "Multi-kasir"].map((f) => (
-                        <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
-                          <CheckCircle2 size={14} className="text-[#3874BC] flex-shrink-0" /> {f}
-                        </li>
-                      ))}
-                    </ul>
-                  </button>
+                      const planFeaturesList = [
+                        { text: `${plan.batas_outlet} Outlet`, icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
+                        { text: isFree ? "3 Pengguna" : "Pengguna Tak Terbatas", icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
+                        { text: isFree ? "Laporan bulanan" : "Laporan real-time", icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
+                        { text: isFree ? "Stock dasar" : "Stock opname & Multi-kasir", icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
+                      ];
+
+                      return (
+                        <div key={plan.id} onClick={() => { setSelectedPlan(plan); if (step > TOTAL_STEPS) setStep(3); }} className="cursor-pointer h-full">
+                          <PlanCard
+                            name={plan.nama_plan}
+                            price={plan.harga}
+                            period={plan.is_lifetime ? undefined : `${plan.durasi_hari} Hari`}
+                            description={plan.deskripsi || (isFree ? "Cocok untuk kamu yang baru mulai mengelola bisnis F&B pertama." : "Untuk bisnis yang berkembang dengan kebutuhan lebih dari satu outlet.")}
+                            features={planFeaturesList}
+                            headerBadge={
+                              <div className="flex items-center gap-2">
+                                <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full ${isFree ? "bg-gray-100 text-gray-500 border border-gray-200" : "bg-[#3874BC] text-white"}`}>
+                                  <Icon size={11} /> {plan.nama_plan}
+                                </span>
+                                {isSelected && <span className={isFree ? "text-[#ff6b00]" : "text-[#3874BC]"}><CheckCircle2 size={20} /></span>}
+                              </div>
+                            }
+                            priceSubtext={
+                              <div className="mt-2">
+                                <span className={`inline-block text-[10px] font-medium px-2 py-0.5 rounded-full ${isFree ? "text-gray-400 bg-gray-100" : "text-[#3874BC] bg-[#3874BC]/10"}`}>
+                                  {isFree ? "3 langkah saja" : "Termasuk langkah pembayaran"}
+                                </span>
+                              </div>
+                            }
+                            isActive={selectedPlan === null || isSelected}
+                            className={isSelected ? activeClass : ""}
+                          />
+                        </div>
+                      )
+                    })
+                  )}
                 </div>
               </div>
             )}
@@ -249,7 +252,7 @@ export function MultiStepForm() {
             )}
 
             {/* STEP 4 — Pembayaran (Pro only) */}
-            {step === 4 && selectedPlan === "pro" && (
+            {step === 4 && !isFreePlan && selectedPlan && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
 
                 {/* Left — Payment Method */}
@@ -336,7 +339,7 @@ export function MultiStepForm() {
 
                   <p className="text-2xl font-bold text-gray-900 mb-1">{planPrice}</p>
                   <p className="text-xs text-gray-500 mb-5">
-                    Untuk bisnis yang berkembang dengan kebutuhan lebih dari satu outlet.
+                    {selectedPlan?.deskripsi || "Untuk bisnis yang berkembang dengan kebutuhan lebih dari satu outlet."}
                   </p>
 
                   <ul className="space-y-2 mb-6">
