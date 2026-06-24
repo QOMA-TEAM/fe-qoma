@@ -290,7 +290,7 @@ function SectionHeader() {
     return (
         <div
             ref={ref}
-            className="w-full py-24 md:py-32 relative overflow-hidden"
+            className="w-full py-24 md:py-15 relative overflow-hidden"
             style={{ background: '#26180B' }}
         >
             {/* Concentric rings */}
@@ -323,20 +323,20 @@ function SectionHeader() {
             >
                 {/* Eyebrow pill */}
                 <div
-                    className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[11px] font-bold tracking-[0.14em] uppercase mb-8"
+                    className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[8px] font-bold tracking-[0.14em] uppercase mb-8"
                     style={{ background: '#FB630018', color: '#FB6300', border: '1px solid #FB630030' }}
                 >
                     <span className="w-1.5 h-1.5 rounded-full bg-[#FB6300] animate-pulse" />
                     Platform Features
                 </div>
 
-                <h2 className="text-4xl md:text-5xl lg:text-[3.5rem] font-extrabold text-white leading-[1.15] mb-6">
+                <h2 className="text-1xl md:text-3xl lg:text-[2.5rem] font-extrabold text-white leading-[1.15] mb-6">
                     Satu platform,
                     <br />
                     <span style={{ color: '#FB6300' }}>semua yang kamu butuhkan</span>
                 </h2>
 
-                <p className="text-white/45 text-lg max-w-lg mx-auto leading-relaxed">
+                <p className="text-white/45 text-[16px] max-w-lg mx-auto leading-relaxed">
                     Dirancang khusus per role — kasir, owner, hingga super admin — agar setiap pengguna punya alur kerja yang intuitif.
                 </p>
 
