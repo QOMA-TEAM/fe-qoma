@@ -21,10 +21,16 @@ import { landingService, type PlanFromBE } from '@/services/public/landing'
 
 type PlanVariant = 'free' | 'pro' | 'enterprise'
 
+/**
+ * FIX 1: Tambah 'hidden-left' | 'hidden-right' agar card jauh
+ * bisa disembunyikan ke arah yang benar, bukan semua ke 'next'.
+ */
+type CardPosition = 'prev' | 'cur' | 'next' | 'hidden-left' | 'hidden-right'
+
 interface LocalPlan {
     id: string
     name: string
-    price: number | React.ReactNode   // pakai number agar PlanCard bisa formatRupiah
+    price: number | React.ReactNode
     period: string
     description: string
     features: Array<{ text: string; icon?: React.ReactNode }>
@@ -87,6 +93,10 @@ function buildHeaderBadge(variant: PlanVariant) {
     )
 }
 
+/**
+ * FIX 2: Hapus `plan.deskripsi` dari features.
+ * Deskripsi sudah ditampilkan di card description — jangan muncul dua kali.
+ */
 function buildFeatures(plan: PlanFromBE): Array<{ text: string; icon: React.ReactNode }> {
     const feats: Array<{ text: string; icon: React.ReactNode }> = []
     const icon = <CircleCheck size={14} className="text-[#FB6300]" />
@@ -97,19 +107,20 @@ function buildFeatures(plan: PlanFromBE): Array<{ text: string; icon: React.Reac
         feats.push({ text: `${plan.batas_outlet} Outlet`, icon })
     }
 
-    if (plan.durasi_hari > 0 && !plan.is_lifetime) {
-        feats.push({ text: `${plan.durasi_hari} hari akses`, icon })
-    } else if (plan.is_lifetime) {
+    if (plan.is_lifetime) {
         feats.push({ text: 'Akses selamanya', icon })
+    } else if (plan.durasi_hari > 0) {
+        feats.push({ text: `${plan.durasi_hari} hari akses`, icon })
     }
 
-    if (plan.deskripsi) {
-        feats.push({ text: plan.deskripsi, icon })
-    }
-
+    // ❌ plan.deskripsi DIHAPUS dari sini — sudah ada di card.description
     return feats
 }
 
+/**
+ * FIX 3: Paksa `price` jadi Number agar PlanCard bisa formatRupiah.
+ * BE kadang mengirim harga sebagai string "1200000.00" bukan number.
+ */
 function mapBEPlanToLocal(plan: PlanFromBE, idx: number): LocalPlan {
     const variant = detectVariant(plan.nama_plan, idx)
     const cta = CTA_LABELS[variant]
@@ -118,7 +129,14 @@ function mapBEPlanToLocal(plan: PlanFromBE, idx: number): LocalPlan {
     return {
         id: plan.id,
         name: plan.nama_plan,
-        price: plan.harga,   // number → PlanCard akan formatRupiah otomatis
+        price: (() => {
+            const num = Math.round(Number(plan.harga) || 0)
+            return (
+                <span className="text-xl font-bold leading-none tracking-tight">
+                    {num === 0 ? 'Gratis' : `Rp ${num.toLocaleString('id-ID')}`}
+                </span>
+            )
+        })(),
         period: plan.is_lifetime ? 'selamanya' : `${plan.durasi_hari} hari`,
         description: plan.deskripsi ?? '',
         features: buildFeatures(plan),
@@ -129,9 +147,7 @@ function mapBEPlanToLocal(plan: PlanFromBE, idx: number): LocalPlan {
                     'w-full rounded-xl text-sm font-medium h-10 border-0',
                     variant === 'pro'
                         ? 'bg-[#1D5E84] hover:bg-[#174d6e] text-white'
-                        : variant === 'enterprise'
-                            ? 'bg-[#FB6300] hover:bg-[#e05700] text-white'
-                            : 'bg-[#FB6300] hover:bg-[#e05700] text-white'
+                        : 'bg-[#FB6300] hover:bg-[#e05700] text-white',
                 )}>
                     {cta}
                 </Button>
@@ -143,95 +159,16 @@ function mapBEPlanToLocal(plan: PlanFromBE, idx: number): LocalPlan {
     }
 }
 
-// ─── Static fallback data ─────────────────────────────────────────────────────
-
-const STATIC_PLANS: LocalPlan[] = [
-    {
-        id: 'free',
-        name: 'Free',
-        price: 0,
-        period: '30 hari',
-        description: 'Baru mulai? Kelola outlet pertamamu tanpa biaya apapun.',
-        features: [
-            { text: '1 Outlet', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
-            { text: '3 Pengguna', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
-            { text: 'Laporan bulanan', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
-            { text: 'Stock dasar', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
-        ],
-        headerBadge: buildHeaderBadge('free'),
-        actionButton: (
-            <Link href="/register">
-                <Button className="w-full rounded-xl text-sm font-medium h-10 border-0 bg-[#FB6300] hover:bg-[#e05700] text-white">
-                    Mulai gratis
-                </Button>
-            </Link>
-        ),
-        variant: 'free',
-        href: '/register',
-        cta: 'Mulai gratis',
-    },
-    {
-        id: 'pro',
-        name: 'Pro',
-        price: 100000,
-        period: '30 hari',
-        description: 'Untuk bisnis berkembang dengan banyak outlet dan tim yang besar.',
-        features: [
-            { text: '3 Outlet', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
-            { text: '20 Pengguna', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
-            { text: 'Laporan real-time', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
-            { text: 'Stock opname', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
-            { text: 'Multi-kasir', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
-        ],
-        headerBadge: buildHeaderBadge('pro'),
-        actionButton: (
-            <Link href="/register">
-                <Button className="w-full rounded-xl text-sm font-medium h-10 border-0 bg-[#1D5E84] hover:bg-[#174d6e] text-white">
-                    Upgrade ke Pro
-                </Button>
-            </Link>
-        ),
-        variant: 'pro',
-        href: '/register',
-        cta: 'Upgrade ke Pro',
-    },
-    {
-        id: 'enterprise',
-        name: 'Enterprise',
-        price: <span className="text-4xl font-bold text-gray-900">Custom</span>,
-        period: 'sesuai kebutuhan',
-        description: 'Skalakan bisnis franchise dan chain resto besar kamu tanpa batas.',
-        features: [
-            { text: 'Outlet tak terbatas', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
-            { text: 'Pengguna tak terbatas', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
-            { text: 'Dashboard pusat', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
-            { text: 'Integrasi API', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
-            { text: 'Dedicated support', icon: <CircleCheck size={14} className="text-[#FB6300]" /> },
-        ],
-        headerBadge: buildHeaderBadge('enterprise'),
-        actionButton: (
-            <Link href="/contact">
-                <Button className="w-full rounded-xl text-sm font-medium h-10 border-0 bg-[#FB6300] hover:bg-[#e05700] text-white">
-                    Hubungi kami
-                </Button>
-            </Link>
-        ),
-        variant: 'enterprise',
-        href: '/contact',
-        cta: 'Hubungi kami',
-    },
-]
-
 const STATS = [
     { num: '500+', label: 'Bisnis aktif' },
     { num: '30 hr', label: 'Coba gratis' },
 ]
 
-// ─── Carousel card wrapper (animasi tetap sama) ───────────────────────────────
+// ─── CarouselCard ─────────────────────────────────────────────────────────────
 
 interface CarouselCardProps {
     plan: LocalPlan
-    position: 'prev' | 'cur' | 'next'
+    position: CardPosition
     onClick: () => void
 }
 
@@ -243,9 +180,18 @@ function CarouselCard({ plan, position, onClick }: CarouselCardProps) {
             onClick={!isCurrent ? onClick : undefined}
             className={cn(
                 'absolute w-[230px] transition-all duration-500 ease-[cubic-bezier(.4,0,.2,1)]',
-                position === 'prev' && '-translate-x-[155px] opacity-50 blur-[3px] scale-[.88] z-10 cursor-pointer',
+                // Kartu kiri: blur + geser kiri
+                position === 'prev' && '-translate-x-[155px] opacity-40 blur-[3px] scale-[.86] z-10 cursor-pointer',
+                // Kartu aktif: fokus penuh
                 position === 'cur' && 'translate-x-0 opacity-100 blur-0 scale-100 z-30',
-                position === 'next' && 'translate-x-[155px] opacity-50 blur-[3px] scale-[.88] z-10 cursor-pointer',
+                // Kartu kanan: blur + geser kanan
+                position === 'next' && 'translate-x-[155px] opacity-40 blur-[3px] scale-[.86] z-10 cursor-pointer',
+                /**
+                 * FIX 1 (lanjutan): Card jauh disembunyikan sepenuhnya (opacity-0).
+                 * Arah disesuaikan agar transisi terasa natural saat cycling.
+                 */
+                position === 'hidden-left' && '-translate-x-[310px] opacity-0 scale-[.7] z-0 pointer-events-none',
+                position === 'hidden-right' && 'translate-x-[310px] opacity-0 scale-[.7] z-0 pointer-events-none',
             )}
         >
             <PlanCard
@@ -262,12 +208,12 @@ function CarouselCard({ plan, position, onClick }: CarouselCardProps) {
     )
 }
 
-// ─── PricingSection (main export) ────────────────────────────────────────────
+// ─── PricingSection ───────────────────────────────────────────────────────────
 
 export function PricingSection() {
-    const [current, setCurrent] = useState(1)
+    const [current, setCurrent] = useState(0)
     const [mounted, setMounted] = useState(false)
-    const [plans, setPlans] = useState<LocalPlan[]>(STATIC_PLANS)
+    const [plans, setPlans] = useState<LocalPlan[]>([])
     const total = plans.length
 
     useEffect(() => {
@@ -279,28 +225,36 @@ export function PricingSection() {
         landingService.getPlans()
             .then((data) => {
                 if (data && data.length > 0) {
-                    setPlans(data.map(mapBEPlanToLocal))
+                    const mapped = data.map(mapBEPlanToLocal)
+                    setPlans(mapped)
+                    // Prioritaskan mulai dari paket 'pro'; fallback ke tengah
+                    const proIdx = mapped.findIndex(p => p.variant === 'pro')
+                    setCurrent(proIdx >= 0 ? proIdx : Math.floor(mapped.length / 2))
                 }
             })
-            .catch(() => {
-                // Gagal fetch → tetap pakai STATIC_PLANS
-            })
+            .catch(err => console.error('Gagal fetch plans:', err))
     }, [])
 
-    const prev = (current - 1 + total) % total
-    const next = (current + 1) % total
+    const prevIdx = total > 0 ? (current - 1 + total) % total : 0
+    const nextIdx = total > 0 ? (current + 1) % total : 0
 
-    function getPosition(idx: number): 'prev' | 'cur' | 'next' {
+    /**
+     * FIX 1 (inti): Sebelumnya semua card non-prev/cur dapat 'next'.
+     * Sekarang hanya card tepat di kanan = 'next', sisanya 'hidden-*'.
+     */
+    function getPosition(idx: number): CardPosition {
+        if (total === 0) return 'cur'
         if (idx === current) return 'cur'
-        if (idx === prev) return 'prev'
-        return 'next'
+        if (idx === prevIdx) return 'prev'
+        if (idx === nextIdx) return 'next'
+        // Tentukan arah card tersembunyi agar animasinya wajar
+        const fwd = (idx - current + total) % total
+        return fwd <= total / 2 ? 'hidden-right' : 'hidden-left'
     }
 
     return (
-        <section
-            id="pricing"
-            className="w-full bg-[#FCFEF1] py-20 border-t border-[#1D5E84]/10"
-        >
+        // FIX 4: bg-white
+        <section id="pricing" className="w-full bg-white py-20 border-t border-gray-100">
             <div className="w-full max-w-6xl mx-auto px-6">
                 <div className="flex flex-col md:flex-row items-center gap-12 md:gap-0">
 
@@ -308,8 +262,7 @@ export function PricingSection() {
                     <div className="flex-1 min-w-0 md:pr-10">
                         <p
                             className={cn(
-                                'text-[11px] font-medium tracking-widest uppercase text-[#FB6300] mb-3',
-                                'transition-all duration-700',
+                                'text-[11px] font-medium tracking-widest uppercase text-[#FB6300] mb-3 transition-all duration-700',
                                 mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3',
                             )}
                             style={{ transitionDelay: '80ms' }}
@@ -319,8 +272,7 @@ export function PricingSection() {
 
                         <h2
                             className={cn(
-                                'text-4xl md:text-[38px] font-medium leading-tight text-[#1D5E84] mb-4',
-                                'transition-all duration-700',
+                                'text-4xl md:text-[38px] font-medium leading-tight text-[#1D5E84] mb-4 transition-all duration-700',
                                 mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4',
                             )}
                             style={{ transitionDelay: '180ms' }}
@@ -331,8 +283,7 @@ export function PricingSection() {
 
                         <p
                             className={cn(
-                                'text-[15px] text-[#26180B] leading-[1.8] mb-8',
-                                'transition-all duration-700',
+                                'text-[15px] text-[#26180B]/65 leading-[1.8] mb-8 transition-all duration-700',
                                 mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4',
                             )}
                             style={{ transitionDelay: '300ms' }}
@@ -344,19 +295,15 @@ export function PricingSection() {
                         {/* Stats */}
                         <div
                             className={cn(
-                                'flex gap-4 mb-8',
-                                'transition-all duration-700',
+                                'flex gap-4 mb-8 transition-all duration-700',
                                 mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4',
                             )}
                             style={{ transitionDelay: '420ms' }}
                         >
-                            {STATS.map((s) => (
-                                <div
-                                    key={s.label}
-                                    className="flex-1 bg-white rounded-xl border border-[#1D5E84]/10 px-4 py-3"
-                                >
+                            {STATS.map(s => (
+                                <div key={s.label} className="flex-1 bg-gray-50 rounded-xl border border-gray-100 px-4 py-3">
                                     <p className="text-2xl font-medium text-[#1D5E84] mb-0.5">{s.num}</p>
-                                    <p className="text-[11px] text-[#26180B]/60">{s.label}</p>
+                                    <p className="text-[11px] text-[#26180B]/50">{s.label}</p>
                                 </div>
                             ))}
                         </div>
@@ -381,61 +328,65 @@ export function PricingSection() {
 
                     {/* ── Right column — carousel ── */}
                     <div className="flex-shrink-0 flex flex-col items-center">
-                        {/* Viewport */}
-                        <div className="relative w-[380px] h-[420px] flex items-center justify-center">
+                        {/*
+                          FIX 5: Tambah overflow-hidden agar card yang sedang
+                          bertransisi tidak bocor keluar area viewport.
+                        */}
+                        <div className="relative w-[380px] h-[440px] flex items-center justify-center overflow-hidden">
+
                             {/* Prev button */}
                             <button
                                 aria-label="Sebelumnya"
-                                onClick={() => setCurrent(prev)}
-                                className={cn(
-                                    'absolute left-1 z-20 w-9 h-9 rounded-full flex items-center justify-center',
-                                    'bg-[#1D5E84]/15 hover:bg-[#1D5E84]/28 text-[#1D5E84]',
-                                    'transition-all duration-200 hover:scale-105',
-                                )}
+                                onClick={() => setCurrent(prevIdx)}
+                                className="absolute left-0 z-40 w-9 h-9 rounded-full flex items-center justify-center bg-[#1D5E84]/10 hover:bg-[#1D5E84]/20 text-[#1D5E84] transition-all duration-200"
                             >
                                 <ChevronLeft size={18} />
                             </button>
 
                             {/* Cards */}
-                            {plans.map((plan, idx) => (
-                                <CarouselCard
-                                    key={plan.id}
-                                    plan={plan}
-                                    position={getPosition(idx)}
-                                    onClick={() => setCurrent(idx)}
-                                />
-                            ))}
+                            {total === 0 ? (
+                                <div className="flex items-center justify-center">
+                                    <div className="w-8 h-8 border-4 border-[#FB6300] border-t-transparent rounded-full animate-spin" />
+                                </div>
+                            ) : (
+                                plans.map((plan, idx) => (
+                                    <CarouselCard
+                                        key={plan.id}
+                                        plan={plan}
+                                        position={getPosition(idx)}
+                                        onClick={() => setCurrent(idx)}
+                                    />
+                                ))
+                            )}
 
                             {/* Next button */}
                             <button
                                 aria-label="Berikutnya"
-                                onClick={() => setCurrent(next)}
-                                className={cn(
-                                    'absolute right-1 z-20 w-9 h-9 rounded-full flex items-center justify-center',
-                                    'bg-[#1D5E84]/15 hover:bg-[#1D5E84]/28 text-[#1D5E84]',
-                                    'transition-all duration-200 hover:scale-105',
-                                )}
+                                onClick={() => setCurrent(nextIdx)}
+                                className="absolute right-0 z-40 w-9 h-9 rounded-full flex items-center justify-center bg-[#1D5E84]/10 hover:bg-[#1D5E84]/20 text-[#1D5E84] transition-all duration-200"
                             >
                                 <ChevronRight size={18} />
                             </button>
                         </div>
 
                         {/* Dots */}
-                        <div className="flex gap-2 mt-4">
-                            {plans.map((_, idx) => (
-                                <button
-                                    key={idx}
-                                    aria-label={`Kartu ${idx + 1}`}
-                                    onClick={() => setCurrent(idx)}
-                                    className={cn(
-                                        'w-2 h-2 rounded-full border-none transition-all duration-300 cursor-pointer',
-                                        idx === current
-                                            ? 'bg-[#1D5E84] scale-125'
-                                            : 'bg-[#1D5E84]/25 hover:bg-[#1D5E84]/50',
-                                    )}
-                                />
-                            ))}
-                        </div>
+                        {total > 0 && (
+                            <div className="flex gap-1.5 mt-3">
+                                {plans.map((_, idx) => (
+                                    <button
+                                        key={idx}
+                                        aria-label={`Kartu ${idx + 1}`}
+                                        onClick={() => setCurrent(idx)}
+                                        className={cn(
+                                            'h-2 rounded-full border-none transition-all duration-300 cursor-pointer',
+                                            idx === current
+                                                ? 'bg-[#FB6300] w-5'
+                                                : 'bg-[#1D5E84]/20 hover:bg-[#1D5E84]/40 w-2',
+                                        )}
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                 </div>
