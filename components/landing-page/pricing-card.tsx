@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { motion, useInView } from 'motion/react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -21,10 +22,6 @@ import { landingService, type PlanFromBE } from '@/services/public/landing'
 
 type PlanVariant = 'free' | 'pro' | 'enterprise'
 
-/**
- * FIX 1: Tambah 'hidden-left' | 'hidden-right' agar card jauh
- * bisa disembunyikan ke arah yang benar, bukan semua ke 'next'.
- */
 type CardPosition = 'prev' | 'cur' | 'next' | 'hidden-left' | 'hidden-right'
 
 interface LocalPlan {
@@ -93,10 +90,6 @@ function buildHeaderBadge(variant: PlanVariant) {
     )
 }
 
-/**
- * FIX 2: Hapus `plan.deskripsi` dari features.
- * Deskripsi sudah ditampilkan di card description — jangan muncul dua kali.
- */
 function buildFeatures(plan: PlanFromBE): Array<{ text: string; icon: React.ReactNode }> {
     const feats: Array<{ text: string; icon: React.ReactNode }> = []
     const icon = <CircleCheck size={14} className="text-[#FB6300]" />
@@ -113,14 +106,9 @@ function buildFeatures(plan: PlanFromBE): Array<{ text: string; icon: React.Reac
         feats.push({ text: `${plan.durasi_hari} hari akses`, icon })
     }
 
-    // ❌ plan.deskripsi DIHAPUS dari sini — sudah ada di card.description
     return feats
 }
 
-/**
- * FIX 3: Paksa `price` jadi Number agar PlanCard bisa formatRupiah.
- * BE kadang mengirim harga sebagai string "1200000.00" bukan number.
- */
 function mapBEPlanToLocal(plan: PlanFromBE, idx: number): LocalPlan {
     const variant = detectVariant(plan.nama_plan, idx)
     const cta = CTA_LABELS[variant]
@@ -164,6 +152,38 @@ const STATS = [
     { num: '30 hr', label: 'Coba gratis' },
 ]
 
+// ─── Animation variants ───────────────────────────────────────────────────────
+
+// Staggered fade-up untuk elemen kiri
+const fadeUp = {
+    hidden: { opacity: 0, y: 28 },
+    visible: (delay: number) => ({
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1], delay },
+    }),
+}
+
+// Slide dari kiri untuk kolom teks
+const slideFromLeft = {
+    hidden: { opacity: 0, x: -36 },
+    visible: {
+        opacity: 1,
+        x: 0,
+        transition: { duration: 0.65, ease: [0.4, 0, 0.2, 1] },
+    },
+}
+
+// Slide dari kanan untuk kolom carousel
+const slideFromRight = {
+    hidden: { opacity: 0, x: 36 },
+    visible: {
+        opacity: 1,
+        x: 0,
+        transition: { duration: 0.65, ease: [0.4, 0, 0.2, 1], delay: 0.12 },
+    },
+}
+
 // ─── CarouselCard ─────────────────────────────────────────────────────────────
 
 interface CarouselCardProps {
@@ -180,16 +200,9 @@ function CarouselCard({ plan, position, onClick }: CarouselCardProps) {
             onClick={!isCurrent ? onClick : undefined}
             className={cn(
                 'absolute w-[230px] transition-all duration-500 ease-[cubic-bezier(.4,0,.2,1)]',
-                // Kartu kiri: blur + geser kiri
                 position === 'prev' && '-translate-x-[155px] opacity-40 blur-[3px] scale-[.86] z-10 cursor-pointer',
-                // Kartu aktif: fokus penuh
                 position === 'cur' && 'translate-x-0 opacity-100 blur-0 scale-100 z-30',
-                // Kartu kanan: blur + geser kanan
                 position === 'next' && 'translate-x-[155px] opacity-40 blur-[3px] scale-[.86] z-10 cursor-pointer',
-                /**
-                 * FIX 1 (lanjutan): Card jauh disembunyikan sepenuhnya (opacity-0).
-                 * Arah disesuaikan agar transisi terasa natural saat cycling.
-                 */
                 position === 'hidden-left' && '-translate-x-[310px] opacity-0 scale-[.7] z-0 pointer-events-none',
                 position === 'hidden-right' && 'translate-x-[310px] opacity-0 scale-[.7] z-0 pointer-events-none',
             )}
@@ -212,14 +225,12 @@ function CarouselCard({ plan, position, onClick }: CarouselCardProps) {
 
 export function PricingSection() {
     const [current, setCurrent] = useState(0)
-    const [mounted, setMounted] = useState(false)
     const [plans, setPlans] = useState<LocalPlan[]>([])
     const total = plans.length
 
-    useEffect(() => {
-        const t = setTimeout(() => setMounted(true), 50)
-        return () => clearTimeout(t)
-    }, [])
+    // ── Scroll-triggered animation ──
+    const sectionRef = useRef<HTMLElement>(null)
+    const isInView = useInView(sectionRef, { once: true, margin: '-80px 0px' })
 
     useEffect(() => {
         landingService.getPlans()
@@ -227,7 +238,6 @@ export function PricingSection() {
                 if (data && data.length > 0) {
                     const mapped = data.map(mapBEPlanToLocal)
                     setPlans(mapped)
-                    // Prioritaskan mulai dari paket 'pro'; fallback ke tengah
                     const proIdx = mapped.findIndex(p => p.variant === 'pro')
                     setCurrent(proIdx >= 0 ? proIdx : Math.floor(mapped.length / 2))
                 }
@@ -238,84 +248,79 @@ export function PricingSection() {
     const prevIdx = total > 0 ? (current - 1 + total) % total : 0
     const nextIdx = total > 0 ? (current + 1) % total : 0
 
-    /**
-     * FIX 1 (inti): Sebelumnya semua card non-prev/cur dapat 'next'.
-     * Sekarang hanya card tepat di kanan = 'next', sisanya 'hidden-*'.
-     */
     function getPosition(idx: number): CardPosition {
         if (total === 0) return 'cur'
         if (idx === current) return 'cur'
         if (idx === prevIdx) return 'prev'
         if (idx === nextIdx) return 'next'
-        // Tentukan arah card tersembunyi agar animasinya wajar
         const fwd = (idx - current + total) % total
         return fwd <= total / 2 ? 'hidden-right' : 'hidden-left'
     }
 
     return (
-        // FIX 4: bg-white
-        <section id="pricing" className="w-full bg-white py-20 border-t border-gray-100">
+        <section
+            ref={sectionRef}
+            id="pricing"
+            className="w-full bg-white py-20 border-t border-gray-100"
+        >
             <div className="w-full max-w-6xl mx-auto px-6">
                 <div className="flex flex-col md:flex-row items-center gap-12 md:gap-0">
 
                     {/* ── Left column ── */}
-                    <div className="flex-1 min-w-0 md:pr-10">
-                        <p
-                            className={cn(
-                                'text-[11px] font-medium tracking-widest uppercase text-[#FB6300] mb-3 transition-all duration-700',
-                                mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3',
-                            )}
-                            style={{ transitionDelay: '80ms' }}
+                    <motion.div
+                        className="flex-1 min-w-0 md:pr-10"
+                        initial="hidden"
+                        animate={isInView ? 'visible' : 'hidden'}
+                        variants={slideFromLeft}
+                    >
+                        {/* Eyebrow */}
+                        <motion.p
+                            custom={0}
+                            variants={fadeUp}
+                            className="text-[11px] font-medium tracking-widest uppercase text-[#FB6300] mb-3"
                         >
                             Pilih paketmu
-                        </p>
+                        </motion.p>
 
-                        <h2
-                            className={cn(
-                                'text-4xl md:text-[38px] font-medium leading-tight text-[#1D5E84] mb-4 transition-all duration-700',
-                                mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4',
-                            )}
-                            style={{ transitionDelay: '180ms' }}
+                        {/* Heading */}
+                        <motion.h2
+                            custom={0.08}
+                            variants={fadeUp}
+                            className="text-4xl md:text-[38px] font-medium leading-tight text-[#1D5E84] mb-4"
                         >
                             Mulai kelola bisnis <br />
                             <span className="text-[#FB6300]">resto mu</span> dari sini
-                        </h2>
+                        </motion.h2>
 
-                        <p
-                            className={cn(
-                                'text-[15px] text-[#26180B]/65 leading-[1.8] mb-8 transition-all duration-700',
-                                mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4',
-                            )}
-                            style={{ transitionDelay: '300ms' }}
+                        {/* Description */}
+                        <motion.p
+                            custom={0.16}
+                            variants={fadeUp}
+                            className="text-[15px] text-[#26180B]/65 leading-[1.8] mb-8"
                         >
                             Mulai coba gratis dengan mengelola satu tenant,<br />
                             lalu berkembang sesuai ritme bisnis kamu.
-                        </p>
+                        </motion.p>
 
                         {/* Stats */}
-                        <div
-                            className={cn(
-                                'flex gap-4 mb-8 transition-all duration-700',
-                                mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4',
-                            )}
-                            style={{ transitionDelay: '420ms' }}
+                        <motion.div
+                            custom={0.24}
+                            variants={fadeUp}
+                            className="flex gap-4 mb-8"
                         >
                             {STATS.map(s => (
-                                <div key={s.label} className="flex-1 bg-gray-50 rounded-xl border border-gray-100 px-4 py-3">
+                                <div
+                                    key={s.label}
+                                    className="flex-1 bg-gray-50 rounded-xl border border-gray-100 px-4 py-3"
+                                >
                                     <p className="text-2xl font-medium text-[#1D5E84] mb-0.5">{s.num}</p>
                                     <p className="text-[11px] text-[#26180B]/50">{s.label}</p>
                                 </div>
                             ))}
-                        </div>
+                        </motion.div>
 
                         {/* CTA */}
-                        <div
-                            className={cn(
-                                'transition-all duration-700',
-                                mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4',
-                            )}
-                            style={{ transitionDelay: '540ms' }}
-                        >
+                        <motion.div custom={0.32} variants={fadeUp}>
                             <Link href="/register">
                                 <Button className="bg-[#FB6300] hover:bg-[#e05700] text-white rounded-xl px-6 h-11 text-sm font-medium border-0 gap-2 transition-transform hover:-translate-y-0.5">
                                     <Zap size={15} />
@@ -323,22 +328,23 @@ export function PricingSection() {
                                     <ArrowRight size={14} />
                                 </Button>
                             </Link>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
 
                     {/* ── Right column — carousel ── */}
-                    <div className="flex-shrink-0 flex flex-col items-center">
-                        {/*
-                          FIX 5: Tambah overflow-hidden agar card yang sedang
-                          bertransisi tidak bocor keluar area viewport.
-                        */}
+                    <motion.div
+                        className="flex-shrink-0 flex flex-col items-center"
+                        initial="hidden"
+                        animate={isInView ? 'visible' : 'hidden'}
+                        variants={slideFromRight}
+                    >
                         <div className="relative w-[380px] h-[440px] flex items-center justify-center overflow-hidden">
 
                             {/* Prev button */}
                             <button
                                 aria-label="Sebelumnya"
                                 onClick={() => setCurrent(prevIdx)}
-                                className="absolute left-0 z-40 w-9 h-9 rounded-full flex items-center justify-center bg-[#1D5E84]/10 hover:bg-[#1D5E84]/20 text-[#1D5E84] transition-all duration-200"
+                                className="absolute left-0 z-40 w-9 h-9 rounded-full flex items-center justify-center bg-[#1D5E84]/10 hover:bg-[#1D5E84]/20 text-[#1D5E84] transition-all duration-200 hover:scale-105"
                             >
                                 <ChevronLeft size={18} />
                             </button>
@@ -363,7 +369,7 @@ export function PricingSection() {
                             <button
                                 aria-label="Berikutnya"
                                 onClick={() => setCurrent(nextIdx)}
-                                className="absolute right-0 z-40 w-9 h-9 rounded-full flex items-center justify-center bg-[#1D5E84]/10 hover:bg-[#1D5E84]/20 text-[#1D5E84] transition-all duration-200"
+                                className="absolute right-0 z-40 w-9 h-9 rounded-full flex items-center justify-center bg-[#1D5E84]/10 hover:bg-[#1D5E84]/20 text-[#1D5E84] transition-all duration-200 hover:scale-105"
                             >
                                 <ChevronRight size={18} />
                             </button>
@@ -387,7 +393,7 @@ export function PricingSection() {
                                 ))}
                             </div>
                         )}
-                    </div>
+                    </motion.div>
 
                 </div>
             </div>

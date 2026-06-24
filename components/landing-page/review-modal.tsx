@@ -118,7 +118,7 @@ const row2Reviews: ReviewCardProps[] = [
         role: 'Owner Coffee Shop',
         color: 'dark',
         stars: 5,
-        text: 'Laporan harian langsung dikirim ke WhatsApp. Gak perlu buka laptop dulu buat tau omzet hari ini, praktis!',
+        text: 'Laporan harian secara realtime, praktis!',
         tag: 'Laporan Otomatis',
         tagVariant: 'blue',
     },
