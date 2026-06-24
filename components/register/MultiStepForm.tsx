@@ -7,17 +7,51 @@ import { CheckCircle2, Zap, Star, CreditCard, Wallet, Eye, EyeOff } from "lucide
 import { toast } from "sonner";
 import { PlanCard } from '@/components/ui/plan-card'
 import { landingService, type PlanFromBE } from '@/services/public/landing'
+import { authService } from '@/services/auth'
 
 export function MultiStepForm() {
   const [step, setStep] = useState(1);
   const [selectedPlan, setSelectedPlan] = useState<PlanFromBE | null>(null);
-  const [plans, setPlans] = useState<PlanFromBE[]>([]);
+  const [groupedPlans, setGroupedPlans] = useState<Record<string, PlanFromBE[]>>({});
+  const [selectedDurations, setSelectedDurations] = useState<Record<string, string>>({});
   const [isLoadingPlans, setIsLoadingPlans] = useState(true);
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "gopay">("card");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"transfer" | "qris">("transfer");
+
+  // Form States
+  const [formData, setFormData] = useState({
+    ownerName: "",
+    ownerEmail: "",
+    ownerUsername: "",
+    ownerPhone: "",
+    ownerPassword: "",
+    ownerConfirmPassword: "",
+    companyName: "",
+    companyPhone: "",
+    companyAddress: "",
+    companyDescription: ""
+  });
 
   useEffect(() => {
     landingService.getPlans()
-      .then(data => setPlans(data.filter(p => p.status)))
+      .then(data => {
+        const activePlans = data.filter(p => p.status);
+        const groups = activePlans.reduce((acc, plan) => {
+          const name = plan.nama_plan.trim();
+          if (!acc[name]) acc[name] = [];
+          acc[name].push(plan);
+          return acc;
+        }, {} as Record<string, PlanFromBE[]>);
+
+        const defaults: Record<string, string> = {};
+        Object.entries(groups).forEach(([name, plansGroup]) => {
+          plansGroup.sort((a, b) => a.durasi_hari - b.durasi_hari);
+          defaults[name] = plansGroup[0].id;
+        });
+
+        setSelectedDurations(defaults);
+        setGroupedPlans(groups);
+      })
       .catch(err => {
         console.error("Gagal memuat paket", err);
         toast.error("Gagal memuat paket");
@@ -28,7 +62,7 @@ export function MultiStepForm() {
   const [showConfirm, setShowConfirm] = useState(false);
   const router = useRouter();
 
-  const isFreePlan = selectedPlan?.harga === 0;
+  const isFreePlan = Number(selectedPlan?.harga) === 0;
   const TOTAL_STEPS = isFreePlan ? 3 : 4;
 
   const allStepLabels = ["Pilih Paket", "Buat Akun", "Data Perusahaan", "Pembayaran"];
@@ -36,13 +70,42 @@ export function MultiStepForm() {
     ? ["Pilih Paket", "Buat Akun", "Data Perusahaan"]
     : allStepLabels;
 
-  const handleNext = () => {
-    if (step === 1 && !selectedPlan) return;
+  const isStep2Valid = !!(formData.ownerName && formData.ownerEmail && formData.ownerUsername && formData.ownerPhone && formData.ownerPassword && formData.ownerConfirmPassword && formData.ownerPassword === formData.ownerConfirmPassword);
+  const isStep3Valid = !!(formData.companyName && formData.companyPhone && formData.companyAddress && formData.companyDescription);
+
+  let isNextDisabled = false;
+  if (step === 1) isNextDisabled = !selectedPlan;
+  if (step === 2) isNextDisabled = !isStep2Valid;
+  if (step === 3) isNextDisabled = !isStep3Valid;
+
+  const handleNext = async () => {
+    if (isNextDisabled || isSubmitting) return;
     if (step < TOTAL_STEPS) {
       setStep(step + 1);
     } else {
-      toast.success("Pendaftaran berhasil! Menunggu konfirmasi superadmin.");
-      router.push("/");
+      setIsSubmitting(true);
+      try {
+        await authService.register({
+          nama_owner: formData.ownerName,
+          email: formData.ownerEmail,
+          username: formData.ownerUsername,
+          no_telp: formData.ownerPhone,
+          password: formData.ownerPassword,
+          password_confirmation: formData.ownerConfirmPassword,
+          nama_usaha: formData.companyName,
+          telp_usaha: formData.companyPhone,
+          alamat: formData.companyAddress,
+          deskripsi_usaha: formData.companyDescription,
+          plan_id: selectedPlan!.id,
+          metode_pembayaran: isFreePlan ? undefined : paymentMethod,
+        });
+        toast.success("Pendaftaran berhasil! Menunggu konfirmasi superadmin.");
+        router.push("/");
+      } catch (err: any) {
+        toast.error(err.message || "Pendaftaran gagal. Silakan coba lagi.");
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -54,7 +117,7 @@ export function MultiStepForm() {
   const planAccent = isFreePlan ? "#ff6b00" : "#3874BC";
   const planBg = isFreePlan ? "#fff4ec" : "#dde8f7";
   const planName = selectedPlan?.nama_plan || (isFreePlan ? "Free" : "Pro");
-  const planPrice = `Rp ${selectedPlan?.harga?.toLocaleString('id-ID') || 0}`;
+  const planPrice = `Rp ${Number(selectedPlan?.harga || 0).toLocaleString('id-ID')}`;
   const planPeriod = selectedPlan?.is_lifetime ? "Lifetime" : `/ ${selectedPlan?.durasi_hari || 30} Hari`;
   const planFeatures = selectedPlan
     ? [
@@ -131,49 +194,90 @@ export function MultiStepForm() {
                   {isLoadingPlans ? (
                     <div className="col-span-full text-center py-10 text-gray-500">Memuat paket...</div>
                   ) : (
-                    plans.map((plan) => {
-                      const isFree = plan.harga === 0;
-                      const isSelected = selectedPlan?.id === plan.id;
-                      const Icon = isFree ? Zap : Star;
-                      const activeClass = isFree ? "border-[#ff6b00] bg-[#fff4ec] ring-2 ring-[#ff6b00]" : "border-[#3874BC] bg-[#dde8f7] ring-2 ring-[#3874BC]";
-                      const iconClass = isFree ? "text-gray-400" : "text-[#3874BC]";
+                    Object.keys(groupedPlans)
+                      .sort((a, b) => groupedPlans[a][0].harga - groupedPlans[b][0].harga)
+                      .map((groupName) => {
+                        const groupPlans = groupedPlans[groupName];
+                        const activePlanId = selectedDurations[groupName];
+                        const activePlanInGroup = groupPlans.find(p => p.id === activePlanId) || groupPlans[0];
 
-                      const planFeaturesList = [
-                        { text: `${plan.batas_outlet} Outlet`, icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
-                        { text: isFree ? "3 Pengguna" : "Pengguna Tak Terbatas", icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
-                        { text: isFree ? "Laporan bulanan" : "Laporan real-time", icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
-                        { text: isFree ? "Stock dasar" : "Stock opname & Multi-kasir", icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
-                      ];
+                        const isFree = Number(activePlanInGroup.harga) === 0;
+                        const isSelected = selectedPlan ? groupPlans.some(p => p.id === selectedPlan.id) : false;
+                        
+                        const Icon = isFree ? Zap : Star;
+                        const activeClass = isFree ? "border-[#ff6b00] bg-[#fff4ec] ring-2 ring-[#ff6b00]" : "border-[#3874BC] bg-[#dde8f7] ring-2 ring-[#3874BC]";
+                        const iconClass = isFree ? "text-gray-400" : "text-[#3874BC]";
+                        const accentColor = isFree ? "#ff6b00" : "#3874BC";
 
-                      return (
-                        <div key={plan.id} onClick={() => { setSelectedPlan(plan); if (step > TOTAL_STEPS) setStep(3); }} className="cursor-pointer h-full">
-                          <PlanCard
-                            name={plan.nama_plan}
-                            price={plan.harga}
-                            period={plan.is_lifetime ? undefined : `${plan.durasi_hari} Hari`}
-                            description={plan.deskripsi || (isFree ? "Cocok untuk kamu yang baru mulai mengelola bisnis F&B pertama." : "Untuk bisnis yang berkembang dengan kebutuhan lebih dari satu outlet.")}
-                            features={planFeaturesList}
-                            headerBadge={
-                              <div className="flex items-center gap-2">
-                                <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full ${isFree ? "bg-gray-100 text-gray-500 border border-gray-200" : "bg-[#3874BC] text-white"}`}>
-                                  <Icon size={11} /> {plan.nama_plan}
-                                </span>
-                                {isSelected && <span className={isFree ? "text-[#ff6b00]" : "text-[#3874BC]"}><CheckCircle2 size={20} /></span>}
-                              </div>
-                            }
-                            priceSubtext={
-                              <div className="mt-2">
-                                <span className={`inline-block text-[10px] font-medium px-2 py-0.5 rounded-full ${isFree ? "text-gray-400 bg-gray-100" : "text-[#3874BC] bg-[#3874BC]/10"}`}>
-                                  {isFree ? "3 langkah saja" : "Termasuk langkah pembayaran"}
-                                </span>
-                              </div>
-                            }
-                            isActive={selectedPlan === null || isSelected}
-                            className={isSelected ? activeClass : ""}
-                          />
-                        </div>
-                      )
-                    })
+                        const planFeaturesList = [
+                          { text: `${activePlanInGroup.batas_outlet} Outlet`, icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
+                          { text: isFree ? "3 Pengguna" : "Pengguna Tak Terbatas", icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
+                          { text: isFree ? "Laporan bulanan" : "Laporan real-time", icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
+                          { text: isFree ? "Stock dasar" : "Stock opname & Multi-kasir", icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
+                        ];
+
+                        return (
+                          <div 
+                            key={groupName} 
+                            onClick={() => { 
+                              setSelectedPlan(activePlanInGroup); 
+                              const newTotalSteps = Number(activePlanInGroup.harga) === 0 ? 3 : 4;
+                              if (step > newTotalSteps) setStep(3); 
+                            }} 
+                            className="cursor-pointer h-full"
+                          >
+                            <PlanCard
+                              name={activePlanInGroup.nama_plan}
+                              price={Number(activePlanInGroup.harga)}
+                              period={activePlanInGroup.is_lifetime ? undefined : `${activePlanInGroup.durasi_hari} Hari`}
+                              description={activePlanInGroup.deskripsi || (isFree ? "Cocok untuk kamu yang baru mulai mengelola bisnis F&B pertama." : "Untuk bisnis yang berkembang dengan kebutuhan lebih dari satu outlet.")}
+                              features={planFeaturesList}
+                              headerBadge={
+                                <div className="flex items-center gap-2">
+                                  <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full ${isFree ? "bg-gray-100 text-gray-500 border border-gray-200" : "bg-[#3874BC] text-white"}`}>
+                                    <Icon size={11} /> {groupName}
+                                  </span>
+                                  {isSelected && <span className={isFree ? "text-[#ff6b00]" : "text-[#3874BC]"}><CheckCircle2 size={20} /></span>}
+                                </div>
+                              }
+                              priceSubtext={
+                                <div className="mt-4">
+                                  {groupPlans.length > 1 ? (
+                                    <div className="flex flex-wrap gap-2">
+                                      {groupPlans.map(p => {
+                                        const isPSelected = p.id === activePlanInGroup.id;
+                                        return (
+                                          <button
+                                            key={p.id}
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setSelectedDurations(prev => ({ ...prev, [groupName]: p.id }));
+                                              if (isSelected) {
+                                                setSelectedPlan(p);
+                                              }
+                                            }}
+                                            className={`px-3 py-1.5 text-[11px] font-semibold rounded-lg border transition-all ${isPSelected ? "text-white shadow-sm" : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"}`}
+                                            style={isPSelected ? { backgroundColor: accentColor, borderColor: accentColor } : {}}
+                                          >
+                                            {p.is_lifetime ? 'Lifetime' : `${p.durasi_hari} Hari`}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  ) : (
+                                    <span className={`inline-block text-[10px] font-medium px-2 py-0.5 rounded-full ${isFree ? "text-gray-400 bg-gray-100" : "text-[#3874BC] bg-[#3874BC]/10"}`}>
+                                      {isFree ? "3 langkah saja" : "Termasuk langkah pembayaran"}
+                                    </span>
+                                  )}
+                                </div>
+                              }
+                              isActive={selectedPlan === null || isSelected}
+                              className={isSelected ? activeClass : ""}
+                            />
+                          </div>
+                        )
+                      })
                   )}
                 </div>
               </div>
@@ -188,24 +292,24 @@ export function MultiStepForm() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Nama Lengkap</label>
-                    <input type="text" placeholder="Nama Lengkap" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                    <input type="text" value={formData.ownerName} onChange={(e) => setFormData(p => ({...p, ownerName: e.target.value}))} placeholder="Nama Lengkap" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Email</label>
-                    <input type="email" placeholder="nama@email.com" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                    <input type="email" value={formData.ownerEmail} onChange={(e) => setFormData(p => ({...p, ownerEmail: e.target.value}))} placeholder="nama@email.com" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Username</label>
-                    <input type="text" placeholder="username" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                    <input type="text" value={formData.ownerUsername} onChange={(e) => setFormData(p => ({...p, ownerUsername: e.target.value}))} placeholder="username" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Nomor Telepon</label>
-                    <input type="tel" placeholder="+62 8xx xxxx xxxx" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                    <input type="tel" value={formData.ownerPhone} onChange={(e) => setFormData(p => ({...p, ownerPhone: e.target.value}))} placeholder="+62 8xx xxxx xxxx" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Password</label>
                     <div className="relative">
-                      <input type={showPassword ? "text" : "password"} placeholder="Minimal 8 karakter" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 pr-11 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                      <input type={showPassword ? "text" : "password"} value={formData.ownerPassword} onChange={(e) => setFormData(p => ({...p, ownerPassword: e.target.value}))} placeholder="Minimal 8 karakter" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 pr-11 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                       <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
@@ -214,7 +318,7 @@ export function MultiStepForm() {
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Konfirmasi Password</label>
                     <div className="relative">
-                      <input type={showConfirm ? "text" : "password"} placeholder="Ulangi password" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 pr-11 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                      <input type={showConfirm ? "text" : "password"} value={formData.ownerConfirmPassword} onChange={(e) => setFormData(p => ({...p, ownerConfirmPassword: e.target.value}))} placeholder="Ulangi password" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 pr-11 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                       <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                         {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
@@ -233,19 +337,19 @@ export function MultiStepForm() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Nama Perusahaan</label>
-                    <input type="text" placeholder="PT / CV / Nama Usaha" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                    <input type="text" value={formData.companyName} onChange={(e) => setFormData(p => ({...p, companyName: e.target.value}))} placeholder="PT / CV / Nama Usaha" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Telepon Perusahaan</label>
-                    <input type="tel" placeholder="+62 2x xxxx xxxx" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                    <input type="tel" value={formData.companyPhone} onChange={(e) => setFormData(p => ({...p, companyPhone: e.target.value}))} placeholder="+62 2x xxxx xxxx" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                   </div>
                   <div className="md:col-span-2 flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Alamat</label>
-                    <input type="text" placeholder="Jl. Contoh No. 1, Kota, Provinsi" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                    <input type="text" value={formData.companyAddress} onChange={(e) => setFormData(p => ({...p, companyAddress: e.target.value}))} placeholder="Jl. Contoh No. 1, Kota, Provinsi" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                   </div>
                   <div className="md:col-span-2 flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Deskripsi Perusahaan</label>
-                    <textarea rows={4} placeholder="Ceritakan sedikit tentang bisnis kamu..." className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm resize-none" />
+                    <textarea rows={4} value={formData.companyDescription} onChange={(e) => setFormData(p => ({...p, companyDescription: e.target.value}))} placeholder="Ceritakan sedikit tentang bisnis kamu..." className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm resize-none" />
                   </div>
                 </div>
               </div>
@@ -263,27 +367,27 @@ export function MultiStepForm() {
                   <div className="flex gap-3 mb-6">
                     <button
                       type="button"
-                      onClick={() => setPaymentMethod("card")}
-                      className={`flex items-center gap-2 px-5 py-3 rounded-xl border-2 text-sm font-medium transition-all ${paymentMethod === "card"
+                      onClick={() => setPaymentMethod("transfer")}
+                      className={`flex items-center gap-2 px-5 py-3 rounded-xl border-2 text-sm font-medium transition-all ${paymentMethod === "transfer"
                         ? "border-[#ff6b00] bg-[#fff4ec] text-[#ff6b00]"
                         : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
                         }`}
                     >
-                      <CreditCard size={16} /> Kartu
+                      <CreditCard size={16} /> Transfer Bank
                     </button>
                     <button
                       type="button"
-                      onClick={() => setPaymentMethod("gopay")}
-                      className={`flex items-center gap-2 px-5 py-3 rounded-xl border-2 text-sm font-medium transition-all ${paymentMethod === "gopay"
+                      onClick={() => setPaymentMethod("qris")}
+                      className={`flex items-center gap-2 px-5 py-3 rounded-xl border-2 text-sm font-medium transition-all ${paymentMethod === "qris"
                         ? "border-[#ff6b00] bg-[#fff4ec] text-[#ff6b00]"
                         : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
                         }`}
                     >
-                      <Wallet size={16} /> GoPay
+                      <Wallet size={16} /> QRIS
                     </button>
                   </div>
 
-                  {paymentMethod === "card" && (
+                  {paymentMethod === "transfer" && (
                     <div className="flex flex-col gap-4">
                       <div className="flex flex-col gap-2">
                         <label className="text-sm font-medium text-gray-700">Nomor Kartu</label>
@@ -312,7 +416,7 @@ export function MultiStepForm() {
                     </div>
                   )}
 
-                  {paymentMethod === "gopay" && (
+                  {paymentMethod === "qris" && (
                     <div className="bg-[#f9fafb] border border-dashed border-[#ff6b00]/40 rounded-2xl p-6 text-center">
                       <Wallet size={36} className="text-[#ff6b00] mx-auto mb-3" />
                       <p className="text-sm font-medium text-gray-700 mb-1">Bayar via GoPay</p>
@@ -382,13 +486,13 @@ export function MultiStepForm() {
 
             <button
               onClick={handleNext}
-              disabled={step === 1 && !selectedPlan}
-              className={`px-10 py-3.5 rounded-xl font-medium text-base transition-colors ${step === 1 && !selectedPlan
+              disabled={isNextDisabled || isSubmitting}
+              className={`px-10 py-3.5 rounded-xl font-medium text-base transition-colors ${(isNextDisabled || isSubmitting)
                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                 : "bg-[#ff6b00] text-white hover:bg-[#e65a00]"
                 }`}
             >
-              {step === TOTAL_STEPS ? (isFreePlan ? "Daftar Sekarang" : "Langganan") : "Lanjut →"}
+              {isSubmitting ? "Memproses..." : (step === TOTAL_STEPS ? (isFreePlan ? "Daftar Sekarang" : "Langganan") : "Lanjut →")}
             </button>
           </div>
 
