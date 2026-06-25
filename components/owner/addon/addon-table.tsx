@@ -78,7 +78,7 @@ export function AddonTable({ data, onEdit, meta, page, setPage }: AddonTableProp
                       </button>
                       <button 
                         onClick={() => setDeleteTarget(addon)} 
-                        className="flex items-center justify-center size-7 bg-[#ff6b00] hover:bg-[#e65a00] text-white rounded-md transition-colors cursor-pointer"
+                        className="flex items-center justify-center size-7 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors cursor-pointer"
                         title="Hapus"
                       >
                         <Trash2 className="size-4" />
