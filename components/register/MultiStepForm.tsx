@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { PlanCard } from '@/components/ui/plan-card'
 import { landingService, type PlanFromBE } from '@/services/public/landing'
 import { authService } from '@/services/auth'
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 
 const BLOBS = [
   {

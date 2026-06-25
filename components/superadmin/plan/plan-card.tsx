@@ -24,7 +24,7 @@ export function PlanCard({ plan, allVariants, onEdit, onDelete }: PlanCardProps)
     : plan.harga;
 
   return (
-    <div className="w-[280px] shrink-0">
+    <div className="w-[280px] shrink-0 flex">
     <GlobalPlanCard
       name={plan.nama_plan}
       price={minPrice}
@@ -98,7 +98,7 @@ export function PlanCard({ plan, allVariants, onEdit, onDelete }: PlanCardProps)
 
 export function PlanCardSkeleton() {
   return (
-    <div className="w-[280px] shrink-0">
+    <div className="w-[280px] shrink-0 flex">
       <Card className="w-full border border-gray-200 rounded-2xl overflow-hidden">
         <CardContent className="p-6 space-y-6">
           <div className="flex items-center justify-between">

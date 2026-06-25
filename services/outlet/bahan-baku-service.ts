@@ -73,6 +73,7 @@ export const bahanBakuService = {
     satuan?: string;
     sort_by?: string;
     sort_dir?: string;
+    per_page?: number;
   }): Promise<BahanOutletResponse> => {
     const response = await axiosInstance.get("/outlet/bahan-baku", { params });
     return response.data;
