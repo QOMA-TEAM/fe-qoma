@@ -136,7 +136,7 @@ export default function Home() {
   const footerInView = useInView(footerRef, { once: true, margin: "-80px 0px" });
 
   return (
-    <div className="min-h-screen bg-[#fff4ec] font-sans relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#fff4ec] font-sans relative flex flex-col">
 
       {/* ── Animated Blob Background ─────────────────────────────────────────── */}
       <div
