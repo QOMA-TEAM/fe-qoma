@@ -151,26 +151,25 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
 
       <SidebarContent className="gap-0">
         {/* OVERVIEW */}
-        <Collapsible
-          asChild
-          defaultOpen={ownerNav.overview.some(item => pathname.startsWith(item.url))}
-          className="group/collapsible"
-        >
-          <SidebarGroup>
-            <SidebarGroupLabel
+        <SidebarGroup>
+          <SidebarMenu>
+            <Collapsible
               asChild
-              className="group/label w-full justify-between hover:bg-sidebar-accent cursor-pointer text-xs font-semibold tracking-wider text-black uppercase"
+              defaultOpen={true}
+              className="group/collapsible"
             >
-              <CollapsibleTrigger>
-                Overview
-                <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarMenu>
-                {ownerNav.overview.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent cursor-pointer text-xs font-semibold tracking-wider text-black uppercase">
+                    <span>Overview</span>
+                    <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    {ownerNav.overview.map((item) => (
+                  <SidebarMenuSubItem key={item.title}>
+                    <SidebarMenuSubButton
                       asChild
                       isActive={pathname === item.url}
                       className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
@@ -179,35 +178,36 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
                         <item.icon className="size-4" />
                         <span>{item.title}</span>
                       </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
                 ))}
-              </SidebarMenu>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+          </SidebarMenu>
+        </SidebarGroup>
 
         {/* KELOLA */}
-        <Collapsible
-          asChild
-          defaultOpen={ownerNav.kelola.some(item => pathname.startsWith(item.url))}
-          className="group/collapsible"
-        >
-          <SidebarGroup>
-            <SidebarGroupLabel
+        <SidebarGroup>
+          <SidebarMenu>
+            <Collapsible
               asChild
-              className="group/label w-full justify-between hover:bg-sidebar-accent cursor-pointer text-xs font-semibold tracking-wider text-black uppercase"
+              defaultOpen={true}
+              className="group/collapsible"
             >
-              <CollapsibleTrigger>
-                Kelola
-                <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarMenu>
-                {ownerNav.kelola.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent cursor-pointer text-xs font-semibold tracking-wider text-black uppercase">
+                    <span>Kelola</span>
+                    <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    {ownerNav.kelola.map((item) => (
+                  <SidebarMenuSubItem key={item.title}>
+                    <SidebarMenuSubButton
                       asChild
                       isActive={pathname === item.url}
                       className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
@@ -216,35 +216,36 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
                         <item.icon className="size-4" />
                         <span>{item.title}</span>
                       </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
                 ))}
-              </SidebarMenu>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+          </SidebarMenu>
+        </SidebarGroup>
 
         {/* APPROVAL */}
-        <Collapsible
-          asChild
-          defaultOpen={ownerNav.approval.some(item => pathname.startsWith(item.url))}
-          className="group/collapsible"
-        >
-          <SidebarGroup>
-            <SidebarGroupLabel
+        <SidebarGroup>
+          <SidebarMenu>
+            <Collapsible
               asChild
-              className="group/label w-full justify-between hover:bg-sidebar-accent cursor-pointer text-xs font-semibold tracking-wider text-black uppercase"
+              defaultOpen={true}
+              className="group/collapsible"
             >
-              <CollapsibleTrigger>
-                Approval
-                <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarMenu>
-                {ownerNav.approval.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent cursor-pointer text-xs font-semibold tracking-wider text-black uppercase">
+                    <span>Approval</span>
+                    <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    {ownerNav.approval.map((item) => (
+                  <SidebarMenuSubItem key={item.title}>
+                    <SidebarMenuSubButton
                       asChild
                       isActive={pathname === item.url}
                       className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
@@ -253,36 +254,37 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
                         <item.icon className="size-4" />
                         <span>{item.title}</span>
                       </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
                 ))}
-              </SidebarMenu>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+          </SidebarMenu>
+        </SidebarGroup>
 
 
         {/* KEUANGAN */}
-        <Collapsible
-          asChild
-          defaultOpen={ownerNav.keuangan.some(item => pathname.startsWith(item.url))}
-          className="group/collapsible"
-        >
-          <SidebarGroup>
-            <SidebarGroupLabel
+        <SidebarGroup>
+          <SidebarMenu>
+            <Collapsible
               asChild
-              className="group/label w-full justify-between hover:bg-sidebar-accent cursor-pointer text-xs font-semibold tracking-wider text-black uppercase"
+              defaultOpen={true}
+              className="group/collapsible"
             >
-              <CollapsibleTrigger>
-                Keuangan
-                <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarMenu>
-                {ownerNav.keuangan.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent cursor-pointer text-xs font-semibold tracking-wider text-black uppercase">
+                    <span>Keuangan</span>
+                    <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    {ownerNav.keuangan.map((item) => (
+                  <SidebarMenuSubItem key={item.title}>
+                    <SidebarMenuSubButton
                       asChild
                       isActive={pathname === item.url}
                       className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
@@ -291,35 +293,36 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
                         <item.icon className="size-4" />
                         <span>{item.title}</span>
                       </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
                 ))}
-              </SidebarMenu>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+          </SidebarMenu>
+        </SidebarGroup>
 
         {/* LAPORAN */}
-        <Collapsible
-          asChild
-          defaultOpen={ownerNav.laporan.some(item => pathname.startsWith(item.url))}
-          className="group/collapsible"
-        >
-          <SidebarGroup>
-            <SidebarGroupLabel
+        <SidebarGroup>
+          <SidebarMenu>
+            <Collapsible
               asChild
-              className="group/label w-full justify-between hover:bg-sidebar-accent cursor-pointer text-xs font-semibold tracking-wider text-black uppercase"
+              defaultOpen={true}
+              className="group/collapsible"
             >
-              <CollapsibleTrigger>
-                Laporan
-                <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarMenu>
-                {ownerNav.laporan.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent cursor-pointer text-xs font-semibold tracking-wider text-black uppercase">
+                    <span>Laporan</span>
+                    <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    {ownerNav.laporan.map((item) => (
+                  <SidebarMenuSubItem key={item.title}>
+                    <SidebarMenuSubButton
                       asChild
                       isActive={pathname === item.url}
                       className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50"
@@ -328,13 +331,15 @@ export function OwnerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
                         <item.icon className="size-4" />
                         <span>{item.title}</span>
                       </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
                 ))}
-              </SidebarMenu>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
 
       {/* FOOTER: Logout & Settings */}

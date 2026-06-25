@@ -16,7 +16,14 @@ import {
   LogOut,
   Settings,
   ArrowUpCircle,
+  ChevronRight,
 } from "lucide-react";
+
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 
 import { ChangePasswordDialog } from "@/components/settings/change-password-dialog";
 
@@ -31,6 +38,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -105,13 +115,24 @@ export function SuperadminSidebar({
       <SidebarContent>
         {/* OVERVIEW */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-muted-foreground/70 uppercase">
-            Overview
-          </SidebarGroupLabel>
           <SidebarMenu>
-            {ownerNav.overview.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
+            <Collapsible
+              asChild
+              defaultOpen={true}
+              className="group/collapsible"
+            >
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent cursor-pointer text-xs font-semibold tracking-wider text-black uppercase">
+                    <span>Overview</span>
+                    <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    {ownerNav.overview.map((item) => (
+              <SidebarMenuSubItem key={item.title}>
+                <SidebarMenuSubButton
                   asChild
                   isActive={pathname === item.url}
                   className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50 cursor-pointer"
@@ -120,21 +141,36 @@ export function SuperadminSidebar({
                     <item.icon className="size-4" />
                     <span>{item.title}</span>
                   </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
             ))}
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
           </SidebarMenu>
         </SidebarGroup>
 
         {/* KELOLA */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-muted-foreground/70 uppercase">
-            Kelola
-          </SidebarGroupLabel>
           <SidebarMenu>
-            {ownerNav.kelola.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
+            <Collapsible
+              asChild
+              defaultOpen={true}
+              className="group/collapsible"
+            >
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton className="w-full justify-between hover:bg-sidebar-accent cursor-pointer text-xs font-semibold tracking-wider text-black uppercase">
+                    <span>Kelola</span>
+                    <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    {ownerNav.kelola.map((item) => (
+              <SidebarMenuSubItem key={item.title}>
+                <SidebarMenuSubButton
                   asChild
                   isActive={pathname === item.url}
                   className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50 cursor-pointer"
@@ -143,9 +179,13 @@ export function SuperadminSidebar({
                     <item.icon className="size-4" />
                     <span>{item.title}</span>
                   </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
             ))}
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
