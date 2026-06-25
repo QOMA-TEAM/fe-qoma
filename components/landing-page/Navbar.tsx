@@ -7,6 +7,7 @@ const navLinks = [
   { name: "Home", href: "/#home" },
   { name: "Feature", href: "/#feature" },
   { name: "Pricing", href: "/#pricing" },
+  { name: "Review", href: "/#reviews" },
   { name: "Contact", href: "/#contact" },
 ];
 
@@ -35,7 +36,7 @@ export function Navbar() {
           href="/register"
           className="px-6 py-2.5 bg-[#1D5E84] text-white rounded-full font-semibold text-sm hover:bg-[#154562] transition-all shadow-sm hover:shadow-md"
         >
-          Start Free
+          Start Here
         </Link>
       </div>
     </nav>

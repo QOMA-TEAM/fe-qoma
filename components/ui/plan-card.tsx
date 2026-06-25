@@ -75,18 +75,18 @@ export function PlanCard({
         {/* Price */}
         <div>
           {typeof price === "number" ? (
-            <div className="flex items-end gap-2">
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
               <span
                 className={cn(
-                  "text-4xl font-bold tracking-tight leading-none",
+                  "text-4xl md:text-3xl lg:text-4xl font-bold tracking-tight leading-none",
                   isActive ? "text-gray-900" : "text-gray-400"
                 )}
               >
                 {formatRupiah(price)}
               </span>
               {period && (
-                <span className="text-sm font-medium text-gray-500 mb-1">
-                  IDR / {period}
+                <span className="text-sm font-medium text-gray-500">
+                  / {period}
                 </span>
               )}
             </div>
