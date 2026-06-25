@@ -1,20 +1,14 @@
-"use client";
+import { SuperadminHeader } from "@/components/superadmin/header";
+import { DashboardContent } from "@/components/superadmin/dashboard/dashboard-content";
 
-import { AppSidebar } from "@/components/app-sidebar";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-
-export default function Page() {
+export default function DashboardPage() {
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "calc(var(--spacing) * 72)",
-          "--header-height": "calc(var(--spacing) * 12)",
-        } as React.CSSProperties
-      }
-    >
-      <AppSidebar variant="inset" />
-      <SidebarInset></SidebarInset>
-    </SidebarProvider>
+    <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
+      {/* Header */}
+      <SuperadminHeader username="Super Admin" notificationCount={3} />
+
+      {/* Page Content */}
+      <DashboardContent />
+    </div>
   );
 }
