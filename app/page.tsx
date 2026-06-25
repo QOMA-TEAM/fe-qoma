@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView } from "motion/react";
+import { motion, useInView } from "framer-motion";
 import { Navbar } from "@/components/landing-page/Navbar";
 import Image from "next/image";
 import Link from "next/link";

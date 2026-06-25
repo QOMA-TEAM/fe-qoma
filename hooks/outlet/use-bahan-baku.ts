@@ -4,10 +4,10 @@ import { toast } from "sonner";
 
 export const BAHAN_BAKU_OUTLET_QUERY_KEY = "bahan-baku-outlet-list";
 
-export function useBahanBakuList(page: number = 1, search: string = "", satuan: string = "all") {
+export function useBahanBakuList(page: number = 1, search: string = "", satuan: string = "all", per_page: number = 10) {
   return useQuery({
-    queryKey: [BAHAN_BAKU_OUTLET_QUERY_KEY, page, search, satuan],
-    queryFn: () => bahanBakuService.getList({ page, search, satuan: satuan === "all" ? undefined : satuan }),
+    queryKey: [BAHAN_BAKU_OUTLET_QUERY_KEY, page, search, satuan, per_page],
+    queryFn: () => bahanBakuService.getList({ page, search, satuan: satuan === "all" ? undefined : satuan, per_page }),
     placeholderData: (previousData) => previousData, // keep previous data while fetching new page
   });
 }

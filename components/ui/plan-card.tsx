@@ -58,9 +58,11 @@ export function PlanCard({
         className
       )}
     >
-      <CardContent className="p-6 md:p-8 flex flex-col flex-1 space-y-6">
-        {/* Header: Name + Badge */}
-        <div className="flex items-center justify-between gap-4">
+      <CardContent className="p-6 md:p-8 flex flex-col flex-1">
+        {/* Top Content: Stretches to push everything else down */}
+        <div className="flex-1 flex flex-col space-y-6">
+          {/* Header: Name + Badge */}
+          <div className="flex items-center justify-between gap-4">
           <h3
             className={cn(
               "text-2xl font-bold truncate",
@@ -101,11 +103,14 @@ export function PlanCard({
             {description}
           </div>
         )}
+        </div>
 
-        <Separator className={isActive ? "bg-gray-100" : "bg-gray-200"} />
+        {/* Bottom Content: Always at the bottom */}
+        <div className="mt-6 flex flex-col space-y-6">
+          <Separator className={isActive ? "bg-gray-100" : "bg-gray-200"} />
 
-        {/* Features — flex-1 supaya mendorong tombol ke bawah */}
-        <ul className="space-y-4 flex-1">
+          {/* Features */}
+          <ul className="space-y-4">
           {features.map((feature, index) => (
             <li key={index} className="flex items-center gap-3 text-sm">
               {feature.icon && (
@@ -126,6 +131,7 @@ export function PlanCard({
             {actionButton}
           </div>
         )}
+        </div>
       </CardContent>
     </Card>
   )
