@@ -64,8 +64,8 @@ export function OutletHeader() {
         ...(alerts?.stok_menipis?.map((a: any) => ({ ...a, type: 'stok_menipis' })) || [])
     ];
 
-    const extraNotifications = flattenedAlerts.map((alert) => {
-        const id = `alert-${alert.type}-${alert.bahan}`;
+    const extraNotifications = flattenedAlerts.map((alert, index) => {
+        const id = `alert-${alert.type}-${alert.bahan}-${index}`;
         return {
             id,
             title: alert.type === 'stok_menipis' ? 'Peringatan Stok' : 'Peringatan Kedaluwarsa',

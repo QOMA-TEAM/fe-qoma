@@ -160,7 +160,7 @@ const fadeUp = {
     visible: (delay: number) => ({
         opacity: 1,
         y: 0,
-        transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1], delay },
+        transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] as any, delay },
     }),
 }
 
@@ -170,7 +170,7 @@ const slideFromLeft = {
     visible: {
         opacity: 1,
         x: 0,
-        transition: { duration: 0.65, ease: [0.4, 0, 0.2, 1] },
+        transition: { duration: 0.65, ease: [0.4, 0, 0.2, 1] as any },
     },
 }
 
@@ -180,7 +180,7 @@ const slideFromRight = {
     visible: {
         opacity: 1,
         x: 0,
-        transition: { duration: 0.65, ease: [0.4, 0, 0.2, 1], delay: 0.12 },
+        transition: { duration: 0.65, ease: [0.4, 0, 0.2, 1] as any, delay: 0.12 },
     },
 }
 
