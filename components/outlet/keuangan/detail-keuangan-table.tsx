@@ -23,16 +23,9 @@ interface Props {
   page: number
   setPage: (page: number) => void
   isLoading: boolean
-  tipe: string
 }
 
-export function DetailKeuanganTable({ transaksi, meta, page, setPage, isLoading, tipe }: Props) {
-  // If `tipe` is not "semua", the backend is still returning all types for the page, 
-  // so client-side filtering might mess up pagination totals unless we do server-side filtering too.
-  // Assuming for now that we filter locally on the fetched page.
-  const filtered = tipe === "semua"
-    ? transaksi
-    : transaksi.filter((t) => t.tipe === tipe)
+export function DetailKeuanganTable({ transaksi, meta, page, setPage, isLoading }: Props) {
 
   const lastPage = meta ? meta.last_page : 1
   const currentPage = meta ? meta.current_page : 1
@@ -58,14 +51,14 @@ export function DetailKeuanganTable({ transaksi, meta, page, setPage, isLoading,
                   <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
                 </TableCell>
               </TableRow>
-            ) : filtered.length === 0 ? (
+            ) : transaksi.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center text-gray-400 py-12 text-sm">
                   Tidak ada transaksi ditemukan.
                 </TableCell>
               </TableRow>
             ) : (
-              filtered.map((row, idx) => (
+              transaksi.map((row, idx) => (
                 <TableRow key={`${row.id}-${idx}`} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
                   <TableCell className="text-gray-600 text-sm whitespace-nowrap">
                     {row.tanggal ? format(new Date(row.tanggal), "dd MMM yyyy", { locale: id }) : "-"}

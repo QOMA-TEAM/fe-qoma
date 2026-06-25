@@ -79,25 +79,12 @@ export function RiwayatPesananContent() {
   };
 
   const getTipeBadge = (row: Pesanan) => {
-    const tipe = row.tipe_pesanan;
     const metode = row.pembayaran?.metode;
-    
+    if (!metode) return <span className="text-gray-400 text-xs">-</span>;
     return (
-      <div className="flex flex-col gap-1 items-center">
-        {tipe === "dine_in" ? (
-          <span className="text-blue-600 dark:text-blue-400 font-medium text-[10px] border border-blue-200 dark:border-blue-900 px-2 py-0.5 rounded-full whitespace-nowrap">Dine In</span>
-        ) : tipe === "take_away" ? (
-          <span className="text-purple-600 dark:text-purple-400 font-medium text-[10px] border border-purple-200 dark:border-purple-900 px-2 py-0.5 rounded-full whitespace-nowrap">Take Away</span>
-        ) : (
-          <span className="text-gray-400 text-xs">-</span>
-        )}
-        
-        {metode && (
-          <span className="text-emerald-600 dark:text-emerald-400 font-bold text-[10px] bg-emerald-50 border border-emerald-100 dark:bg-emerald-900/20 px-2 py-0.5 rounded whitespace-nowrap uppercase">
-            {metode}
-          </span>
-        )}
-      </div>
+      <span className="text-emerald-600 dark:text-emerald-400 font-bold text-[10px] bg-emerald-50 border border-emerald-100 dark:bg-emerald-900/20 px-2 py-0.5 rounded whitespace-nowrap uppercase">
+        {metode}
+      </span>
     );
   };
 

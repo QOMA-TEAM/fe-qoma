@@ -40,8 +40,10 @@ api.interceptors.response.use(
       }
 
       if (error.response?.status === 403) {
-        // Tidak punya akses
-        window.location.href = "/forbidden";
+        // Tidak punya akses, kecuali error OUTLET_CLOSED yang dihandle di UI
+        if (error.response?.data?.code !== "OUTLET_CLOSED") {
+          window.location.href = "/forbidden";
+        }
       }
     }
 
