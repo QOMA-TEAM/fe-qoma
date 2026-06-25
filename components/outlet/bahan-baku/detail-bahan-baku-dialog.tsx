@@ -99,8 +99,16 @@ export function DetailBahanBakuDialog({ bahan, onClose }: DetailBahanBakuDialogP
             </h4>
             <div className="space-y-3 text-sm">
               <div>
-                <p className="text-xs text-gray-500 mb-0.5">Satuan</p>
+                <p className="text-xs text-gray-500 mb-0.5">Satuan Default</p>
                 <p className="text-gray-900 font-medium">{bahan.bahan_master.satuan}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-0.5">Satuan Penggunaan</p>
+                <p className="text-gray-900 font-medium">
+                  {(bahan.bahan_master.konversi_ke_dasar || 1) > 1 
+                    ? (bahan.bahan_master.satuan_dasar || bahan.bahan_master.satuan) 
+                    : bahan.bahan_master.satuan}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-gray-500 mb-0.5">Harga Default</p>
@@ -119,12 +127,12 @@ export function DetailBahanBakuDialog({ bahan, onClose }: DetailBahanBakuDialogP
               <div className="flex items-center gap-4">
                 <div className="flex-1">
                   <p className="text-xs text-gray-500 mb-0.5">Sisa Stok</p>
-                  <p className="text-gray-900 font-medium text-lg">{bahan.stok}</p>
+                  <p className="text-gray-900 font-medium text-lg">{bahan.stok_label || `${bahan.stok} ${bahan.bahan_master.satuan_dasar}`}</p>
                 </div>
                 <div className="w-px h-8 bg-gray-200" />
                 <div className="flex-1">
                   <p className="text-xs text-gray-500 mb-0.5">Min. Stok</p>
-                  <p className="text-gray-900 font-medium">{bahan.stok_minimum}</p>
+                  <p className="text-gray-900 font-medium">{bahan.stok_minimum_label || `${bahan.stok_minimum} ${bahan.bahan_master.satuan_dasar}`}</p>
                 </div>
               </div>
               

@@ -250,7 +250,9 @@ export function BahanBakuContent() {
                     {row._stok}
                   </TableCell>
                   <TableCell className="text-gray-600 text-sm text-center py-3">
-                    {row.bahan_master?.satuan || "-"}
+                    {(row.bahan_master?.konversi_ke_dasar || 1) > 1 
+                      ? (row.bahan_master?.satuan_dasar || row.bahan_master?.satuan || "-")
+                      : (row.bahan_master?.satuan || "-")}
                   </TableCell>
                   <TableCell className="text-gray-600 text-sm text-center py-3">
                     {formatDate(row._tanggal_masuk || null)}

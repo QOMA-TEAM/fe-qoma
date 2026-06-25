@@ -131,6 +131,7 @@ export default function LoginPage() {
                 type="email"
                 placeholder="Masukkan email"
                 required
+                suppressHydrationWarning
                 className="h-[46px] border-gray-200 bg-gray-50/30 text-gray-800 placeholder:text-gray-400 rounded-xl px-4 text-[15px] focus-visible:ring-1 focus-visible:ring-[#FF6600] focus-visible:border-[#FF6600]"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -149,6 +150,7 @@ export default function LoginPage() {
                 type="password"
                 placeholder="Masukkan password"
                 required
+                suppressHydrationWarning
                 className="h-[46px] border-gray-200 bg-gray-50/30 text-gray-800 placeholder:text-gray-400 rounded-xl px-4 text-[15px] focus-visible:ring-1 focus-visible:ring-[#FF6600] focus-visible:border-[#FF6600]"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -159,6 +161,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={isLoading}
+                suppressHydrationWarning
                 className="w-36 h-[46px] bg-[#3B82F6] hover:bg-blue-600 text-white rounded-[14px] font-semibold text-[17px] shadow-sm transition-all active:scale-95"
               >
                 {isLoading ? "Loading..." : "Login"}
