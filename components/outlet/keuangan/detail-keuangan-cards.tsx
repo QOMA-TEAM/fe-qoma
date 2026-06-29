@@ -32,7 +32,11 @@ export function DetailKeuanganCards({ cards, isLoading }: Props) {
   const totalPendapatan = cards?.total_pendapatan ?? 0
   const totalPengeluaran = cards?.total_pengeluaran ?? 0
   const totalKerugian = cards?.total_kerugian ?? 0
-  const totalKeuntungan = cards?.total_keuntungan ?? 0
+  const totalKeuntunganRaw = cards?.total_keuntungan ?? 0
+  
+  const displayKeuntungan = totalKeuntunganRaw > 0 ? totalKeuntunganRaw : 0
+  const displayKerugian = totalKeuntunganRaw < 0 ? Math.abs(totalKeuntunganRaw) : totalKerugian
+
   const status = cards?.status ?? "untung"
   const pesan = cards?.pesan ?? ""
 
@@ -53,55 +57,61 @@ export function DetailKeuanganCards({ cards, isLoading }: Props) {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Pendapatan: Blue */}
+        {/* Pendapatan */}
         <div className="bg-[#2A49B8] text-white p-6 rounded-2xl shadow-sm relative overflow-hidden">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="bg-white/20 p-2 rounded-lg">
-              <Store className="w-5 h-5 text-white" />
+          <div className="flex flex-col h-full justify-between">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-white/20 p-2 rounded-lg">
+                <Store className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm font-medium opacity-90">Total Pendapatan</span>
             </div>
-            <span className="text-sm font-medium opacity-90">Total Pendapatan</span>
+            <h3 className="text-2xl font-bold">{formatRupiah(totalPendapatan)}</h3>
+            <Store className="absolute -bottom-6 -right-4 w-28 h-28 text-white/10" />
           </div>
-          <h3 className="text-2xl font-bold">{formatRupiah(totalPendapatan)}</h3>
-          <Store className="absolute -bottom-6 -right-4 w-28 h-28 text-white/10" />
         </div>
 
-        {/* Keuntungan: Green */}
+        {/* Keuntungan */}
         <div className="bg-[#29A364] text-white p-6 rounded-2xl shadow-sm relative overflow-hidden">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="bg-white/20 p-2 rounded-lg">
-              <CircleDollarSign className="w-5 h-5 text-white" />
+          <div className="flex flex-col h-full justify-between">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-white/20 p-2 rounded-lg">
+                <CircleDollarSign className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm font-medium opacity-90">Total Keuntungan</span>
             </div>
-            <span className="text-sm font-medium opacity-90">Total Keuntungan</span>
+            <h3 className="text-2xl font-bold">{formatRupiah(displayKeuntungan)}</h3>
+            <CircleDollarSign className="absolute -bottom-6 -right-4 w-28 h-28 text-white/10" />
           </div>
-          <h3 className="text-2xl font-bold">{formatRupiah(Math.max(0, totalKeuntungan))}</h3>
-          <CircleDollarSign className="absolute -bottom-6 -right-4 w-28 h-28 text-white/10" />
         </div>
       
-        {/* Pengeluaran: Orange */}
+        {/* Pengeluaran */}
         <div className="bg-[#F29C38] text-white p-6 rounded-2xl shadow-sm relative overflow-hidden">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="bg-white/20 p-2 rounded-lg">
-              <Coins className="w-5 h-5 text-white" />
+          <div className="flex flex-col h-full justify-between">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-white/20 p-2 rounded-lg">
+                <Coins className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm font-medium opacity-90">Total Pengeluaran</span>
             </div>
-            <span className="text-sm font-medium opacity-90">Total Pengeluaran</span>
+            <h3 className="text-2xl font-bold">{formatRupiah(totalPengeluaran)}</h3>
+            <Coins className="absolute -bottom-6 -right-4 w-28 h-28 text-white/10" />
           </div>
-          <h3 className="text-2xl font-bold">{formatRupiah(totalPengeluaran)}</h3>
-          <Coins className="absolute -bottom-6 -right-4 w-28 h-28 text-white/10" />
         </div>
 
-        {/* Kerugian: Red */}
+        {/* Kerugian */}
         <div className="bg-rose-500 text-white p-6 rounded-2xl shadow-sm relative overflow-hidden">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="bg-white/20 p-2 rounded-lg">
-              <TrendingDown className="w-5 h-5 text-white" />
+          <div className="flex flex-col h-full justify-between">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-white/20 p-2 rounded-lg">
+                <TrendingDown className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm font-medium opacity-90">Total Kerugian</span>
             </div>
-            <span className="text-sm font-medium opacity-90">Total Kerugian</span>
+            <h3 className="text-2xl font-bold">{formatRupiah(displayKerugian)}</h3>
+            <TrendingDown className="absolute -bottom-6 -right-4 w-28 h-28 text-white/10" />
           </div>
-          <h3 className="text-2xl font-bold">{formatRupiah(totalKerugian)}</h3>
-          <TrendingDown className="absolute -bottom-6 -right-4 w-28 h-28 text-white/10" />
         </div>
-
-        
       </div>
     </div>
   )
