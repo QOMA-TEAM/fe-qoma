@@ -397,18 +397,7 @@ export function UserDashboardContent() {
           <div className="flex items-center justify-between h-16">
             {/* Logo + Name */}
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => {
-                  if (view === "main") {
-                    window.history.back();
-                  } else {
-                    setView("main");
-                  }
-                }}
-                className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 transition"
-              >
-                <ChevronRight className="w-5 h-5 text-gray-700 rotate-180" />
-              </button>
+
               <div className="w-9 h-9 rounded-full overflow-hidden bg-amber-50 border">
                 <Image
                   src={menuResponse?.outlet?.gambar_icon || "/images/coffee-cat-logo.png"}
