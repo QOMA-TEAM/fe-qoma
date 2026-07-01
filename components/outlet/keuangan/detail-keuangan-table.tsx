@@ -23,19 +23,12 @@ interface Props {
   page: number
   setPage: (page: number) => void
   isLoading: boolean
-  tipe: string
 }
 
-export function DetailKeuanganTable({ transaksi, meta, page, setPage, isLoading, tipe }: Props) {
-  // If `tipe` is not "semua", the backend is still returning all types for the page, 
-  // so client-side filtering might mess up pagination totals unless we do server-side filtering too.
-  // Assuming for now that we filter locally on the fetched page.
-  const filtered = tipe === "semua"
-    ? transaksi
-    : transaksi.filter((t) => t.tipe === tipe)
+export function DetailKeuanganTable({ transaksi, meta, page, setPage, isLoading }: Props) {
 
   // Sort by date and time descending (newest first)
-  const sorted = [...filtered].sort((a, b) => {
+  const sorted = [...transaksi].sort((a, b) => {
     const timeA = new Date(`${a.tanggal}T${a.waktu || "00:00:00"}`).getTime()
     const timeB = new Date(`${b.tanggal}T${b.waktu || "00:00:00"}`).getTime()
     // if time is invalid (NaN), put them at the end

@@ -46,7 +46,7 @@ export function AvailablePlanCards() {
             )}
           </div>
           
-          <p className="text-gray-500 text-sm mb-6">{plan.deskripsi}</p>
+          <p className="text-gray-500 text-sm mb-6 h-10 line-clamp-2">{plan.deskripsi}</p>
 
           <button 
             onClick={() => {

@@ -76,50 +76,66 @@ export function OrderCard({ order, onClick, className }: OrderCardProps) {
       <div 
         onClick={isCancelled ? undefined : onClick}
         className={cn(
-          "flex h-[112px] rounded-[16px] overflow-hidden shadow-sm transition-all",
+          "flex min-h-[112px] rounded-2xl overflow-hidden shadow-sm transition-all border border-gray-100",
           isCancelled
-            ? "bg-gray-400 cursor-default opacity-70"
-            : "bg-[#1a5f7a] cursor-pointer hover:ring-2 ring-offset-2 ring-[#1a5f7a]",
+            ? "bg-gray-50 cursor-default opacity-80"
+            : "bg-white cursor-pointer hover:shadow-md hover:border-[#1a5f7a]/30",
           className
         )}
       >
-        {/* Left Icon Strip */}
-        <div className="w-16 flex-shrink-0 flex items-center justify-center">
-          <UtensilsCrossed className="w-6 h-6 text-white" />
-        </div>
+        {/* Left Color Strip */}
+        <div className={cn(
+          "w-2 flex-shrink-0",
+          isCancelled ? "bg-gray-300" : "bg-[#1a5f7a]" 
+        )} />
 
         {/* Right Content */}
-        <div className="flex-1 bg-white m-1 rounded-[12px] p-4 flex flex-col justify-center">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-semibold text-[#1a5f7a]">
-              ID : {shortId}
-            </span>
+        <div className="flex-1 p-4 sm:p-5 flex flex-col justify-between gap-3">
+          {/* Top Header: ID & Badge */}
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className={cn(
+                "p-2 rounded-xl flex items-center justify-center",
+                isCancelled ? "bg-gray-200 text-gray-500" : "bg-[#1a5f7a]/10 text-[#1a5f7a]"
+              )}>
+                <UtensilsCrossed className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-xs font-medium text-gray-500 block leading-tight">ID Pesanan</span>
+                <span className="text-sm font-bold text-gray-900">{shortId}</span>
+              </div>
+            </div>
             <span
-              className={cn("px-2.5 py-1 text-[10px] font-bold text-white rounded-md tracking-wider shadow-sm", currentBadge.cls)}
+              className={cn("px-3 py-1 text-[11px] font-bold text-white rounded-full tracking-wide shadow-sm", currentBadge.cls)}
             >
               {currentBadge.label}
             </span>
           </div>
 
-          <div className="flex items-center justify-between">
+          {/* Bottom Details & Actions */}
+          <div className="flex items-end justify-between mt-1">
             <div className="space-y-1.5 flex-1">
-              <div className="flex items-center gap-4 text-sm">
-                <span className="text-[#1a5f7a] font-medium w-16">Nama</span>
-                <span className="text-[#1a5f7a] font-medium truncate flex-1 pr-2">{order.nama_pelanggan}</span>
+              <div className="flex items-center gap-3 text-sm">
+                <span className="text-gray-500 font-medium w-14">Nama</span>
+                <span className="text-gray-900 font-semibold truncate flex-1 pr-2">{order.nama_pelanggan}</span>
               </div>
-              <div className="flex items-center gap-4 text-sm">
-                <span className="text-[#1a5f7a] font-medium w-16">No. Meja</span>
-                <span className="text-[#1a5f7a] font-medium">{order.nomor_meja}</span>
+              <div className="flex items-center gap-3 text-sm">
+                <span className="text-gray-500 font-medium w-14">Meja</span>
+                <span className="text-gray-900 font-semibold text-lg">{order.nomor_meja}</span>
               </div>
             </div>
-            <div className="flex flex-col items-end justify-between gap-2">
+            
+            <div className="flex items-center gap-2 sm:gap-3">
               {order.status === "pending" && timeLeft !== null && (
                 <div className={cn(
-                  "flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-md",
-                  timeLeft <= 60 ? "text-red-700 bg-red-100" : "text-orange-700 bg-orange-100"
+                  "flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border",
+                  timeLeft <= 60 
+                    ? "text-red-700 bg-red-50 border-red-200" 
+                    : "text-orange-700 bg-orange-50 border-orange-200"
                 )}>
-                  {timeLeft === 0 ? <AlertCircle className="size-3.5" /> : <Clock className="size-3.5" />}
-                  <span>{timeLeft === 0 ? "Waktu Habis" : `Sisa Waktu: ${formatTime(timeLeft)}`}</span>
+                  {timeLeft === 0 ? <AlertCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
+                  <span className="hidden sm:inline">{timeLeft === 0 ? "Habis" : "Sisa Waktu:"}</span>
+                  <span>{timeLeft === 0 ? "" : formatTime(timeLeft)}</span>
                 </div>
               )}
 
@@ -131,7 +147,7 @@ export function OrderCard({ order, onClick, className }: OrderCardProps) {
                     setShowCancelConfirm(true);
                   }}
                   disabled={isCanceling}
-                  className="p-2 text-[#1a5f7a]/60 hover:text-[#ff6b00] hover:bg-orange-50 rounded-lg transition-colors cursor-pointer flex-shrink-0 disabled:opacity-50"
+                  className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer flex-shrink-0 disabled:opacity-50"
                   title="Batalkan Pesanan"
                 >
                   <Trash2 className="w-[18px] h-[18px]" />

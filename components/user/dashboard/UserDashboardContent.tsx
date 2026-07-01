@@ -49,7 +49,7 @@ export function UserDashboardContent() {
   const mejaId = searchParams.get("meja_id");
 
   const { data: validasiData, isLoading: isValidating, error: validasiError } = useValidasiMeja(outletId, mejaId);
-  const { data: menuResponse, isLoading: isMenuLoading } = usePublicMenus(validasiData?.outlet.id || null);
+  const { data: menuResponse, isLoading: isMenuLoading, error: menuError } = usePublicMenus(validasiData?.outlet.id || null);
   const submitOrder = useSubmitOrder();
 
   // ── Modals ──
@@ -402,12 +402,32 @@ export function UserDashboardContent() {
     );
   }
 
+  const validasiErrorData = (validasiError as any)?.response?.data;
+  const menuErrorData = (menuError as any)?.response?.data;
+  const isClosed = validasiErrorData?.code === "OUTLET_CLOSED" || menuErrorData?.code === "OUTLET_CLOSED";
+
+  if (isClosed) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-orange-500 to-orange-400 flex items-center justify-center text-center px-6">
+        <div className="bg-white p-8 rounded-3xl shadow-xl max-w-sm w-full flex flex-col items-center">
+          <div className="w-20 h-20 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-orange-100">
+            <Clock className="w-10 h-10" />
+          </div>
+          <h2 className="text-2xl font-extrabold text-gray-800 mb-2 uppercase tracking-wide">Outlet Tutup</h2>
+          <p className="text-gray-500 font-medium text-sm leading-relaxed">
+            {validasiErrorData?.message || menuErrorData?.message || "Mohon maaf, outlet sedang tidak beroperasi saat ini. Silakan datang kembali nanti."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (validasiError || !validasiData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100 text-center px-4">
         <div>
           <h2 className="text-xl font-bold text-gray-800 mb-2">Gagal Memvalidasi Meja</h2>
-          <p className="text-sm text-gray-500">{(validasiError as any)?.response?.data?.message || "Terjadi kesalahan. Silakan coba scan ulang."}</p>
+          <p className="text-sm text-gray-500">{validasiErrorData?.message || "Terjadi kesalahan. Silakan coba scan ulang."}</p>
         </div>
       </div>
     );
@@ -446,18 +466,7 @@ export function UserDashboardContent() {
           <div className="flex items-center justify-between h-14">
             {/* Logo + Name */}
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => {
-                  if (view === "main") {
-                    window.history.back();
-                  } else {
-                    setView("main");
-                  }
-                }}
-                className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 transition"
-              >
-                <ChevronRight className="w-5 h-5 text-gray-700 rotate-180" />
-              </button>
+
               <div className="w-9 h-9 rounded-full overflow-hidden bg-amber-50 border">
                 <Image
                   src={menuResponse?.outlet?.gambar_icon || "/images/coffee-cat-logo.png"}

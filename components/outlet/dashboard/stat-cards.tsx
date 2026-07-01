@@ -9,8 +9,10 @@ interface OutletStatCardsProps {
 export function OutletStatCards({ keuangan }: OutletStatCardsProps) {
   const totalPendapatan = keuangan?.total_pendapatan ?? 0;
   const totalPengeluaran = keuangan?.total_pengeluaran ?? 0;
-  const totalKerugian = keuangan?.total_kerugian ?? 0;
-  const totalKeuntungan = keuangan?.total_keuntungan ?? 0;
+  const totalKeuntunganRaw = keuangan?.total_keuntungan ?? 0;
+  
+  const displayKeuntungan = totalKeuntunganRaw > 0 ? totalKeuntunganRaw : 0;
+  const displayKerugian = totalKeuntunganRaw < 0 ? Math.abs(totalKeuntunganRaw) : (keuangan?.total_kerugian ?? 0);
 
   return (
     <div className="space-y-4">
@@ -36,7 +38,7 @@ export function OutletStatCards({ keuangan }: OutletStatCardsProps) {
             </div>
             <span className="text-sm font-medium opacity-90">Total Keuntungan</span>
           </div>
-          <h3 className="text-2xl font-bold">{formatRupiah(Math.max(0, totalKeuntungan))}</h3>
+          <h3 className="text-2xl font-bold">{formatRupiah(displayKeuntungan)}</h3>
           <CircleDollarSign className="absolute -bottom-6 -right-4 w-28 h-28 text-white/10" />
         </div>
 
@@ -60,7 +62,7 @@ export function OutletStatCards({ keuangan }: OutletStatCardsProps) {
             </div>
             <span className="text-sm font-medium opacity-90">Total Kerugian</span>
           </div>
-          <h3 className="text-2xl font-bold">{formatRupiah(totalKerugian)}</h3>
+          <h3 className="text-2xl font-bold">{formatRupiah(displayKerugian)}</h3>
           <TrendingDown className="absolute -bottom-6 -right-4 w-28 h-28 text-white/10" />
         </div>
 

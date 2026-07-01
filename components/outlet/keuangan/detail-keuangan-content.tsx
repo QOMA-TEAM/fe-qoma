@@ -15,7 +15,7 @@ export function DetailKeuanganContent() {
   const handleRangeChange = (v: string) => { setRange(v); setPage(1); }
   const handleTipeChange = (v: string) => { setTipe(v); setPage(1); }
 
-  const { data, isLoading } = useOutletKeuangan(range, page)
+  const { data, isLoading } = useOutletKeuangan(range, page, tipe)
 
   const cards = data?.data?.cards
   const transaksi = data?.data?.transaksi?.data ?? []
@@ -50,7 +50,6 @@ export function DetailKeuanganContent() {
           page={page}
           setPage={setPage}
           isLoading={isLoading} 
-          tipe={tipe} 
         />
       </div>
     </div>

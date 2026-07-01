@@ -125,7 +125,7 @@ export function MenuTable({ search, selectedCategoryId }: MenuTableProps) {
                       </button>
                       <button 
                         onClick={() => setDeleteTarget(row)} 
-                        className="flex items-center justify-center size-7 bg-[#ff6b00] hover:bg-[#e65a00] text-white rounded-md transition-colors cursor-pointer"
+                        className="flex items-center justify-center size-7 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors cursor-pointer"
                         title="Hapus"
                       >
                         <Trash2 className="size-4" />
@@ -200,6 +200,11 @@ export function MenuTable({ search, selectedCategoryId }: MenuTableProps) {
             nama: b.nama,
             jumlah: Number(b.pivot.jumlah_pakai),
             satuan: b.satuan
+          })) || [],
+          addons: editItem.addons?.map(a => ({
+            id: a.id,
+            nama: a.nama,
+            harga: Number(a.harga)
           })) || [],
           gambarUrl: editItem.gambar ? (editItem.gambar.startsWith('http') ? editItem.gambar : `http://localhost:8000/storage/${editItem.gambar}`) : undefined,
         } : undefined}

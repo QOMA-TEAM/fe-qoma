@@ -32,7 +32,7 @@ export function ActivePlanCard() {
         )}
       </div>
       
-      <p className="text-gray-500 text-sm mb-6">{activeSub.plan.deskripsi}</p>
+      <p className="text-gray-500 text-sm mb-6 h-10 line-clamp-2">{activeSub.plan.deskripsi}</p>
 
       <button disabled className="w-full text-sm font-semibold py-3 px-4 rounded-xl border border-gray-300 text-gray-700 bg-transparent mb-8">
         {isPending ? 'Menunggu Pembayaran' : 'Paket Anda saat ini'}

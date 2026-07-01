@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -7,12 +8,27 @@ const navLinks = [
   { name: "Home", href: "/#home" },
   { name: "Feature", href: "/#feature" },
   { name: "Pricing", href: "/#pricing" },
+  { name: "Review", href: "/#reviews" },
   { name: "Contact", href: "/#contact" },
 ];
 
 export function Navbar() {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <nav className="w-full flex items-center justify-between py-6 px-8 md:px-16 fixed top-0 left-0 z-50 bg-white/40 backdrop-blur-sm">
+    <nav
+      className={`w-full flex items-center justify-between py-6 px-8 md:px-16 fixed top-0 left-0 z-50 transition-all duration-300 ${isScrolled ? "bg-white/60 backdrop-blur-md shadow-sm py-4" : "bg-transparent"
+        }`}
+    >
       <div className="flex items-center gap-12">
         {/* Logo */}
         <Link href="/" className="flex items-center justify-center">
@@ -38,6 +54,7 @@ export function Navbar() {
       </div>
 
       {/* Right side - Start Free Button */}
+
     </nav>
   );
 }

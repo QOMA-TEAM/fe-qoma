@@ -22,6 +22,7 @@ import { useState, useRef, useEffect } from "react"
 import { useKategori } from "@/hooks/owner/use-kategori"
 import { useBahanBaku } from "@/hooks/owner/use-bahan-baku"
 import { useAddMenu, useUpdateMenu, useDeleteMenu } from "@/hooks/owner/use-menu"
+import { useAddons } from "@/hooks/owner/use-addon"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 
@@ -43,6 +44,7 @@ interface MenuFormDialogProps {
     harga: number
     keterangan: string
     bahanBaku: BahanBakuItem[]
+    addons?: { id: string, nama: string, harga: number }[]
     gambarUrl?: string
   }
 }
@@ -58,9 +60,11 @@ export function MenuFormDialog({
   // Data Fetching
   const { data: kategoriResponse } = useKategori(1, "", 1000)
   const { data: bahanBakuResponse } = useBahanBaku(1, "", 1000)
+  const { data: addonsResponse } = useAddons(1, 1000)
   
   const kategoriOptions = kategoriResponse?.data || []
   const allBahanBaku = bahanBakuResponse?.data || []
+  const allAddons = addonsResponse?.data || []
 
   // Mutations
   const addMutation = useAddMenu()
@@ -76,7 +80,9 @@ export function MenuFormDialog({
   const [keterangan, setKeterangan] = useState("")
   const [bahanBaku, setBahanBaku] = useState<BahanBakuItem[]>([])
   const [searchBahan, setSearchBahan] = useState("")
+  const [searchAddon, setSearchAddon] = useState("")
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [addonIds, setAddonIds] = useState<string[]>([])
 
   useEffect(() => {
     if (open && mode === "edit" && initialData) {
@@ -85,18 +91,22 @@ export function MenuFormDialog({
       setHarga(initialData.harga.toString())
       setKeterangan(initialData.keterangan || "")
       setBahanBaku(initialData.bahanBaku)
+      setAddonIds(initialData.addons?.map(a => a.id) || [])
       setGambarPreview(initialData.gambarUrl ?? null)
       setGambarFile(null)
       setSearchBahan("")
+      setSearchAddon("")
     } else if (open && mode === "tambah") {
       setNamaMenu("")
       setKategoriId("")
       setHarga("")
       setKeterangan("")
       setBahanBaku([])
+      setAddonIds([])
       setGambarPreview(null)
       setGambarFile(null)
       setSearchBahan("")
+      setSearchAddon("")
     }
   }, [open, mode, initialData])
 
@@ -126,8 +136,12 @@ export function MenuFormDialog({
     )
   }
 
-  const filteredBahan = allBahanBaku.filter((b) =>
+  const filteredBahan = allBahanBaku.filter((b: any) =>
     b.nama.toLowerCase().includes(searchBahan.toLowerCase())
+  )
+
+  const filteredAddon = allAddons.filter((a: any) =>
+    a.nama.toLowerCase().includes(searchAddon.toLowerCase())
   )
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -153,6 +167,14 @@ export function MenuFormDialog({
       formData.append(`bahan_baku[${index}][bahan_master_id]`, item.bahan_master_id)
       formData.append(`bahan_baku[${index}][jumlah_pakai]`, item.jumlah.toString())
     })
+
+    if (addonIds.length > 0) {
+      addonIds.forEach((id, index) => {
+        formData.append(`addon_ids[${index}]`, id)
+      })
+    } else {
+      formData.append('clear_addons', '1')
+    }
 
     if (mode === "tambah") {
       addMutation.mutate(formData, {
@@ -363,6 +385,60 @@ export function MenuFormDialog({
                   onChange={(e) => setKeterangan(e.target.value)}
                   className="rounded-lg border-gray-300"
                 />
+              </div>
+
+              {/* Addon Selection */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between ">
+                  <Label className="text-sm font-semibold text-gray-700">Pilihan Addon</Label>
+                  <div className="relative">
+                    <Input
+                      placeholder="Cari..."
+                      value={searchAddon}
+                      onChange={(e) => setSearchAddon(e.target.value)}
+                      className="pr-8 h-8 w-32 text-xs border-gray-200 rounded-full"
+                    />
+                    <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" />
+                  </div>
+                </div>
+                <div className="border border-gray-200 rounded-lg p-3 max-h-[160px] overflow-y-auto space-y-2 bg-gray-50/50">
+                  {filteredAddon.length === 0 ? (
+                    <p className="text-xs text-gray-400 text-center py-2">Addon tidak ditemukan.</p>
+                  ) : (
+                    filteredAddon.map((addon: any) => {
+                      const isSelected = addonIds.includes(addon.id)
+                      return (
+                        <label
+                          key={addon.id}
+                          className={`flex items-center justify-between p-2.5 rounded-md border cursor-pointer transition-colors ${
+                            isSelected ? "border-emerald-500 bg-emerald-50/80" : "border-gray-200 bg-white hover:border-gray-300"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setAddonIds([...addonIds, addon.id])
+                                } else {
+                                  setAddonIds(addonIds.filter(id => id !== addon.id))
+                                }
+                              }}
+                              className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer"
+                            />
+                            <span className={`text-sm font-medium ${isSelected ? "text-emerald-800" : "text-gray-700"}`}>
+                              {addon.nama}
+                            </span>
+                          </div>
+                          <span className="text-xs font-semibold text-gray-500">
+                            +Rp {addon.harga.toLocaleString('id-ID')}
+                          </span>
+                        </label>
+                      )
+                    })
+                  )}
+                </div>
               </div>
             </div>
           </div>

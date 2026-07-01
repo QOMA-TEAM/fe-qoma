@@ -4,6 +4,8 @@ export interface BahanMaster {
   id: string;
   nama: string;
   satuan: string;
+  satuan_dasar?: string;
+  konversi_ke_dasar?: number;
   harga_default?: string | number;
   gambar: string | null;
 }
@@ -11,7 +13,11 @@ export interface BahanMaster {
 export interface BahanOutlet {
   id: string;
   stok: number;
+  stok_display?: number;
+  stok_label?: string;
   stok_minimum: number;
+  stok_minimum_display?: number;
+  stok_minimum_label?: string;
   batch_terdekat_expired: {
     sisa: number;
     expired_date: string | null;
@@ -67,6 +73,7 @@ export const bahanBakuService = {
     satuan?: string;
     sort_by?: string;
     sort_dir?: string;
+    per_page?: number;
   }): Promise<BahanOutletResponse> => {
     const response = await axiosInstance.get("/outlet/bahan-baku", { params });
     return response.data;
