@@ -34,6 +34,16 @@ export function DetailKeuanganTable({ transaksi, meta, page, setPage, isLoading,
     ? transaksi
     : transaksi.filter((t) => t.tipe === tipe)
 
+  // Sort by date and time descending (newest first)
+  const sorted = [...filtered].sort((a, b) => {
+    const timeA = new Date(`${a.tanggal}T${a.waktu || "00:00:00"}`).getTime()
+    const timeB = new Date(`${b.tanggal}T${b.waktu || "00:00:00"}`).getTime()
+    // if time is invalid (NaN), put them at the end
+    if (isNaN(timeA)) return 1
+    if (isNaN(timeB)) return -1
+    return timeB - timeA
+  })
+
   const lastPage = meta ? meta.last_page : 1
   const currentPage = meta ? meta.current_page : 1
 
@@ -58,14 +68,14 @@ export function DetailKeuanganTable({ transaksi, meta, page, setPage, isLoading,
                   <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
                 </TableCell>
               </TableRow>
-            ) : filtered.length === 0 ? (
+            ) : sorted.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center text-gray-400 py-12 text-sm">
                   Tidak ada transaksi ditemukan.
                 </TableCell>
               </TableRow>
             ) : (
-              filtered.map((row, idx) => (
+              sorted.map((row, idx) => (
                 <TableRow key={`${row.id}-${idx}`} className="hover:bg-gray-50/50 border-gray-100 transition-colors">
                   <TableCell className="text-gray-600 text-sm whitespace-nowrap">
                     {row.tanggal ? format(new Date(row.tanggal), "dd MMM yyyy", { locale: id }) : "-"}

@@ -1,10 +1,34 @@
 import { Navbar } from "@/components/landing-page/Navbar";
 import Image from "next/image";
 import Link from "next/link";
-import { PricingSection } from "@/components/landing-page/pricing-card";
 
 
-export default function Home() {
+interface Plan {
+  id: string;
+  nama_plan: string;
+  harga: number;
+  batas_outlet: number;
+  durasi_hari: number;
+  deskripsi: string;
+}
+
+async function getPlans(): Promise<Plan[]> {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/public/landing/plans`, {
+      next: { revalidate: 60 }
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data || [];
+  } catch (error) {
+    console.error("Failed to fetch plans", error);
+    return [];
+  }
+}
+
+export default async function Home() {
+  const plans = await getPlans();
+
   return (
     <div className="min-h-screen bg-[#fff4ec] font-sans relative overflow-x-hidden">
       <Navbar />
@@ -85,7 +109,55 @@ export default function Home() {
         </section>
 
         {/* --- Pricing Section --- */}
-        <PricingSection />
+        <section id="pricing" className="w-full bg-white py-24 border-t border-gray-100">
+          <div className="w-full max-w-6xl mx-auto px-6">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">Pricing</h2>
+              <p className="text-gray-500 text-lg">Using basic skills you can improve your business stuff with<br/>Around</p>
+            </div>
+            
+            <div className="flex flex-col md:flex-row items-center justify-center gap-8 max-w-4xl mx-auto flex-wrap">
+              {plans.length > 0 ? (
+                plans.map((plan, index) => {
+                  const isFree = plan.harga === 0;
+                  return (
+                    <div key={plan.id} className={`${isFree ? 'bg-[#fff4ec] border-2 border-[#ff6b00] shadow-lg' : 'bg-[#eef2f6] border border-gray-200 shadow-md'} rounded-3xl p-10 w-full md:w-1/2 relative transform hover:-translate-y-1 transition-transform`}>
+                      <h3 className="text-2xl font-bold text-gray-900">{plan.nama_plan}</h3>
+                      <p className="text-sm text-gray-500 mb-6">Plan</p>
+                      <div className="flex items-end gap-1 mb-2">
+                        <span className="text-4xl font-bold text-gray-900">
+                          Rp. {new Intl.NumberFormat('id-ID').format(plan.harga)}
+                        </span>
+                      </div>
+                      <p className="text-gray-500 text-sm mb-8">Per {plan.durasi_hari} Hari</p>
+                      
+                      <div className="w-full h-px bg-gray-300 mb-8"></div>
+                      
+                      <ul className="mb-10 space-y-4 text-gray-600">
+                        <li className="flex items-center gap-3">
+                          <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
+                          {plan.batas_outlet === 0 ? "Unlimited" : plan.batas_outlet} Outlet
+                        </li>
+                        {plan.deskripsi && (
+                          <li className="flex items-center gap-3">
+                            <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
+                            {plan.deskripsi}
+                          </li>
+                        )}
+                      </ul>
+                      
+                      <Link href="/register" className={`block w-full py-3.5 px-4 ${isFree ? 'bg-[#ff6b00] hover:bg-[#e65a00]' : 'bg-[#2563eb] hover:bg-[#1d4ed8]'} text-white text-center font-semibold rounded-xl transition-colors`}>
+                        Get Start
+                      </Link>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-gray-500 text-center w-full py-10">Memuat paket...</div>
+              )}
+            </div>
+          </div>
+        </section>
 
         {/* --- Contact / Footer --- */}
         <footer id="contact" className="w-full bg-white pt-16 pb-8 border-t border-gray-200">
