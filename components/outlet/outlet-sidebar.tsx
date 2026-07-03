@@ -30,6 +30,7 @@ import {
 
 import { ChangePasswordDialog } from "@/components/settings/change-password-dialog"
 import { OutletProfileSettings } from "./outlet-profile-settings"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 
 import {
   Sidebar,
@@ -108,6 +109,7 @@ export function OutletSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
   const pathname = usePathname()
   const router = useRouter()
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false)
   const handleLogout = () => {
     localStorage.removeItem("token")
     localStorage.removeItem("role")
@@ -301,7 +303,7 @@ export function OutletSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="hover:bg-red-50 hover:text-red-600 cursor-pointer">
-              <button type="button" className="w-full" onClick={handleLogout}>
+              <button type="button" className="w-full cursor-pointer" onClick={() => setIsLogoutOpen(true)}>
                 <Avatar className="size-7">
                   <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-semibold">
                     OU
@@ -320,6 +322,16 @@ export function OutletSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
       <ChangePasswordDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
         <OutletProfileSettings />
       </ChangePasswordDialog>
+      <ConfirmDialog
+        open={isLogoutOpen}
+        onOpenChange={setIsLogoutOpen}
+        title="Konfirmasi Logout"
+        description="Apakah Anda yakin ingin keluar dari sistem?"
+        confirmLabel="Ya, Logout"
+        cancelLabel="Batal"
+        variant="warning"
+        onConfirm={handleLogout}
+      />
     </Sidebar>
   )
 }

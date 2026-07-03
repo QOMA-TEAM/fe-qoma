@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/collapsible"
 
 import { ChangePasswordDialog } from "@/components/settings/change-password-dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 import {
   Sidebar,
@@ -82,6 +83,7 @@ export function SuperadminSidebar({
   const pathname = usePathname();
   const router = useRouter();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -206,7 +208,7 @@ export function SuperadminSidebar({
               asChild
               className="hover:bg-red-50 hover:text-red-600 cursor-pointer"
             >
-              <button type="button" className="w-full cursor-pointer" onClick={handleLogout}>
+              <button type="button" className="w-full cursor-pointer" onClick={() => setIsLogoutOpen(true)}>
                 <Avatar className="size-7">
                   <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-semibold">
                     SA
@@ -225,6 +227,16 @@ export function SuperadminSidebar({
       <ChangePasswordDialog 
         open={isSettingsOpen} 
         onOpenChange={setIsSettingsOpen} 
+      />
+      <ConfirmDialog
+        open={isLogoutOpen}
+        onOpenChange={setIsLogoutOpen}
+        title="Konfirmasi Logout"
+        description="Apakah Anda yakin ingin keluar dari sistem?"
+        confirmLabel="Ya, Logout"
+        cancelLabel="Batal"
+        variant="warning"
+        onConfirm={handleLogout}
       />
     </Sidebar>
   );
