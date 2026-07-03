@@ -43,17 +43,23 @@ export function Navbar() {
             </Link>
           ))}
         </div>
-        <div className="flex items-center">
-          <Link
-            href="/register"
-            className="px-6 py-2.5 bg-[#1D5E84] text-white rounded-full font-semibold text-sm hover:bg-[#154562] transition-all shadow-sm hover:shadow-md"
-          >
-            Start Free
-          </Link>
-        </div>
       </div>
 
-      {/* Right side - Start Free Button */}
+      {/* Right side - Login and Start Free Button */}
+      <div className="flex items-center gap-4">
+        <Link
+          href="/register"
+          className="px-6 py-2.5 bg-[#1D5E84] text-white rounded-full font-semibold text-sm hover:bg-[#154562] transition-all shadow-sm hover:shadow-md"
+        >
+          Start Free
+        </Link>
+        <Link
+          href="/login"
+          className="px-6 py-2.5 bg-[#FB6300] text-white rounded-full font-semibold text-sm hover:bg-[#154562] transition-all"
+        >
+          Login
+        </Link>
+      </div>
 
     </nav>
   );
