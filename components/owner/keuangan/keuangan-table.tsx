@@ -23,8 +23,17 @@ interface KeuanganTableProps {
 export function KeuanganTable({ page, setPage, range, tipe, outletId }: KeuanganTableProps) {
   const { data: listResponse, isLoading } = useKeuanganList(page, range, tipe, outletId || undefined, 15)
   
-  const transactions = listResponse?.data || []
+  const listData = listResponse?.data || []
   const meta = listResponse?.meta
+
+  // Sort by date and time descending (newest first)
+  const transactions = [...listData].sort((a, b) => {
+    const timeA = new Date(`${a.tanggal}T${a.waktu || "00:00:00"}`).getTime()
+    const timeB = new Date(`${b.tanggal}T${b.waktu || "00:00:00"}`).getTime()
+    if (isNaN(timeA)) return 1
+    if (isNaN(timeB)) return -1
+    return timeB - timeA
+  })
 
   return (
     <>

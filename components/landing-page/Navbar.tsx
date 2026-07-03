@@ -25,10 +25,9 @@ export function Navbar() {
   }, []);
 
   return (
-    <nav 
-      className={`w-full flex items-center justify-between py-6 px-8 md:px-16 fixed top-0 left-0 z-50 transition-all duration-300 ${
-        isScrolled ? "bg-white/60 backdrop-blur-md shadow-sm py-4" : "bg-transparent"
-      }`}
+    <nav
+      className={`w-full flex items-center justify-between py-6 px-8 md:px-16 fixed top-0 left-0 z-50 transition-all duration-300 ${isScrolled ? "bg-white/60 backdrop-blur-md shadow-sm py-4" : "bg-transparent"
+        }`}
     >
       <div className="flex items-center gap-12">
         {/* Logo */}
@@ -44,17 +43,18 @@ export function Navbar() {
             </Link>
           ))}
         </div>
+        <div className="flex items-center">
+          <Link
+            href="/register"
+            className="px-6 py-2.5 bg-[#1D5E84] text-white rounded-full font-semibold text-sm hover:bg-[#154562] transition-all shadow-sm hover:shadow-md"
+          >
+            Start Free
+          </Link>
+        </div>
       </div>
 
       {/* Right side - Start Free Button */}
-      <div className="flex items-center">
-        <Link
-          href="/register"
-          className="px-6 py-2.5 bg-[#1D5E84] text-white rounded-full font-semibold text-sm hover:bg-[#154562] transition-all shadow-sm hover:shadow-md"
-        >
-          Start Here
-        </Link>
-      </div>
+
     </nav>
   );
 }
