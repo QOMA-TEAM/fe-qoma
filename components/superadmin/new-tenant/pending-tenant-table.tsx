@@ -11,8 +11,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { PendingTenantDetailDialog } from "@/components/superadmin/new-tenant/pending-tenant-detail-dialog";
 
-import { ChevronDown, ChevronUp, ChevronsUpDown, Search, Loader2, CheckCircle, XCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronsUpDown, Search, Loader2, CheckCircle, XCircle, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Tenant } from "@/types/superadmin/tenant";
 import { format } from "date-fns";
@@ -41,6 +42,7 @@ export function PendingTenantTable({ tenants, loading, onApprove, onReject }: Pe
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
 
   const handleColumnSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -249,7 +251,16 @@ export function PendingTenantTable({ tenants, loading, onApprove, onReject }: Pe
                   </TableCell>
 
                   <TableCell>
-                    <div className="flex items-center justify-center gap-2">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-500 hover:bg-gray-100 hover:text-gray-700 h-8 w-8 px-0 rounded-full"
+                        onClick={() => setSelectedTenantId(row.id)}
+                        title="Lihat Detail"
+                      >
+                        <Eye size={16} />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -276,6 +287,15 @@ export function PendingTenantTable({ tenants, loading, onApprove, onReject }: Pe
           </TableBody>
         </Table>
       </div>
+
+      {/* Detail Dialog */}
+      <PendingTenantDetailDialog
+        tenantId={selectedTenantId}
+        open={!!selectedTenantId}
+        onOpenChange={(open) => { if (!open) setSelectedTenantId(null); }}
+        onApprove={(t) => { onApprove(t); setSelectedTenantId(null); }}
+        onReject={(t) => { onReject(t); setSelectedTenantId(null); }}
+      />
     </>
   );
 }
