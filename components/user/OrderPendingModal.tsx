@@ -92,10 +92,12 @@ export function OrderPendingPage({
 
   // Watch status changes
   useEffect(() => {
-    if (orderData?.status === "confirmed") {
-      onConfirmed();
-    } else if (orderData?.status === "paid" && onPaid) {
-      onPaid();
+    if (orderData?.status === "paid") {
+      if (onPaid) {
+        onPaid();
+      } else {
+        onConfirmed();
+      }
     }
     // Dihapus auto-redirect onCancel agar user bisa lihat tulisan DIBATALKAN dulu
   }, [orderData?.status, onConfirmed, onPaid]);
