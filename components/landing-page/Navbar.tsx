@@ -55,7 +55,7 @@ export function Navbar() {
         </Link>
         <Link
           href="/login"
-          className="px-6 py-2.5 bg-[#FB6300] text-white rounded-full font-semibold text-sm hover:bg-[#154562] transition-all"
+          className="px-6 py-2.5 bg-[#FB6300] text-white rounded-full font-semibold text-sm hover:bg-[#D75500] transition-all shadow-sm hover:shadow-md"
         >
           Login
         </Link>
