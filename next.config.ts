@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
+        protocol: 'https',
+        hostname: 'api.qoma.codes',
+        pathname: '/**',
+      },
+      {
         protocol: 'http',
         hostname: '146.190.86.207',
         pathname: '/**',
