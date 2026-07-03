@@ -81,13 +81,12 @@ export function UserDashboardContent() {
   const [paidAt, setPaidAt] = useLocalStorage("qoma_user_paidAt", "");
 
   // ── Derived values ──
-  const safeOrderItems = Array.isArray(orderItems) ? orderItems : [];
-  const subtotal = safeOrderItems.reduce((acc, item) => acc + (item?.totalPrice || 0), 0);
+  const subtotal = orderItems.reduce((acc, item) => acc + item.totalPrice, 0);
   const grandTotal = subtotal;
-  const cartItemCount = safeOrderItems.reduce((acc, item) => acc + (item?.qty || 0), 0);
+  const cartItemCount = orderItems.reduce((acc, item) => acc + item.qty, 0);
 
-  const recommendedItemsForCheckout = Array.isArray(menuResponse?.menu_per_kategori)
-    ? menuResponse.menu_per_kategori.flatMap(g => Array.isArray(g?.items) ? g.items : []).slice(0, 4).map(mapToMenuItem)
+  const recommendedItemsForCheckout = menuResponse?.menu_per_kategori
+    ? menuResponse.menu_per_kategori.flatMap(g => g.items).slice(0, 4).map(mapToMenuItem)
     : [];
 
   // ── Dynamic values from Validasi ──
@@ -112,10 +111,10 @@ export function UserDashboardContent() {
   useEffect(() => {
     if (!menuResponse?.kategoris || view !== "main") return;
 
-    const validKats = Array.isArray(menuResponse.kategoris) ? menuResponse.kategoris.filter((kat: KategoriInfo) => {
-      const group = Array.isArray(menuResponse.menu_per_kategori) ? menuResponse.menu_per_kategori.find((g: any) => g.kategori === kat.nama) : null;
-      return group && Array.isArray(group.items) && group.items.length > 0;
-    }) : [];
+    const validKats = menuResponse.kategoris.filter((kat: KategoriInfo) => {
+      const group = menuResponse.menu_per_kategori.find((g: any) => g.kategori === kat.nama);
+      return group && group.items.length > 0;
+    });
 
     const handleScroll = () => {
       const headerOffset = window.innerWidth < 640 ? 180 : 140;
@@ -521,9 +520,9 @@ export function UserDashboardContent() {
                 ref={categoryScrollRef}
                 className="flex overflow-x-auto gap-2 py-2.5 scrollbar-hide snap-x"
               >
-                {Array.isArray(menuResponse.kategoris) && menuResponse.kategoris.filter((kat: KategoriInfo) => {
-                  const group = Array.isArray(menuResponse.menu_per_kategori) ? menuResponse.menu_per_kategori.find((g: any) => g.kategori === kat.nama) : null;
-                  return group && Array.isArray(group.items) && group.items.length > 0;
+                {menuResponse.kategoris.filter((kat: KategoriInfo) => {
+                  const group = menuResponse?.menu_per_kategori.find((g) => g.kategori === kat.nama);
+                  return group && group.items.length > 0;
                 }).map((kat: KategoriInfo) => {
                   const isActive = selectedCategoryId === kat.id;
                   return (
@@ -531,10 +530,11 @@ export function UserDashboardContent() {
                       key={kat.id}
                       id={`btn-category-${kat.id}`}
                       onClick={() => handleCategoryClick(kat.id, kat.nama)}
-                      className={`snap-start whitespace-nowrap px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 flex-shrink-0 ${isActive
+                      className={`snap-start whitespace-nowrap px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 flex-shrink-0 ${
+                        isActive
                           ? "bg-orange-500 text-white shadow-md shadow-orange-200 scale-105"
                           : "bg-orange-50 text-orange-600 border border-orange-200 hover:bg-orange-100 hover:border-orange-300"
-                        }`}
+                      }`}
                     >
                       {kat.nama}
                     </button>
@@ -578,9 +578,9 @@ export function UserDashboardContent() {
             ) : (
               <>
                 {/* ── Menu Sections ── (category bar is now in the header) */}
-                {Array.isArray(menuResponse?.kategoris) && menuResponse.kategoris.map((kat: KategoriInfo) => {
-                  const group = Array.isArray(menuResponse?.menu_per_kategori) ? menuResponse.menu_per_kategori.find((g: any) => g.kategori === kat.nama) : null;
-                  if (!group || !Array.isArray(group.items) || group.items.length === 0) return null;
+                {menuResponse?.kategoris.map((kat: KategoriInfo) => {
+                  const group = menuResponse?.menu_per_kategori.find((g) => g.kategori === kat.nama);
+                  if (!group || group.items.length === 0) return null;
 
                   return (
                     <section key={kat.id} id={`category-${kat.id}`} className="scroll-mt-24">
@@ -643,9 +643,9 @@ export function UserDashboardContent() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-            {Array.isArray(menuResponse?.menu_per_kategori) && menuResponse.menu_per_kategori
-              .find((g: any) => g.kategori === activeCategoryName)
-              ?.items?.map((item: any) => (
+            {menuResponse?.menu_per_kategori
+              .find((g) => g.kategori === activeCategoryName)
+              ?.items.map((item) => (
                 <MenuCard
                   key={item.id}
                   item={mapToMenuItem(item)}
@@ -680,4 +680,5 @@ export function UserDashboardContent() {
     </div>
   );
 }
+
 
