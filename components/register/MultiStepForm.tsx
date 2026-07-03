@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/landing-page/Navbar";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Zap, Star, CreditCard, Wallet, Eye, EyeOff } from "lucide-react";
+import { CheckCircle2, Zap, Star, CreditCard, Wallet, Eye, EyeOff, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { PlanCard } from '@/components/ui/plan-card'
 import { landingService, type PlanFromBE } from '@/services/public/landing'
@@ -11,9 +11,11 @@ import { authService } from '@/services/auth'
 import { motion } from "framer-motion";
 
 import { AnimatedBackground } from "@/components/animated-background";
+import React from "react";
 
 
 export function MultiStepForm() {
+  const scrollRef = React.useRef<HTMLDivElement>(null);
   const [step, setStep] = useState(1);
   const [selectedPlan, setSelectedPlan] = useState<PlanFromBE | null>(null);
   const [groupedPlans, setGroupedPlans] = useState<Record<string, PlanFromBE[]>>({});
@@ -21,6 +23,11 @@ export function MultiStepForm() {
   const [isLoadingPlans, setIsLoadingPlans] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"transfer" | "qris">("transfer");
+  const [paymentData, setPaymentData] = useState({
+    cardNumber: "",
+    expiryDate: "",
+    cvv: ""
+  });
 
   // Form States
   const [formData, setFormData] = useState({
@@ -81,6 +88,11 @@ export function MultiStepForm() {
   if (step === 1) isNextDisabled = !selectedPlan;
   if (step === 2) isNextDisabled = !isStep2Valid;
   if (step === 3) isNextDisabled = !isStep3Valid;
+  if (step === 4 && !isFreePlan) {
+    if (paymentMethod === "transfer") {
+      isNextDisabled = !paymentData.cardNumber || !paymentData.expiryDate || !paymentData.cvv;
+    }
+  }
 
   const handleNext = async () => {
     if (isNextDisabled || isSubmitting) return;
@@ -194,95 +206,122 @@ export function MultiStepForm() {
                 <h2 className="text-2xl font-bold text-gray-800 mb-1">Pilih Paket</h2>
                 <p className="text-gray-500 text-sm mb-8">Mulai gratis, upgrade kapan saja sesuai kebutuhan bisnismu.</p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
-                  {isLoadingPlans ? (
-                    <div className="col-span-full text-center py-10 text-gray-500">Memuat paket...</div>
-                  ) : (
-                    Object.keys(groupedPlans)
-                      .sort((a, b) => groupedPlans[a][0].harga - groupedPlans[b][0].harga)
-                      .map((groupName) => {
-                        const groupPlans = groupedPlans[groupName];
-                        const activePlanId = selectedDurations[groupName];
-                        const activePlanInGroup = groupPlans.find(p => p.id === activePlanId) || groupPlans[0];
+                <div className="relative w-full max-w-5xl mx-auto">
+                  {/* Tombol Kiri */}
+                  <button
+                    onClick={() => scrollRef.current?.scrollBy({ left: -320, behavior: 'smooth' })}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-5 md:-translate-x-8 z-10 w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center text-[#ff6b00] hover:scale-105 transition-transform"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
 
-                        const isFree = Number(activePlanInGroup.harga) === 0;
-                        const isSelected = selectedPlan ? groupPlans.some(p => p.id === selectedPlan.id) : false;
+                  <div
+                    ref={scrollRef}
+                    className="flex gap-6 overflow-x-auto snap-x snap-mandatory py-4 px-2"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                  >
+                    {isLoadingPlans ? (
+                      <div className="w-full text-center py-10 text-gray-500">Memuat paket...</div>
+                    ) : (
+                      Object.keys(groupedPlans)
+                        .sort((a, b) => groupedPlans[a][0].harga - groupedPlans[b][0].harga)
+                        .map((groupName) => {
+                          const groupPlans = groupedPlans[groupName];
+                          const activePlanId = selectedDurations[groupName];
+                          const activePlanInGroup = groupPlans.find(p => p.id === activePlanId) || groupPlans[0];
 
-                        const Icon = isFree ? Zap : Star;
-                        const activeClass = isFree ? "border-[#ff6b00] bg-[#fff4ec] ring-2 ring-[#ff6b00]" : "border-[#3874BC] bg-[#dde8f7] ring-2 ring-[#3874BC]";
-                        const iconClass = isFree ? "text-gray-400" : "text-[#3874BC]";
-                        const accentColor = isFree ? "#ff6b00" : "#3874BC";
+                          const isFree = Number(activePlanInGroup.harga) === 0;
+                          const isSelected = selectedPlan ? groupPlans.some(p => p.id === selectedPlan.id) : false;
 
-                        const planFeaturesList = [
-                          { text: `${activePlanInGroup.batas_outlet} Outlet`, icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
-                          { text: isFree ? "3 Pengguna" : "Pengguna Tak Terbatas", icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
-                          { text: isFree ? "Laporan bulanan" : "Laporan real-time", icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
-                          { text: isFree ? "Stock dasar" : "Stock opname & Multi-kasir", icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
-                        ];
+                          const Icon = isFree ? Zap : Star;
+                          const activeClass = isFree ? "border-[#ff6b00] bg-[#fff4ec] ring-2 ring-[#ff6b00]" : "border-[#3874BC] bg-[#dde8f7] ring-2 ring-[#3874BC]";
+                          const iconClass = isFree ? "text-gray-400" : "text-[#3874BC]";
+                          const accentColor = isFree ? "#ff6b00" : "#3874BC";
 
-                        return (
-                          <div
-                            key={groupName}
-                            onClick={() => {
-                              setSelectedPlan(activePlanInGroup);
-                              const newTotalSteps = Number(activePlanInGroup.harga) === 0 ? 3 : 4;
-                              if (step > newTotalSteps) setStep(3);
-                            }}
-                            className="cursor-pointer h-full"
-                          >
-                            <PlanCard
-                              name={activePlanInGroup.nama_plan}
-                              price={Number(activePlanInGroup.harga)}
-                              period={activePlanInGroup.is_lifetime ? undefined : `${activePlanInGroup.durasi_hari} Hari`}
-                              description={activePlanInGroup.deskripsi || (isFree ? "Cocok untuk kamu yang baru mulai mengelola bisnis F&B pertama." : "Untuk bisnis yang berkembang dengan kebutuhan lebih dari satu outlet.")}
-                              features={planFeaturesList}
-                              headerBadge={
-                                <div className="flex items-center gap-2">
-                                  <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full ${isFree ? "bg-gray-100 text-gray-500 border border-gray-200" : "bg-[#3874BC] text-white"}`}>
-                                    <Icon size={11} /> {groupName}
-                                  </span>
-                                  {isSelected && <span className={isFree ? "text-[#ff6b00]" : "text-[#3874BC]"}><CheckCircle2 size={20} /></span>}
-                                </div>
-                              }
-                              priceSubtext={
-                                <div className="mt-4">
-                                  {groupPlans.length > 1 ? (
-                                    <div className="flex flex-wrap gap-2">
-                                      {groupPlans.map(p => {
-                                        const isPSelected = p.id === activePlanInGroup.id;
-                                        return (
-                                          <button
-                                            key={p.id}
-                                            type="button"
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              setSelectedDurations(prev => ({ ...prev, [groupName]: p.id }));
-                                              if (isSelected) {
-                                                setSelectedPlan(p);
-                                              }
-                                            }}
-                                            className={`px-3 py-1.5 text-[11px] font-semibold rounded-lg border transition-all ${isPSelected ? "text-white shadow-sm" : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"}`}
-                                            style={isPSelected ? { backgroundColor: accentColor, borderColor: accentColor } : {}}
-                                          >
-                                            {p.is_lifetime ? 'Lifetime' : `${p.durasi_hari} Hari`}
-                                          </button>
-                                        );
-                                      })}
-                                    </div>
-                                  ) : (
-                                    <span className={`inline-block text-[10px] font-medium px-2 py-0.5 rounded-full ${isFree ? "text-gray-400 bg-gray-100" : "text-[#3874BC] bg-[#3874BC]/10"}`}>
-                                      {isFree ? "3 langkah saja" : "Termasuk langkah pembayaran"}
+                          const planFeaturesList = [
+                            { text: `${activePlanInGroup.batas_outlet} Outlet`, icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
+                            { text: isFree ? "3 Pengguna" : "Pengguna Tak Terbatas", icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
+                            { text: isFree ? "Laporan bulanan" : "Laporan real-time", icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
+                            { text: isFree ? "Stock dasar" : "Stock opname & Multi-kasir", icon: <CheckCircle2 size={14} className={`${iconClass} flex-shrink-0`} /> },
+                          ];
+
+                          return (
+                            <div
+                              key={groupName}
+                              onClick={() => {
+                                setSelectedPlan(activePlanInGroup);
+                                const newTotalSteps = Number(activePlanInGroup.harga) === 0 ? 3 : 4;
+                                if (step > newTotalSteps) setStep(3);
+                              }}
+                              className="snap-center shrink-0 w-[280px] md:w-[300px] cursor-pointer h-full transition-transform hover:-translate-y-1"
+                            >
+                              <PlanCard
+                                name={activePlanInGroup.nama_plan}
+                                price={Number(activePlanInGroup.harga)}
+                                period={activePlanInGroup.is_lifetime ? undefined : `${activePlanInGroup.durasi_hari} Hari`}
+                                description={activePlanInGroup.deskripsi || (isFree ? "Cocok untuk kamu yang baru mulai mengelola bisnis F&B pertama." : "Untuk bisnis yang berkembang dengan kebutuhan lebih dari satu outlet.")}
+                                features={planFeaturesList}
+                                headerBadge={
+                                  <div className="flex items-center gap-2">
+                                    <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full ${isFree ? "bg-gray-100 text-gray-500 border border-gray-200" : "bg-[#3874BC] text-white"}`}>
+                                      <Icon size={11} /> {groupName}
                                     </span>
-                                  )}
-                                </div>
-                              }
-                              isActive={selectedPlan === null || isSelected}
-                              className={isSelected ? activeClass : ""}
-                            />
-                          </div>
-                        )
-                      })
-                  )}
+                                    {isSelected && <span className={isFree ? "text-[#ff6b00]" : "text-[#3874BC]"}><CheckCircle2 size={20} /></span>}
+                                  </div>
+                                }
+                                priceSubtext={
+                                  <div className="mt-4">
+                                    {groupPlans.length > 1 ? (
+                                      <div className="flex flex-wrap gap-2">
+                                        {groupPlans.map(p => {
+                                          const isPSelected = p.id === activePlanInGroup.id;
+                                          return (
+                                            <button
+                                              key={p.id}
+                                              type="button"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedDurations(prev => ({ ...prev, [groupName]: p.id }));
+                                                if (isSelected) {
+                                                  setSelectedPlan(p);
+                                                }
+                                              }}
+                                              className={`px-3 py-1.5 text-[11px] font-semibold rounded-lg border transition-all ${isPSelected ? "text-white shadow-sm" : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"}`}
+                                              style={isPSelected ? { backgroundColor: accentColor, borderColor: accentColor } : {}}
+                                            >
+                                              {p.is_lifetime ? 'Lifetime' : `${p.durasi_hari} Hari`}
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    ) : (
+                                      <span className={`inline-block text-[10px] font-medium px-2 py-0.5 rounded-full ${isFree ? "text-gray-400 bg-gray-100" : "text-[#3874BC] bg-[#3874BC]/10"}`}>
+                                        {isFree ? "3 langkah saja" : "Termasuk langkah pembayaran"}
+                                      </span>
+                                    )}
+                                  </div>
+                                }
+                                isActive={selectedPlan === null || isSelected}
+                                className={isSelected ? activeClass : ""}
+                              />
+                            </div>
+                          )
+                        })
+                    )}
+                  </div>
+                  <style jsx>{`
+                    div::-webkit-scrollbar {
+                      display: none;
+                    }
+                  `}</style>
+
+                  {/* Tombol Kanan */}
+                  <button
+                    onClick={() => scrollRef.current?.scrollBy({ left: 320, behavior: 'smooth' })}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-5 md:translate-x-8 z-10 w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center text-[#ff6b00] hover:scale-105 transition-transform"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
                 </div>
               </div>
             )}
@@ -377,7 +416,7 @@ export function MultiStepForm() {
                         : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
                         }`}
                     >
-                      <CreditCard size={16} /> Transfer Bank
+                      <CreditCard size={16} /> Kartu Kredit / Debit
                     </button>
                     <button
                       type="button"
@@ -396,9 +435,8 @@ export function MultiStepForm() {
                       <div className="flex flex-col gap-2">
                         <label className="text-sm font-medium text-gray-700">Nomor Kartu</label>
                         <div className="relative">
-                          <input type="text" placeholder="1234 5678 9012 3456" maxLength={19} className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 pr-28 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                          <input type="text" value={paymentData.cardNumber} onChange={(e) => setPaymentData(p => ({ ...p, cardNumber: e.target.value }))} placeholder="1234 5678 9012 3456" maxLength={19} className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 pr-28 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                           <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1 items-center">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" alt="Visa" className="h-4 object-contain opacity-70" />
                             <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="MC" className="h-4 object-contain opacity-70" />
                           </div>
                         </div>
@@ -406,11 +444,11 @@ export function MultiStepForm() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="flex flex-col gap-2">
                           <label className="text-sm font-medium text-gray-700">Tanggal Kedaluwarsa</label>
-                          <input type="text" placeholder="MM / YY" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                          <input type="text" value={paymentData.expiryDate} onChange={(e) => setPaymentData(p => ({ ...p, expiryDate: e.target.value }))} placeholder="MM / YY" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                         </div>
                         <div className="flex flex-col gap-2">
                           <label className="text-sm font-medium text-gray-700">Kode Keamanan</label>
-                          <input type="text" placeholder="CVV" maxLength={4} className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                          <input type="text" value={paymentData.cvv} onChange={(e) => setPaymentData(p => ({ ...p, cvv: e.target.value }))} placeholder="CVV" maxLength={4} className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
                         </div>
                       </div>
                       <label className="flex items-start gap-2.5 text-xs text-gray-500 cursor-pointer mt-1">
