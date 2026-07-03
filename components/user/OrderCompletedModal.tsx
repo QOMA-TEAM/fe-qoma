@@ -143,9 +143,24 @@ export function OrderCompletedModal({
             </div>
             <Separator />
             <div className="flex justify-between text-sm font-bold text-orange-500">
-              <span>Total Pembayaran</span>
+              <span>Total Tagihan</span>
               <span>Rp. {grandTotal.toLocaleString("id-ID")}</span>
             </div>
+
+            {orderData.pembayaran && (
+              <>
+                <div className="flex justify-between text-sm text-gray-500 pt-1">
+                  <span className="capitalize">Pembayaran ({orderData.pembayaran.metode})</span>
+                  <span>Rp. {orderData.pembayaran.jumlah_bayar.toLocaleString("id-ID")}</span>
+                </div>
+                {orderData.pembayaran.jumlah_bayar > grandTotal && (
+                  <div className="flex justify-between text-sm text-gray-500">
+                    <span>Kembalian</span>
+                    <span>Rp. {(orderData.pembayaran.jumlah_bayar - grandTotal).toLocaleString("id-ID")}</span>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </section>
 

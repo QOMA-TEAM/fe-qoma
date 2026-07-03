@@ -1,7 +1,7 @@
 // app/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { ChevronRight, ShoppingCart, Loader2 } from "lucide-react";
@@ -58,6 +58,8 @@ export function UserDashboardContent() {
   const [showCategorySheet, setShowCategorySheet] = useState(false);
   const [activeCategoryName, setActiveCategoryName] = useLocalStorage("qoma_user_activeCategory", "");
   const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const categoryScrollRef = useRef<HTMLDivElement>(null);
 
   // ── Persisted State ──
   const [isMounted, setIsMounted] = useState(false);
@@ -105,6 +107,73 @@ export function UserDashboardContent() {
   }, [validasiData, isValidating]);
 
   // ── Handlers: Category & Menu ──
+  // ── Scroll-spy: auto-highlight category as user scrolls ──
+  useEffect(() => {
+    if (!menuResponse?.kategoris || view !== "main") return;
+
+    const validKats = menuResponse.kategoris.filter((kat: KategoriInfo) => {
+      const group = menuResponse.menu_per_kategori.find((g: any) => g.kategori === kat.nama);
+      return group && group.items.length > 0;
+    });
+
+    const handleScroll = () => {
+      const headerOffset = window.innerWidth < 640 ? 180 : 140;
+      let currentActiveId = null;
+
+      for (const kat of validKats) {
+        const el = document.getElementById(`category-${kat.id}`);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          // If the section top is near the header
+          if (rect.top <= headerOffset + 100) {
+            currentActiveId = kat.id;
+          }
+        }
+      }
+
+      if (currentActiveId) {
+        setSelectedCategoryId((prev) => {
+          if (prev !== currentActiveId) {
+            // Auto-scroll the category button into view
+            const container = categoryScrollRef.current;
+            const btn = document.getElementById(`btn-category-${currentActiveId}`);
+            if (container && btn) {
+              const scrollLeft = btn.offsetLeft - container.offsetLeft - 16;
+              container.scrollTo({ left: scrollLeft, behavior: "smooth" });
+            }
+            return currentActiveId;
+          }
+          return prev;
+        });
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // run once on mount
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [menuResponse, view]);
+
+  const handleCategoryClick = useCallback((katId: string, katNama: string) => {
+    setSelectedCategoryId(katId);
+
+    // Scroll page to section
+    const el = document.getElementById(`category-${katId}`);
+    if (el) {
+      const headerOffset = window.innerWidth < 640 ? 160 : 120;
+      const y = el.getBoundingClientRect().top + window.scrollY - headerOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+
+    // Scroll button to the left
+    const container = categoryScrollRef.current;
+    const btn = document.getElementById(`btn-category-${katId}`);
+    if (container && btn) {
+      const scrollLeft = btn.offsetLeft - container.offsetLeft - 8;
+      container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+    }
+  }, []);
+
   const handleOpenCategory = (name: string) => {
     setActiveCategoryName(name);
     setView("category");
@@ -391,10 +460,10 @@ export function UserDashboardContent() {
         }}
       />
 
-      {/* ── Sticky Header ── */}
-      <header className="sticky top-0 z-40 bg-white border-b shadow-sm">
+      {/* ── Sticky Header + Category Bar ── */}
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200/70 shadow-sm">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-14">
             {/* Logo + Name */}
             <div className="flex items-center gap-3">
 
@@ -411,7 +480,6 @@ export function UserDashboardContent() {
                 <p className="font-bold text-gray-900 text-sm leading-none">
                   {outletName}
                 </p>
-
               </div>
             </div>
 
@@ -443,6 +511,39 @@ export function UserDashboardContent() {
             Table Number : {tableNumber}
           </div>
         </div>
+
+        {/* ── Category Bar (inside header) ── */}
+        {view === "main" && !isMenuLoading && menuResponse?.kategoris && (
+          <div className="border-t border-gray-100 bg-white/90">
+            <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div
+                ref={categoryScrollRef}
+                className="flex overflow-x-auto gap-2 py-2.5 scrollbar-hide snap-x"
+              >
+                {menuResponse.kategoris.filter((kat: KategoriInfo) => {
+                  const group = menuResponse?.menu_per_kategori.find((g) => g.kategori === kat.nama);
+                  return group && group.items.length > 0;
+                }).map((kat: KategoriInfo) => {
+                  const isActive = selectedCategoryId === kat.id;
+                  return (
+                    <button
+                      key={kat.id}
+                      id={`btn-category-${kat.id}`}
+                      onClick={() => handleCategoryClick(kat.id, kat.nama)}
+                      className={`snap-start whitespace-nowrap px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 flex-shrink-0 ${
+                        isActive
+                          ? "bg-orange-500 text-white shadow-md shadow-orange-200 scale-105"
+                          : "bg-orange-50 text-orange-600 border border-orange-200 hover:bg-orange-100 hover:border-orange-300"
+                      }`}
+                    >
+                      {kat.nama}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* ── Main View Content ── */}
@@ -476,31 +577,7 @@ export function UserDashboardContent() {
               </div>
             ) : (
               <>
-                {/* ── Category List (Buttons) ── */}
-                <section className="mb-8">
-                  <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4">
-                    List Kategori
-                  </h2>
-                  <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-hide snap-x">
-                    {menuResponse?.kategoris.filter((kat: KategoriInfo) => {
-                       const group = menuResponse?.menu_per_kategori.find((g) => g.kategori === kat.nama);
-                       return group && group.items.length > 0;
-                    }).map((kat: KategoriInfo) => (
-                      <button
-                        key={kat.id}
-                        onClick={() => {
-                          const el = document.getElementById(`category-${kat.id}`);
-                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }}
-                        className="snap-start whitespace-nowrap px-6 py-3 rounded-full border border-orange-500 bg-orange-500 text-white text-base font-bold hover:bg-orange-600 hover:border-orange-600 transition-colors shadow-md flex-shrink-0"
-                      >
-                        {kat.nama}
-                      </button>
-                    ))}
-                  </div>
-                </section>
-
-                {/* ── Menu Sections ── */}
+                {/* ── Menu Sections ── (category bar is now in the header) */}
                 {menuResponse?.kategoris.map((kat: KategoriInfo) => {
                   const group = menuResponse?.menu_per_kategori.find((g) => g.kategori === kat.nama);
                   if (!group || group.items.length === 0) return null;
@@ -519,14 +596,24 @@ export function UserDashboardContent() {
                           <ChevronRight className="w-4 h-4" />
                         </button>
                       </div>
-                      <div className="flex overflow-x-auto gap-3 sm:gap-4 pb-2 snap-x items-stretch">
-                        {group.items.slice(0, 5).map((item) => (
-                          <div className="flex-shrink-0 w-40 snap-start flex flex-col" key={item.id}>
+                      {/* Mobile: horizontal scroll | Desktop: grid */}
+                      <div className="flex overflow-x-auto gap-3 pb-2 snap-x items-stretch md:hidden">
+                        {group.items.slice(0, 6).map((item) => (
+                          <div className="flex-shrink-0 w-44 snap-start flex flex-col" key={item.id}>
                             <MenuCard
                               item={mapToMenuItem(item)}
                               onClick={setSelectedMenu}
                             />
                           </div>
+                        ))}
+                      </div>
+                      <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                        {group.items.slice(0, 10).map((item) => (
+                          <MenuCard
+                            key={item.id}
+                            item={mapToMenuItem(item)}
+                            onClick={setSelectedMenu}
+                          />
                         ))}
                       </div>
                     </section>
