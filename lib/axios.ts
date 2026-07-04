@@ -36,7 +36,11 @@ api.interceptors.response.use(
         // Token expired / tidak valid → hapus token dan redirect ke login
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        window.location.href = "/login";
+        
+        // Jangan reload/redirect jika sudah berada di halaman login
+        if (window.location.pathname !== "/login") {
+          window.location.href = "/login";
+        }
       }
 
       if (error.response?.status === 403) {
