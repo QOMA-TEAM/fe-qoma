@@ -41,6 +41,7 @@ export function PendingTenantContent() {
             loading={loading}
             onApprove={handleApprove}
             onReject={(tenant) => setTenantToReject(tenant)}
+            onView={(tenant) => setSelectedTenant(tenant)}
           />
 
           {/* Pagination Controls */}

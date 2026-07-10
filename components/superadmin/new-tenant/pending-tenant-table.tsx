@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { ChevronDown, ChevronUp, ChevronsUpDown, Search, Loader2, CheckCircle, XCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronsUpDown, Search, Loader2, CheckCircle, XCircle, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Tenant } from "@/types/superadmin/tenant";
 import { format } from "date-fns";
@@ -35,9 +35,10 @@ interface PendingTenantTableProps {
   loading: boolean;
   onApprove: (tenant: Tenant) => void;
   onReject: (tenant: Tenant) => void;
+  onView?: (tenant: Tenant) => void;
 }
 
-export function PendingTenantTable({ tenants, loading, onApprove, onReject }: PendingTenantTableProps) {
+export function PendingTenantTable({ tenants, loading, onApprove, onReject, onView }: PendingTenantTableProps) {
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
@@ -250,6 +251,15 @@ export function PendingTenantTable({ tenants, loading, onApprove, onReject }: Pe
 
                   <TableCell>
                     <div className="flex items-center justify-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-500 hover:bg-gray-100 hover:text-gray-700 h-8 w-8 px-0 rounded-full"
+                        onClick={() => onView?.(row)}
+                        title="View"
+                      >
+                        <Eye size={18} />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"
