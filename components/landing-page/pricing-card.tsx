@@ -129,18 +129,7 @@ function mapBEPlanToLocal(plan: PlanFromBE, idx: number): LocalPlan {
         description: plan.deskripsi ?? '',
         features: buildFeatures(plan),
         headerBadge: buildHeaderBadge(variant),
-        actionButton: (
-            <Link href={href}>
-                <Button className={cn(
-                    'w-full rounded-xl text-sm font-medium h-10 border-0',
-                    variant === 'pro'
-                        ? 'bg-[#1D5E84] hover:bg-[#174d6e] text-white'
-                        : 'bg-[#FB6300] hover:bg-[#e05700] text-white',
-                )}>
-                    {cta}
-                </Button>
-            </Link>
-        ),
+        actionButton: undefined, // Menghilangkan button
         variant,
         href,
         cta,
@@ -200,11 +189,11 @@ function CarouselCard({ plan, position, onClick }: CarouselCardProps) {
             onClick={!isCurrent ? onClick : undefined}
             className={cn(
                 'absolute w-[230px] transition-all duration-500 ease-[cubic-bezier(.4,0,.2,1)]',
-                position === 'prev' && '-translate-x-[155px] opacity-40 blur-[3px] scale-[.86] z-10 cursor-pointer',
-                position === 'cur' && 'translate-x-0 opacity-100 blur-0 scale-100 z-30',
-                position === 'next' && 'translate-x-[155px] opacity-40 blur-[3px] scale-[.86] z-10 cursor-pointer',
-                position === 'hidden-left' && '-translate-x-[310px] opacity-0 scale-[.7] z-0 pointer-events-none',
-                position === 'hidden-right' && 'translate-x-[310px] opacity-0 scale-[.7] z-0 pointer-events-none',
+                position === 'prev' && '-translate-x-[160px] opacity-100 blur-0 scale-[.9] z-10 cursor-pointer hover:scale-[.92]',
+                position === 'cur' && 'translate-x-0 opacity-100 blur-0 scale-100 z-30 hover:scale-[1.02]',
+                position === 'next' && 'translate-x-[160px] opacity-100 blur-0 scale-[.9] z-10 cursor-pointer hover:scale-[.92]',
+                position === 'hidden-left' && '-translate-x-[320px] opacity-0 scale-[.7] z-0 pointer-events-none',
+                position === 'hidden-right' && 'translate-x-[320px] opacity-0 scale-[.7] z-0 pointer-events-none',
             )}
         >
             <PlanCard
@@ -311,7 +300,7 @@ export function PricingSection() {
                             {STATS.map(s => (
                                 <div
                                     key={s.label}
-                                    className="flex-1 bg-gray-50 rounded-xl border border-gray-100 px-4 py-3"
+                                    className="flex-1 max-w-[200px] bg-gray-50 rounded-xl border border-gray-100 px-4 py-3"
                                 >
                                     <p className="text-2xl font-medium text-[#1D5E84] mb-0.5">{s.num}</p>
                                     <p className="text-[11px] text-[#26180B]/50">{s.label}</p>
@@ -338,7 +327,7 @@ export function PricingSection() {
                         animate={isInView ? 'visible' : 'hidden'}
                         variants={slideFromRight}
                     >
-                        <div className="relative w-[380px] h-[440px] flex items-center justify-center overflow-hidden">
+                        <div className="relative w-[450px] h-[440px] flex items-center justify-center">
 
                             {/* Prev button */}
                             <button
