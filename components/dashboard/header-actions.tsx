@@ -166,7 +166,7 @@ export function HeaderActions({ extraNotifications = [], onMarkAlertRead, onMark
   const [selectedNotif, setSelectedNotif] = useState<(Notification & { is_read: boolean }) | null>(null);
 
   // Optimistic tracking — ID yang sudah diklik/dibaca di sesi ini
-  const [localReadIds, setLocalReadIds] = useState<Set<string>>(new Set());
+  const [localReadIds, setLocalReadIds] = useState<string[]>([]);
   const [allMarkedRead, setAllMarkedRead] = useState(false);
 
   const fetchedUnreadCount = unreadData?.unread_count || 0;
@@ -175,10 +175,17 @@ export function HeaderActions({ extraNotifications = [], onMarkAlertRead, onMark
   // Hitung unread secara optimistic — langsung berkurang saat diklik
   const unreadCount = useMemo(() => {
     if (allMarkedRead) return 0;
-    const serverUnread = Math.max(0, fetchedUnreadCount - localReadIds.size);
-    const extraUnread = extraNotifications.filter(n => !n.is_read && !localReadIds.has(n.id)).length;
+    
+    // Hitung berapa notif server yang sudah di-klik di frontend
+    const localServerReadCount = fetchedNotifications.filter(
+      n => !n.is_read && localReadIds.includes(String(n.id))
+    ).length;
+    
+    const serverUnread = Math.max(0, fetchedUnreadCount - localServerReadCount);
+    const extraUnread = extraNotifications.filter(n => !n.is_read && !localReadIds.includes(String(n.id))).length;
+    
     return serverUnread + extraUnread;
-  }, [fetchedUnreadCount, localReadIds, extraNotifications, allMarkedRead]);
+  }, [fetchedUnreadCount, localReadIds, extraNotifications, fetchedNotifications, allMarkedRead]);
 
   // Merge notifikasi + override is_read secara optimistic
   const notifications = useMemo(() => {
@@ -186,18 +193,19 @@ export function HeaderActions({ extraNotifications = [], onMarkAlertRead, onMark
     if (allMarkedRead) return all.map(n => ({ ...n, is_read: true }));
     return all.map(n => ({
       ...n,
-      is_read: n.is_read || localReadIds.has(n.id),
+      is_read: n.is_read || localReadIds.includes(String(n.id)),
     }));
   }, [extraNotifications, fetchedNotifications, localReadIds, allMarkedRead]);
 
   const handleNotifClick = (notif: any) => {
+    const idStr = String(notif.id);
     // Optimistic: langsung tandai dibaca di UI (tanpa nunggu refetch)
-    if (!notif.is_read && !localReadIds.has(notif.id)) {
-      setLocalReadIds(prev => new Set([...prev, notif.id]));
-      if (notif.id.startsWith("alert-")) {
-        if (onMarkAlertRead) onMarkAlertRead(notif.id);
+    if (!notif.is_read && !localReadIds.includes(idStr)) {
+      setLocalReadIds(prev => [...prev, idStr]);
+      if (idStr.startsWith("alert-")) {
+        if (onMarkAlertRead) onMarkAlertRead(idStr);
       } else {
-        markRead.mutate(notif.id);
+        markRead.mutate(idStr);
       }
     }
     // Buka dialog
@@ -212,7 +220,7 @@ export function HeaderActions({ extraNotifications = [], onMarkAlertRead, onMark
 
   // Status is_read di dialog — optimistic
   const selectedIsRead = selectedNotif
-    ? selectedNotif.is_read || localReadIds.has(selectedNotif.id) || allMarkedRead
+    ? selectedNotif.is_read || localReadIds.includes(String(selectedNotif.id)) || allMarkedRead
     : false;
 
   return (
