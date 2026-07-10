@@ -31,7 +31,24 @@ export function OrderCompletedModal({
 
   const subtotal = orderData.total_harga;
   const grandTotal = subtotal;
-  const paidAt = orderData.pembayaran?.paid_at || "-";
+
+  const formatDateTime = (dateStr?: string) => {
+    if (!dateStr || dateStr === "-") return "-";
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleString("id-ID", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const paidAt = formatDateTime(orderData.pembayaran?.paid_at);
   const customerName = orderData.nama_pelanggan;
   const phoneNumber = orderData.no_telp;
 
@@ -68,7 +85,7 @@ export function OrderCompletedModal({
             </div>
             <div className="text-right flex-shrink-0">
               <p className="text-sm text-gray-500">ID ORDER :</p>
-              <p className="font-bold text-gray-900 break-all w-48 ml-auto text-xs">{orderId}</p>
+              <p className="font-bold text-gray-900 break-all w-48 ml-auto text-xs">{orderId.substring(0, 4)}</p>
               <p className="text-sm text-gray-500 mt-2">Paid :</p>
               <p className="font-bold text-gray-900">{paidAt}</p>
             </div>

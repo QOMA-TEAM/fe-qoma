@@ -118,12 +118,6 @@ export function DetailTenantDialog({ tenant, onClose }: DetailTenantDialogProps)
                         </div>
                     </div>
                 </div>
-
-                <div className="flex justify-center mt-4">
-                    <Button onClick={onClose} className="rounded-full px-10 bg-blue-600 hover:bg-blue-700 text-white">
-                        Tutup
-                    </Button>
-                </div>
             </DialogContent>
         </Dialog>
     )
