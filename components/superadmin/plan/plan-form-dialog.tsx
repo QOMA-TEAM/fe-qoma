@@ -217,6 +217,9 @@ export function PlanFormFields({
                         onChange={(e) => updateHarga(tagihan, e.target.value === "" ? 0 : Number(e.target.value))}
                         className={`rounded-md border-gray-200 focus-visible:ring-[#1D5E84] text-sm h-8 ${errors?.[`harga_${tagihan}`] ? "border-red-400" : ""}`}
                       />
+                      {errors?.[`harga_${tagihan}`] && (
+                        <p className="text-xs text-red-500 mt-1">{errors[`harga_${tagihan}`]}</p>
+                      )}
                     </div>
                   </div>
                 ))
