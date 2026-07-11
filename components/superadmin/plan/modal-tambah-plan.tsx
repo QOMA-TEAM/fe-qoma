@@ -21,6 +21,7 @@ interface ModalTambahPlanProps {
   onClose: () => void;
   onSubmit: (payload: CreatePlanPayload, opts?: PlanActionOptions) => Promise<boolean>;
   submitting?: boolean;
+  existingNames?: string[];
 }
 
 const INITIAL: PlanFormValues = {
@@ -32,9 +33,22 @@ const INITIAL: PlanFormValues = {
   deskripsi: "",
 };
 
-function validate(values: Partial<PlanFormValues>): PlanFormErrors {
+function validate(
+  values: Partial<PlanFormValues>,
+  existingNames: string[] = []
+): PlanFormErrors {
   const errors: PlanFormErrors = {};
-  if (!values.nama_plan?.trim()) errors.nama_plan = "Nama plan wajib diisi";
+  if (!values.nama_plan?.trim()) {
+    errors.nama_plan = "Nama plan wajib diisi";
+  } else {
+    const namaTrimmed = values.nama_plan.trim().toLowerCase();
+    const isDuplicate = existingNames.some(
+      (n) => n.trim().toLowerCase() === namaTrimmed
+    );
+    if (isDuplicate) {
+      errors.nama_plan = "Nama plan sudah digunakan, gunakan nama lain";
+    }
+  }
   if ((values.batas_outlet ?? 1) < 1) errors.batas_outlet = "Minimal 1 outlet";
   
   if (!values.selectedTagihan || values.selectedTagihan.length === 0) {
@@ -56,6 +70,7 @@ export function ModalTambahPlan({
   onClose,
   onSubmit,
   submitting,
+  existingNames = [],
 }: ModalTambahPlanProps) {
   const [values, setValues] = useState<PlanFormValues>(INITIAL);
   const [errors, setErrors] = useState<PlanFormErrors>({});
@@ -69,7 +84,7 @@ export function ModalTambahPlan({
   };
 
   const handleSubmit = async () => {
-    const errs = validate(values);
+    const errs = validate(values, existingNames);
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       return;
