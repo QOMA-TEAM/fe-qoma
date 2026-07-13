@@ -40,7 +40,14 @@ export const authService = {
       }
 
       if (!res.ok) {
-        throw new Error(json.message || `HTTP ${res.status}: Failed to register`)
+        let errorMessage = json.message || `HTTP ${res.status}: Failed to register`;
+        if (json.errors) {
+          const firstErrorKey = Object.keys(json.errors)[0];
+          if (firstErrorKey && json.errors[firstErrorKey].length > 0) {
+            errorMessage = json.errors[firstErrorKey][0];
+          }
+        }
+        throw new Error(errorMessage)
       }
 
       return json

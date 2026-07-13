@@ -96,6 +96,15 @@ export function MultiStepForm() {
 
   const handleNext = async () => {
     if (isNextDisabled || isSubmitting) return;
+
+    // Validate Step 2: Username length
+    if (step === 2) {
+      if (formData.ownerUsername.length < 4) {
+        toast.error("Username harus memiliki minimal 4 karakter");
+        return;
+      }
+    }
+
     if (step < TOTAL_STEPS) {
       setStep(step + 1);
     } else {
