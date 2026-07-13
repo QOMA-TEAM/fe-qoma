@@ -30,6 +30,7 @@ import {
 
 import { ChangePasswordDialog } from "@/components/settings/change-password-dialog"
 import { OutletProfileSettings } from "./outlet-profile-settings"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 
 import {
   Sidebar,
@@ -108,7 +109,13 @@ export function OutletSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
   const pathname = usePathname()
   const router = useRouter()
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+
   const handleLogout = () => {
+    setShowLogoutConfirm(true)
+  }
+
+  const confirmLogout = () => {
     localStorage.removeItem("token")
     localStorage.removeItem("role")
     document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax"
@@ -292,24 +299,26 @@ export function OutletSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
       <SidebarFooter className="p-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="hover:bg-slate-100 hover:text-slate-900 cursor-pointer">
-              <button type="button" className="w-full" onClick={() => setIsSettingsOpen(true)}>
-                <Settings className="size-4" />
-                <span>Setting</span>
-              </button>
+            <SidebarMenuButton 
+              className="hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
+              onClick={() => setIsSettingsOpen(true)}
+            >
+              <Settings className="size-4" />
+              <span>Setting</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="hover:bg-red-50 hover:text-red-600 cursor-pointer">
-              <button type="button" className="w-full" onClick={handleLogout}>
-                <Avatar className="size-7">
-                  <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-semibold">
-                    OU
-                  </AvatarFallback>
-                </Avatar>
-                <span>Logout</span>
-                <LogOut className="ml-auto size-4" />
-              </button>
+            <SidebarMenuButton 
+              className="hover:bg-red-50 hover:text-red-600 cursor-pointer"
+              onClick={handleLogout}
+            >
+              <Avatar className="size-7">
+                <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-semibold">
+                  OU
+                </AvatarFallback>
+              </Avatar>
+              <span>Logout</span>
+              <LogOut className="ml-auto size-4" />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -320,6 +329,16 @@ export function OutletSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
       <ChangePasswordDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
         <OutletProfileSettings />
       </ChangePasswordDialog>
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        onOpenChange={setShowLogoutConfirm}
+        title="Konfirmasi Logout"
+        description="Apakah kamu yakin ingin keluar? Kamu perlu login kembali untuk mengakses sistem."
+        confirmLabel="Ya, Logout"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={confirmLogout}
+      />
     </Sidebar>
   )
 }

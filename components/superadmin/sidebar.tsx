@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/collapsible"
 
 import { ChangePasswordDialog } from "@/components/settings/change-password-dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 import {
   Sidebar,
@@ -82,14 +83,19 @@ export function SuperadminSidebar({
   const pathname = usePathname();
   const router = useRouter();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
     document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
     router.push("/login");
-  };
+  };;
 
   return (
     <Sidebar {...props}>
@@ -131,19 +137,19 @@ export function SuperadminSidebar({
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     {ownerNav.overview.map((item) => (
-              <SidebarMenuSubItem key={item.title}>
-                <SidebarMenuSubButton
-                  asChild
-                  isActive={pathname === item.url}
-                  className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50 cursor-pointer"
-                >
-                  <Link href={item.url} className="cursor-pointer">
-                    <item.icon className="size-4" />
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuSubButton>
-              </SidebarMenuSubItem>
-            ))}
+                      <SidebarMenuSubItem key={item.title}>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={pathname === item.url}
+                          className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50 cursor-pointer"
+                        >
+                          <Link href={item.url} className="cursor-pointer">
+                            <item.icon className="size-4" />
+                            <span>{item.title}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
                   </SidebarMenuSub>
                 </CollapsibleContent>
               </SidebarMenuItem>
@@ -169,19 +175,19 @@ export function SuperadminSidebar({
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     {ownerNav.kelola.map((item) => (
-              <SidebarMenuSubItem key={item.title}>
-                <SidebarMenuSubButton
-                  asChild
-                  isActive={pathname === item.url}
-                  className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50 cursor-pointer"
-                >
-                  <Link href={item.url} className="cursor-pointer">
-                    <item.icon className="size-4" />
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuSubButton>
-              </SidebarMenuSubItem>
-            ))}
+                      <SidebarMenuSubItem key={item.title}>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={pathname === item.url}
+                          className="data-[active=true]:bg-slate-100 data-[active=true]:text-orange-500 data-[active=true]:font-bold hover:bg-slate-50 cursor-pointer"
+                        >
+                          <Link href={item.url} className="cursor-pointer">
+                            <item.icon className="size-4" />
+                            <span>{item.title}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
                   </SidebarMenuSub>
                 </CollapsibleContent>
               </SidebarMenuItem>
@@ -194,37 +200,46 @@ export function SuperadminSidebar({
       <SidebarFooter className="p-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="hover:bg-slate-100 hover:text-slate-900 cursor-pointer">
-              <button type="button" className="w-full cursor-pointer" onClick={() => setIsSettingsOpen(true)}>
-                <Settings className="size-4" />
-                <span>Setting</span>
-              </button>
+            <SidebarMenuButton 
+              className="hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
+              onClick={() => setIsSettingsOpen(true)}
+            >
+              <Settings className="size-4" />
+              <span>Setting</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
-              asChild
               className="hover:bg-red-50 hover:text-red-600 cursor-pointer"
+              onClick={handleLogout}
             >
-              <button type="button" className="w-full cursor-pointer" onClick={handleLogout}>
-                <Avatar className="size-7">
-                  <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-semibold">
-                    SA
-                  </AvatarFallback>
-                </Avatar>
-                <span>Logout</span>
-                <LogOut className="ml-auto size-4" />
-              </button>
+              <Avatar className="size-7">
+                <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-semibold">
+                  SA
+                </AvatarFallback>
+              </Avatar>
+              <span>Logout</span>
+              <LogOut className="ml-auto size-4" />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
 
       <SidebarRail />
-      
-      <ChangePasswordDialog 
-        open={isSettingsOpen} 
-        onOpenChange={setIsSettingsOpen} 
+
+      <ChangePasswordDialog
+        open={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
+      />
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        onOpenChange={setShowLogoutConfirm}
+        title="Konfirmasi Logout"
+        description="Apakah kamu yakin ingin keluar? Kamu perlu login kembali untuk mengakses sistem."
+        confirmLabel="Ya, Logout"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={confirmLogout}
       />
     </Sidebar>
   );
