@@ -71,6 +71,7 @@ export function MultiStepForm() {
   }, []);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [usernameError, setUsernameError] = useState("");
   const router = useRouter();
 
   const isFreePlan = Number(selectedPlan?.harga) === 0;
@@ -81,7 +82,53 @@ export function MultiStepForm() {
     ? ["Pilih Paket", "Buat Akun", "Data Perusahaan"]
     : allStepLabels;
 
-  const isStep2Valid = !!(formData.ownerName && formData.ownerEmail && formData.ownerUsername && formData.ownerPhone && formData.ownerPassword && formData.ownerConfirmPassword && formData.ownerPassword === formData.ownerConfirmPassword);
+  // Real-time username validation
+  useEffect(() => {
+    const username = formData.ownerUsername;
+    if (!username) {
+      setUsernameError("");
+      return;
+    }
+
+    if (username.length < 4) {
+      setUsernameError("Username harus memiliki minimal 4 karakter");
+      return;
+    }
+
+    let isMounted = true;
+
+    const check = async () => {
+      try {
+        const isAvailable = await authService.checkUsername(username);
+        if (isMounted) {
+          if (!isAvailable) {
+            setUsernameError("Username sudah digunakan");
+          } else {
+            setUsernameError("");
+          }
+        }
+      } catch (err) {
+        console.error("Failed to check username", err);
+      }
+    };
+
+    check();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [formData.ownerUsername]);
+
+  const isStep2Valid = !!(
+    formData.ownerName &&
+    formData.ownerEmail &&
+    formData.ownerUsername &&
+    formData.ownerPhone &&
+    formData.ownerPassword &&
+    formData.ownerConfirmPassword &&
+    formData.ownerPassword === formData.ownerConfirmPassword &&
+    !usernameError
+  );
   const isStep3Valid = !!(formData.companyName && formData.companyPhone && formData.companyAddress && formData.companyDescription);
 
   let isNextDisabled = false;
@@ -97,12 +144,9 @@ export function MultiStepForm() {
   const handleNext = async () => {
     if (isNextDisabled || isSubmitting) return;
 
-    // Validate Step 2: Username length
-    if (step === 2) {
-      if (formData.ownerUsername.length < 4) {
-        toast.error("Username harus memiliki minimal 4 karakter");
-        return;
-      }
+    // Validate Step 2: Username error check
+    if (step === 2 && usernameError) {
+      return;
     }
 
     if (step < TOTAL_STEPS) {
@@ -352,7 +396,14 @@ export function MultiStepForm() {
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Username</label>
-                    <input type="text" value={formData.ownerUsername} onChange={(e) => setFormData(p => ({ ...p, ownerUsername: e.target.value }))} placeholder="username" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                    <input
+                      type="text"
+                      value={formData.ownerUsername}
+                      onChange={(e) => setFormData(p => ({ ...p, ownerUsername: e.target.value }))}
+                      placeholder="username"
+                      className={`w-full bg-[#f9fafb] border ${usernameError ? 'border-red-500 focus:ring-red-500/50' : 'border-[#d1d5db] focus:ring-[#ff6b00]/50'} rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 text-sm`}
+                    />
+                    {usernameError && <span className="text-xs text-red-500">{usernameError}</span>}
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Nomor Telepon</label>

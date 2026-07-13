@@ -134,6 +134,11 @@
   [role="button"] {
     @apply cursor-pointer;
   }
+
+  input[type="password"]::-ms-reveal,
+  input[type="password"]::-ms-clear {
+    display: none;
+  }
 }
 
 @keyframes marquee-left {
