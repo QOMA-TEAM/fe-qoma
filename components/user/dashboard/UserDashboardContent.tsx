@@ -4,7 +4,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { ChevronRight, ShoppingCart, Loader2 } from "lucide-react";
+import { ChevronRight, ShoppingCart, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Clock, MapPin } from "lucide-react";
 
@@ -73,6 +73,9 @@ export function UserDashboardContent() {
   // ── Order State ──
   const [orderItems, setOrderItems] = useLocalStorage<OrderItem[]>("qoma_user_orderItems", []);
   const [editingItem, setEditingItem] = useState<OrderItem | null>(null);
+
+  // ── Search State ──
+  const [searchQuery, setSearchQuery] = useState("");
 
   // ── Completed Order Info ──
   const [orderId, setOrderId] = useLocalStorage("qoma_user_orderId", "");
@@ -578,10 +581,30 @@ export function UserDashboardContent() {
               </div>
             ) : (
               <>
+                {/* ── Search Bar ── */}
+                <div className="relative mb-8 w-full max-w-2xl mx-auto">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input 
+                    type="text" 
+                    placeholder="Cari menu favoritmu..." 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-white border border-gray-200 shadow-sm rounded-full py-3.5 pl-12 pr-4 text-sm outline-none transition-all focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  />
+                </div>
+
                 {/* ── Menu Sections ── (category bar is now in the header) */}
                 {Array.isArray(menuResponse?.kategoris) && menuResponse.kategoris.map((kat: KategoriInfo) => {
                   const group = Array.isArray(menuResponse?.menu_per_kategori) ? menuResponse.menu_per_kategori.find((g: any) => g.kategori === kat.nama) : null;
-                  if (!group || !Array.isArray(group.items) || group.items.length === 0) return null;
+                  if (!group || !Array.isArray(group.items)) return null;
+
+                  // Filter items by search query
+                  const filteredItems = group.items.filter((item: any) => 
+                    item.nama.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                    (item.deskripsi && item.deskripsi.toLowerCase().includes(searchQuery.toLowerCase()))
+                  );
+
+                  if (filteredItems.length === 0) return null;
 
                   return (
                     <section key={kat.id} id={`category-${kat.id}`} className="scroll-mt-24">
@@ -599,7 +622,7 @@ export function UserDashboardContent() {
                       </div>
                       {/* Mobile: horizontal scroll | Desktop: grid */}
                       <div className="flex overflow-x-auto gap-3 pb-2 snap-x items-stretch md:hidden">
-                        {group.items.slice(0, 6).map((item) => (
+                        {filteredItems.slice(0, 6).map((item: any) => (
                           <div className="flex-shrink-0 w-44 snap-start flex flex-col" key={item.id}>
                             <MenuCard
                               item={mapToMenuItem(item)}
@@ -609,7 +632,7 @@ export function UserDashboardContent() {
                         ))}
                       </div>
                       <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                        {group.items.slice(0, 10).map((item) => (
+                        {filteredItems.slice(0, 10).map((item: any) => (
                           <MenuCard
                             key={item.id}
                             item={mapToMenuItem(item)}
