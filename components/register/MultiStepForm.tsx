@@ -23,11 +23,7 @@ export function MultiStepForm() {
   const [isLoadingPlans, setIsLoadingPlans] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"transfer" | "qris">("transfer");
-  const [paymentData, setPaymentData] = useState({
-    cardNumber: "",
-    expiryDate: "",
-    cvv: ""
-  });
+  const [transferConfirmed, setTransferConfirmed] = useState(false);
 
   // Form States
   const [formData, setFormData] = useState({
@@ -71,6 +67,7 @@ export function MultiStepForm() {
   }, []);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [usernameError, setUsernameError] = useState("");
   const router = useRouter();
 
   const isFreePlan = Number(selectedPlan?.harga) === 0;
@@ -81,7 +78,53 @@ export function MultiStepForm() {
     ? ["Pilih Paket", "Buat Akun", "Data Perusahaan"]
     : allStepLabels;
 
-  const isStep2Valid = !!(formData.ownerName && formData.ownerEmail && formData.ownerUsername && formData.ownerPhone && formData.ownerPassword && formData.ownerConfirmPassword && formData.ownerPassword === formData.ownerConfirmPassword);
+  // Real-time username validation
+  useEffect(() => {
+    const username = formData.ownerUsername;
+    if (!username) {
+      setUsernameError("");
+      return;
+    }
+
+    if (username.length < 4) {
+      setUsernameError("Username harus memiliki minimal 4 karakter");
+      return;
+    }
+
+    let isMounted = true;
+
+    const check = async () => {
+      try {
+        const isAvailable = await authService.checkUsername(username);
+        if (isMounted) {
+          if (!isAvailable) {
+            setUsernameError("Username sudah digunakan");
+          } else {
+            setUsernameError("");
+          }
+        }
+      } catch (err) {
+        console.error("Failed to check username", err);
+      }
+    };
+
+    check();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [formData.ownerUsername]);
+
+  const isStep2Valid = !!(
+    formData.ownerName &&
+    formData.ownerEmail &&
+    formData.ownerUsername &&
+    formData.ownerPhone &&
+    formData.ownerPassword &&
+    formData.ownerConfirmPassword &&
+    formData.ownerPassword === formData.ownerConfirmPassword &&
+    !usernameError
+  );
   const isStep3Valid = !!(formData.companyName && formData.companyPhone && formData.companyAddress && formData.companyDescription);
 
   let isNextDisabled = false;
@@ -90,12 +133,19 @@ export function MultiStepForm() {
   if (step === 3) isNextDisabled = !isStep3Valid;
   if (step === 4 && !isFreePlan) {
     if (paymentMethod === "transfer") {
-      isNextDisabled = !paymentData.cardNumber || !paymentData.expiryDate || !paymentData.cvv;
+      isNextDisabled = !transferConfirmed;
     }
+    // QRIS: always allowed to proceed (payment confirmed manually by admin)
   }
 
   const handleNext = async () => {
     if (isNextDisabled || isSubmitting) return;
+
+    // Validate Step 2: Username error check
+    if (step === 2 && usernameError) {
+      return;
+    }
+
     if (step < TOTAL_STEPS) {
       setStep(step + 1);
     } else {
@@ -343,7 +393,14 @@ export function MultiStepForm() {
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Username</label>
-                    <input type="text" value={formData.ownerUsername} onChange={(e) => setFormData(p => ({ ...p, ownerUsername: e.target.value }))} placeholder="username" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
+                    <input
+                      type="text"
+                      value={formData.ownerUsername}
+                      onChange={(e) => setFormData(p => ({ ...p, ownerUsername: e.target.value }))}
+                      placeholder="username"
+                      className={`w-full bg-[#f9fafb] border ${usernameError ? 'border-red-500 focus:ring-red-500/50' : 'border-[#d1d5db] focus:ring-[#ff6b00]/50'} rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 text-sm`}
+                    />
+                    {usernameError && <span className="text-xs text-red-500">{usernameError}</span>}
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-gray-700">Nomor Telepon</label>
@@ -432,28 +489,46 @@ export function MultiStepForm() {
 
                   {paymentMethod === "transfer" && (
                     <div className="flex flex-col gap-4">
-                      <div className="flex flex-col gap-2">
-                        <label className="text-sm font-medium text-gray-700">Nomor Kartu</label>
-                        <div className="relative">
-                          <input type="text" value={paymentData.cardNumber} onChange={(e) => setPaymentData(p => ({ ...p, cardNumber: e.target.value }))} placeholder="1234 5678 9012 3456" maxLength={19} className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 pr-28 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1 items-center">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="MC" className="h-4 object-contain opacity-70" />
+                      {/* Bank Info Cards */}
+                      <div className="space-y-3">
+                        <p className="text-sm text-gray-500">Silakan transfer ke salah satu rekening berikut:</p>
+                        
+                        {/* BCA */}
+                        <div className="flex items-center gap-4 bg-[#f9fafb] border border-gray-200 rounded-xl px-5 py-4">
+                          <div className="w-12 h-12 rounded-xl bg-[#005baa] flex items-center justify-center shrink-0">
+                            <span className="text-white font-extrabold text-base tracking-tight">BCA</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-gray-400 font-medium mb-0.5">Bank BCA</p>
+                            <p className="text-xl font-bold text-gray-900 tracking-widest">1234567890</p>
+                            <p className="text-sm text-gray-500 mt-0.5">a.n. PT QOMA INDONESIA</p>
+                          </div>
+                        </div>
+
+                        {/* Mandiri */}
+                        <div className="flex items-center gap-4 bg-[#f9fafb] border border-gray-200 rounded-xl px-5 py-4">
+                          <div className="w-12 h-12 rounded-xl bg-[#003f88] flex items-center justify-center shrink-0">
+                            <span className="text-yellow-400 font-extrabold text-xs tracking-tight">MDR</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-gray-400 font-medium mb-0.5">Bank Mandiri</p>
+                            <p className="text-xl font-bold text-gray-900 tracking-widest">1550098765432</p>
+                            <p className="text-sm text-gray-500 mt-0.5">a.n. PT QOMA INDONESIA</p>
                           </div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="flex flex-col gap-2">
-                          <label className="text-sm font-medium text-gray-700">Tanggal Kedaluwarsa</label>
-                          <input type="text" value={paymentData.expiryDate} onChange={(e) => setPaymentData(p => ({ ...p, expiryDate: e.target.value }))} placeholder="MM / YY" className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <label className="text-sm font-medium text-gray-700">Kode Keamanan</label>
-                          <input type="text" value={paymentData.cvv} onChange={(e) => setPaymentData(p => ({ ...p, cvv: e.target.value }))} placeholder="CVV" maxLength={4} className="w-full bg-[#f9fafb] border border-[#d1d5db] rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6b00]/50 text-sm" />
-                        </div>
-                      </div>
-                      <label className="flex items-start gap-2.5 text-xs text-gray-500 cursor-pointer mt-1">
-                        <input type="checkbox" className="mt-0.5 accent-[#ff6b00]" />
-                        Simpan detail kartu ini untuk pembelian mendatang
+
+                      {/* Confirmation Checkbox */}
+                      <label className="flex items-start gap-3 bg-[#fff4ec] border border-[#ff6b00]/30 rounded-xl px-4 py-3 cursor-pointer mt-1">
+                        <input
+                          type="checkbox"
+                          checked={transferConfirmed}
+                          onChange={(e) => setTransferConfirmed(e.target.checked)}
+                          className="mt-0.5 accent-[#ff6b00] w-4 h-4 shrink-0 cursor-pointer"
+                        />
+                        <span className="text-sm text-gray-700 leading-relaxed">
+                          Saya telah melakukan transfer dan menunggu konfirmasi dari admin QOMA.
+                        </span>
                       </label>
                     </div>
                   )}

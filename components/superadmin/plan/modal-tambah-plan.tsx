@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
 import { PlanFormFields, PlanFormValues, PlanFormErrors } from "./plan-form-dialog";
-import { CreatePlanPayload, TAGIHAN_TO_HARI } from "@/types/superadmin/plan";
+import { CreatePlanPayload, TAGIHAN_TO_HARI, PlanTagihan } from "@/types/superadmin/plan";
 import { PlanActionOptions } from "@/hooks/superadmin/use-plan";
 
 interface ModalTambahPlanProps {
@@ -21,6 +21,7 @@ interface ModalTambahPlanProps {
   onClose: () => void;
   onSubmit: (payload: CreatePlanPayload, opts?: PlanActionOptions) => Promise<boolean>;
   submitting?: boolean;
+  existingNames?: string[];
 }
 
 const INITIAL: PlanFormValues = {
@@ -32,20 +33,52 @@ const INITIAL: PlanFormValues = {
   deskripsi: "",
 };
 
-function validate(values: Partial<PlanFormValues>): PlanFormErrors {
+// Urutan durasi dari pendek ke panjang
+const TAGIHAN_ORDER: PlanTagihan[] = ["30 Hari", "60 Hari", "90 Hari", "365 Hari"];
+
+function validate(
+  values: Partial<PlanFormValues>,
+  existingNames: string[] = []
+): PlanFormErrors {
   const errors: PlanFormErrors = {};
-  if (!values.nama_plan?.trim()) errors.nama_plan = "Nama plan wajib diisi";
+  if (!values.nama_plan?.trim()) {
+    errors.nama_plan = "Nama plan wajib diisi";
+  } else {
+    const namaTrimmed = values.nama_plan.trim().toLowerCase();
+    const isDuplicate = existingNames.some(
+      (n) => n.trim().toLowerCase() === namaTrimmed
+    );
+    if (isDuplicate) {
+      errors.nama_plan = "Nama plan sudah digunakan, gunakan nama lain";
+    }
+  }
   if ((values.batas_outlet ?? 1) < 1) errors.batas_outlet = "Minimal 1 outlet";
   
   if (!values.selectedTagihan || values.selectedTagihan.length === 0) {
     errors.selectedTagihan = "Pilih minimal satu variasi tagihan";
   } else {
+    // Validasi harga per variasi tidak negatif
     values.selectedTagihan.forEach((tagihan) => {
       const harga = values.hargaMap?.[tagihan];
       if (harga === undefined || harga < 0 || harga === null) {
         errors[`harga_${tagihan}`] = "Harga tidak valid";
       }
     });
+
+    // Validasi urutan harga: durasi lebih panjang harus >= durasi lebih pendek
+    const selected = values.selectedTagihan;
+    const hargaMap = values.hargaMap ?? {};
+    const sortedSelected = TAGIHAN_ORDER.filter((t) => selected.includes(t));
+    for (let i = 1; i < sortedSelected.length; i++) {
+      const prev = sortedSelected[i - 1];
+      const curr = sortedSelected[i];
+      const hargaPrev = hargaMap[prev] ?? 0;
+      const hargaCurr = hargaMap[curr] ?? 0;
+      if (hargaCurr < hargaPrev) {
+        errors[`harga_${curr}`] =
+          `Harga ${curr} harus lebih mahal dari harga ${prev}`;
+      }
+    }
   }
   
   return errors;
@@ -56,6 +89,7 @@ export function ModalTambahPlan({
   onClose,
   onSubmit,
   submitting,
+  existingNames = [],
 }: ModalTambahPlanProps) {
   const [values, setValues] = useState<PlanFormValues>(INITIAL);
   const [errors, setErrors] = useState<PlanFormErrors>({});
@@ -69,7 +103,7 @@ export function ModalTambahPlan({
   };
 
   const handleSubmit = async () => {
-    const errs = validate(values);
+    const errs = validate(values, existingNames);
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       return;
@@ -157,4 +191,4 @@ export function ModalTambahPlan({
       </DialogContent>
     </Dialog>
   );
-}
+}

@@ -152,6 +152,11 @@ export function MenuFormDialog({
       return
     }
 
+    if (bahanBaku.length === 0) {
+      toast.error("Pilih minimal satu bahan baku untuk menu ini.")
+      return
+    }
+
     const formData = new FormData()
     formData.append("nama", namaMenu)
     formData.append("kategori_id", kategoriId)
@@ -444,8 +449,11 @@ export function MenuFormDialog({
           </div>
 
           {/* Buttons */}
-          <div className="flex items-center justify-center gap-4 pt-6">
-            <Button type="submit" disabled={isPending} className="rounded-lg px-8 bg-[#1D5E84] hover:bg-[#154663] text-white font-semibold cursor-pointer">
+          <div className="flex flex-col items-center gap-2 pt-6">
+            {bahanBaku.length === 0 && (
+              <p className="text-xs text-amber-600 font-medium">Pilih minimal satu bahan baku untuk melanjutkan.</p>
+            )}
+            <Button type="submit" disabled={isPending || bahanBaku.length === 0} className="rounded-lg px-8 bg-[#1D5E84] hover:bg-[#154663] text-white font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
               {(addMutation.isPending || updateMutation.isPending) ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
             </Button>
           </div>

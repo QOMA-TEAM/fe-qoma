@@ -7,14 +7,11 @@ import { OutletStatCards } from "@/components/outlet/dashboard/stat-cards";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { CustomersChart } from "@/components/dashboard/customers-chart";
 import { NotificationFeed } from "@/components/outlet/dashboard/notification-feed";
-import { Loader2, Store, Settings, Bell } from "lucide-react";
+import { Loader2, Store, Bell } from "lucide-react";
 import { useState, useEffect } from "react";
-import { ChangePasswordDialog } from "@/components/settings/change-password-dialog";
-import { OutletSettingsContent } from "@/components/outlet/outlet-settings-content";
 
 export function OutletDashboardContent() {
   const { data: response, isLoading, isError } = useOutletDashboard();
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [readAlerts, setReadAlerts] = useState<string[]>([]);
 
   useEffect(() => {
@@ -100,15 +97,6 @@ export function OutletDashboardContent() {
           Welcome back, {outlet.nama_outlet || "Outlet"}
         </h2>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setIsSettingsOpen(true)}
-            className="flex items-center justify-center size-9 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-100 transition-colors cursor-pointer"
-            aria-label="Settings"
-          >
-            <Settings className="size-4" />
-          </button>
-
           <HeaderActions 
             extraNotifications={extraNotifications} 
             onMarkAlertRead={handleMarkAlertRead}
@@ -116,10 +104,6 @@ export function OutletDashboardContent() {
           />
         </div>
       </header>
-
-      <ChangePasswordDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <OutletSettingsContent outlet={outlet} />
-      </ChangePasswordDialog>
 
       <main className="flex-1 overflow-auto p-8 space-y-8">
         {/* Header */}

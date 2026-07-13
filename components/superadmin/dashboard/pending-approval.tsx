@@ -63,7 +63,7 @@ export function PendingApprovals({
             Tidak ada usaha yang menunggu persetujuan
           </div>
         ) : (
-          <ScrollArea className="max-h-72">
+          <ScrollArea className="h-[288px]">
             <div className="space-y-3 pr-4">
               {approvals.map((approval) => (
                 <div

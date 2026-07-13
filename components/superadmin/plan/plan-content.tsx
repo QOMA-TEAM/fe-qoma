@@ -103,6 +103,7 @@ export function PlanContent() {
         onClose={() => setModalTambah(false)}
         onSubmit={createPlan}
         submitting={submitting}
+        existingNames={plans.map((p) => p.nama_plan)}
       />
 
       <ModalEditPlan
