@@ -40,12 +40,34 @@ export const authService = {
       }
 
       if (!res.ok) {
-        throw new Error(json.message || `HTTP ${res.status}: Failed to register`)
+        let errorMessage = json.message || `HTTP ${res.status}: Failed to register`;
+        if (json.errors) {
+          const firstErrorKey = Object.keys(json.errors)[0];
+          if (firstErrorKey && json.errors[firstErrorKey].length > 0) {
+            errorMessage = json.errors[firstErrorKey][0];
+          }
+        }
+        throw new Error(errorMessage)
       }
 
       return json
     } catch (err) {
       console.error("[authService] register error:", err)
+      throw err
+    }
+  },
+  
+  checkUsername: async (username: string) => {
+    const url = `${BASE}/auth/check-username?username=${encodeURIComponent(username)}`
+    try {
+      const res = await fetch(url)
+      const json = await res.json()
+      if (!res.ok) {
+        throw new Error(json.message || "Gagal mengecek username")
+      }
+      return json.available
+    } catch (err) {
+      console.error("[authService] check username error:", err)
       throw err
     }
   }
