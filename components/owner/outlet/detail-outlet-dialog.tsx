@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { MapPin, CalendarDays, Store, Hash, CheckCircle2 } from "lucide-react"
 import type { Outlet } from "@/types/owner/outlet"
 
 interface DetailOutletDialogProps {
@@ -15,96 +15,93 @@ interface DetailOutletDialogProps {
   onClose: () => void
 }
 
+function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
+    return (
+        <div className="flex items-start justify-between py-2.5 border-b border-gray-100 last:border-b-0 gap-4">
+            <span className="text-sm text-gray-500 shrink-0">{label}</span>
+            <span className="text-sm font-medium text-gray-800 text-right break-words max-w-[60%]">{value ?? '-'}</span>
+        </div>
+    )
+}
+
 export function DetailOutletDialog({ outlet, onClose }: DetailOutletDialogProps) {
   if (!outlet) return null
 
+  const initials = outlet.nama_outlet
+      .split(" ")
+      .slice(0, 2)
+      .map(w => w[0] || "")
+      .join("")
+      .toUpperCase()
+
   return (
     <Dialog open={!!outlet} onOpenChange={(open) => { if (!open) onClose() }}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-gray-800">
-            Detail Outlet
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-md p-0 overflow-hidden rounded-2xl gap-0">
+        
+        {/* ── Header ── */}
+        <div className="bg-gradient-to-br from-[#FF6600] to-[#FF8C42] px-6 pt-6 pb-6">
+            <DialogHeader>
+                <DialogTitle className="text-white/70 text-sm font-medium mb-3">
+                    Detail Outlet
+                </DialogTitle>
+            </DialogHeader>
 
-        <div className="border-t border-gray-200 my-1" />
-
-        {/* Nama + Status */}
-        <div className="flex items-center justify-between mt-2">
-          <h3 className="text-lg font-bold text-gray-800">{outlet.nama_outlet}</h3>
-          <Badge
-            variant="outline"
-            className="border-emerald-400 text-emerald-600 bg-emerald-50 rounded-full px-4"
-          >
-            Aktif
-          </Badge>
+            {/* Avatar + Info Ringkas */}
+            <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-xl font-bold shrink-0">
+                    {initials}
+                </div>
+                <div className="min-w-0 flex-1">
+                    <h3 className="text-white text-lg font-bold leading-tight truncate">{outlet.nama_outlet}</h3>
+                    <p className="text-white/70 text-sm mt-0.5 truncate">{outlet.email || '-'}</p>
+                    <div className="mt-2 flex items-center gap-2 flex-wrap">
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <CheckCircle2 size={12} /> Aktif
+                        </span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        {/* Info Grid */}
-        <div className="grid grid-cols-2 gap-x-8 gap-y-4 mt-4">
-          {/* Left: Information Subscription */}
-          <div>
-            <h4 className="text-sm font-bold text-gray-700 mb-3">Information</h4>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-500">ID Outlet</span>
-                <span className="text-gray-800 font-medium" title={String(outlet.id)}>
-                  {String(outlet.id).length > 8 ? `${String(outlet.id).slice(0, 8)}` : outlet.id}
+        {/* ── Content ── */}
+        <div className="px-6 py-4 min-h-[200px] max-h-[60vh] overflow-y-auto">
+            <InfoRow label="ID Outlet" value={
+                <span className="flex items-center gap-1 justify-end">
+                    <Hash size={13} className="text-gray-400 shrink-0" />
+                    <span title={String(outlet.id)}>{String(outlet.id).length > 8 ? `${String(outlet.id).slice(0, 8)}...` : outlet.id}</span>
                 </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Jumlah Meja</span>
-                <span className="text-gray-800 font-medium">{outlet.mejas_count || 0}</span>
-              </div>
+            } />
+            <InfoRow label="Alamat" value={
+                <span className="flex items-start gap-1 justify-end">
+                    <MapPin size={13} className="text-gray-400 mt-0.5 shrink-0" />
+                    <span>{outlet.alamat || '-'}</span>
+                </span>
+            } />
+            <InfoRow label="Jumlah Meja" value={outlet.mejas_count || 0} />
+            <InfoRow label="Created At" value={
+                <span className="flex items-center gap-1 justify-end">
+                    <CalendarDays size={13} className="text-gray-400 shrink-0" />
+                    {outlet.created_at ? new Date(outlet.created_at).toLocaleDateString("id-ID") : '-'}
+                </span>
+            } />
+            <InfoRow label="Updated At" value={
+                <span className="flex items-center gap-1 justify-end">
+                    <CalendarDays size={13} className="text-gray-400 shrink-0" />
+                    {outlet.updated_at ? new Date(outlet.updated_at).toLocaleDateString("id-ID") : '-'}
+                </span>
+            } />
+            
+            <div className="flex justify-end mt-6">
+                <Button
+                    onClick={onClose}
+                    className="rounded-lg px-8 bg-[#1D5E84] hover:bg-[#154663] text-white cursor-pointer"
+                >
+                    Tutup
+                </Button>
             </div>
-          </div>
-
-          {/* Right: Data Tenant */}
-          <div>
-            <h4 className="text-sm font-bold text-gray-700 mb-3">Data Tenant</h4>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between gap-4">
-                <span className="text-gray-500 whitespace-nowrap">Nama Outlet</span>
-                <span className="text-gray-800 font-medium text-right break-words max-w-[160px]">{outlet.nama_outlet}</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-gray-500 whitespace-nowrap">Email</span>
-                <span className="text-gray-800 font-medium text-right break-all max-w-[160px]">{outlet.email || "-"}</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-gray-500 whitespace-nowrap">Alamat</span>
-                <span className="text-gray-800 font-medium text-right break-words max-w-[160px]">{outlet.alamat || "-"}</span>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-        {/* Timestamp */}
-        <div className="mt-4">
-          <h4 className="text-sm font-bold text-gray-700 mb-3">Timestamp</h4>
-          <div className="space-y-2 text-sm max-w-[280px]">
-            <div className="flex justify-between">
-              <span className="text-gray-500">Created At</span>
-              <span className="text-gray-800 font-medium">{outlet.created_at ? new Date(outlet.created_at).toLocaleDateString() : '-'}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Updated At</span>
-              <span className="text-gray-800 font-medium">{outlet.updated_at ? new Date(outlet.updated_at).toLocaleDateString() : '-'}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Tutup Button */}
-        <div className="flex justify-center mt-4">
-          <Button
-            onClick={onClose}
-            className="rounded-lg px-10 bg-[#1D5E84] hover:bg-[#154663] text-white cursor-pointer"
-          >
-            Tutup
-          </Button>
         </div>
       </DialogContent>
     </Dialog>
   )
 }
+

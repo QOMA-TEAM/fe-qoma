@@ -223,7 +223,7 @@ export function BahanBakuFormDialog({
                   Menyimpan...
                 </>
               ) : (
-                "Update"
+                "Simpan"
               )}
             </Button>
           </div>

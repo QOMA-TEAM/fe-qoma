@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronDown, Loader2 } from "lucide-react"
+import { ChevronDown, Loader2, BarChart2 } from "lucide-react"
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -82,6 +82,16 @@ export function OwnerCharts() {
             <div className="absolute inset-0 flex items-center justify-center">
               <Loader2 className="w-6 h-6 animate-spin text-[#94A3B8]" />
             </div>
+          ) : pendapatanData.length === 0 || pendapatanData.every(d => d.value === 0) ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center">
+                <BarChart2 className="w-6 h-6 text-orange-300" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-500">Tidak ada penjualan</p>
+                <p className="text-xs text-gray-400 mt-0.5">dalam {rangeLabels[rangePendapatan].toLowerCase()}</p>
+              </div>
+            </div>
           ) : (
             <MetricChart data={pendapatanData} labelName="Pendapatan" color="#F97316" />
           )}
@@ -115,6 +125,16 @@ export function OwnerCharts() {
           {graphKerugianLoading ? (
             <div className="absolute inset-0 flex items-center justify-center">
               <Loader2 className="w-6 h-6 animate-spin text-[#94A3B8]" />
+            </div>
+          ) : kerugianData.length === 0 || kerugianData.every(d => d.value === 0) ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center">
+                <BarChart2 className="w-6 h-6 text-orange-300" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-500">Tidak ada kerugian tercatat</p>
+                <p className="text-xs text-gray-400 mt-0.5">dalam {rangeLabels[rangeKerugian].toLowerCase()}</p>
+              </div>
             </div>
           ) : (
             <MetricChart data={kerugianData} labelName="Kerugian" color="#F97316" />
