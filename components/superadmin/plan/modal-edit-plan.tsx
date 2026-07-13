@@ -27,6 +27,9 @@ interface ModalEditPlanProps {
   submitting?: boolean;
 }
 
+// Urutan durasi dari pendek ke panjang
+const TAGIHAN_ORDER: PlanTagihan[] = ["30 Hari", "60 Hari", "90 Hari", "365 Hari"];
+
 function validate(values: Partial<PlanFormValues>): PlanFormErrors {
   const errors: PlanFormErrors = {};
   if (!values.nama_plan?.trim()) errors.nama_plan = "Nama plan wajib diisi";
@@ -38,6 +41,21 @@ function validate(values: Partial<PlanFormValues>): PlanFormErrors {
     const harga = values.hargaMap?.[tagihan];
     if (harga === undefined || harga < 0 || harga === null) {
       errors[`harga_${tagihan}`] = "Harga tidak valid";
+    }
+
+    // Validasi urutan harga: durasi lebih panjang harus >= durasi lebih pendek
+    const selected = values.selectedTagihan;
+    const hargaMap = values.hargaMap ?? {};
+    const sortedSelected = TAGIHAN_ORDER.filter((t) => selected.includes(t));
+    for (let i = 1; i < sortedSelected.length; i++) {
+      const prev = sortedSelected[i - 1];
+      const curr = sortedSelected[i];
+      const hargaPrev = hargaMap[prev] ?? 0;
+      const hargaCurr = hargaMap[curr] ?? 0;
+      if (hargaCurr < hargaPrev) {
+        errors[`harga_${curr}`] =
+          `Harga ${curr} harus lebih mahal dari harga ${prev}`;
+      }
     }
   }
   return errors;

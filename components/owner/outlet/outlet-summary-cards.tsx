@@ -4,13 +4,12 @@ import { Store, Coins, TrendingDown, TrendingUp, Loader2 } from "lucide-react"
 import { useKeuanganSummary } from "@/hooks/owner/use-keuangan"
 import { formatRupiah } from "@/lib/utils"
 
-interface KeuanganSummaryCardsProps {
-  range: string
-  outletId: string
+interface OutletSummaryCardsProps {
+  outletId?: string
 }
 
-export function KeuanganSummaryCards({ range, outletId }: KeuanganSummaryCardsProps) {
-  const { data: summaryResponse, isLoading } = useKeuanganSummary(range, outletId || undefined)
+export function OutletSummaryCards({ outletId }: OutletSummaryCardsProps) {
+  const { data: summaryResponse, isLoading } = useKeuanganSummary("7days", outletId)
   const summary = summaryResponse?.data
 
   if (isLoading) {
