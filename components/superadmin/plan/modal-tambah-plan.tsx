@@ -58,7 +58,7 @@ function validate(
     errors.selectedTagihan = "Pilih minimal satu variasi tagihan";
   } else {
     // Validasi harga per variasi tidak negatif
-    values.selectedTagihan.forEach((tagihan) => {
+    values.selectedTagihan.forEach((tagihan: PlanTagihan) => {
       const harga = values.hargaMap?.[tagihan];
       if (harga === undefined || harga < 0 || harga === null) {
         errors[`harga_${tagihan}`] = "Harga tidak valid";
@@ -96,9 +96,9 @@ export function ModalTambahPlan({
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleChange = (field: keyof PlanFormValues, value: any) => {
-    setValues((prev) => ({ ...prev, [field]: value }));
+    setValues((prev: PlanFormValues) => ({ ...prev, [field]: value }));
     if (errors[field as keyof PlanFormErrors]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
+      setErrors((prev: PlanFormErrors) => ({ ...prev, [field]: undefined }));
     }
   };
 
@@ -149,7 +149,7 @@ export function ModalTambahPlan({
   const isLoading = submitting || isProcessing;
 
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
+    <Dialog open={open} onOpenChange={(o: boolean) => !o && handleClose()}>
       <DialogContent className="sm:max-w-3xl rounded-xl p-0 overflow-hidden">
         <DialogHeader className="px-6 pt-5 pb-4">
           <DialogTitle className="text-base font-semibold text-gray-900">

@@ -86,7 +86,7 @@ export function PlanFormFields({
               id="nama_plan"
               placeholder="Contoh: Paket Pro"
               value={values.nama_plan ?? ""}
-              onChange={(e) => onChange("nama_plan", e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange("nama_plan", e.target.value)}
               className={`h-10 border-gray-200 focus-visible:ring-[#1D5E84] ${
                 errors?.nama_plan ? "border-red-400" : ""
               }`}
@@ -107,7 +107,7 @@ export function PlanFormFields({
               min={1}
               placeholder="0"
               value={values.batas_outlet === 0 ? "" : values.batas_outlet?.toString()}
-              onChange={(e) => onChange("batas_outlet", e.target.value === "" ? 0 : Number(e.target.value))}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange("batas_outlet", e.target.value === "" ? 0 : Number(e.target.value))}
               className={`h-10 border-gray-200 focus-visible:ring-[#1D5E84] ${
                 errors?.batas_outlet ? "border-red-400" : ""
               }`}
@@ -122,7 +122,7 @@ export function PlanFormFields({
             <Label className="text-sm font-semibold text-gray-700">Status</Label>
             <Select
               value={values.status ?? "aktif"}
-              onValueChange={(v) => onChange("status", v as PlanStatus)}
+              onValueChange={(v: string) => onChange("status", v as PlanStatus)}
             >
               <SelectTrigger className="h-10 border-gray-200 focus:ring-[#1D5E84]">
                 <SelectValue placeholder="Aktif" />
@@ -143,7 +143,7 @@ export function PlanFormFields({
               id="deskripsi"
               placeholder="Deskripsi singkat plan ini..."
               value={values.deskripsi ?? ""}
-              onChange={(e) => onChange("deskripsi", e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange("deskripsi", e.target.value)}
               className="resize-none min-h-[80px] border-gray-200 focus-visible:ring-[#1D5E84]"
             />
           </div>
@@ -214,7 +214,7 @@ export function PlanFormFields({
                         min={0}
                         placeholder="0"
                         value={hargaMap[tagihan] === 0 ? "" : hargaMap[tagihan]?.toString()}
-                        onChange={(e) => updateHarga(tagihan, e.target.value === "" ? 0 : Number(e.target.value))}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateHarga(tagihan, e.target.value === "" ? 0 : Number(e.target.value))}
                         className={`rounded-md border-gray-200 focus-visible:ring-[#1D5E84] text-sm h-8 ${errors?.[`harga_${tagihan}`] ? "border-red-400" : ""}`}
                       />
                       {errors?.[`harga_${tagihan}`] && (
