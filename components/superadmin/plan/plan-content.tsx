@@ -38,7 +38,7 @@ export function PlanContent() {
 
   const groupedPlans = useMemo(() => {
     const map = new Map<string, Plan[]>();
-    plans.forEach((p) => {
+    plans.forEach((p: Plan) => {
       if (!map.has(p.nama_plan)) map.set(p.nama_plan, []);
       map.get(p.nama_plan)!.push(p);
     });
@@ -103,7 +103,7 @@ export function PlanContent() {
         onClose={() => setModalTambah(false)}
         onSubmit={createPlan}
         submitting={submitting}
-        existingNames={plans.map((p) => p.nama_plan)}
+        existingNames={plans.map((p: Plan) => p.nama_plan)}
       />
 
       <ModalEditPlan

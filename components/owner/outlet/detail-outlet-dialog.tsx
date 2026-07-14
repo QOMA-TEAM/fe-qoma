@@ -19,7 +19,7 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
     return (
         <div className="flex items-start justify-between py-2.5 border-b border-gray-100 last:border-b-0 gap-4">
             <span className="text-sm text-gray-500 shrink-0">{label}</span>
-            <span className="text-sm font-medium text-gray-800 text-right break-words max-w-[60%]">{value ?? '-'}</span>
+            <span className="text-sm font-medium text-gray-800 text-right wrap-break-word max-w-[60%]">{value ?? '-'}</span>
         </div>
     )
 }
@@ -30,16 +30,16 @@ export function DetailOutletDialog({ outlet, onClose }: DetailOutletDialogProps)
   const initials = outlet.nama_outlet
       .split(" ")
       .slice(0, 2)
-      .map(w => w[0] || "")
+      .map((w: string) => w[0] || "")
       .join("")
       .toUpperCase()
 
   return (
-    <Dialog open={!!outlet} onOpenChange={(open) => { if (!open) onClose() }}>
+    <Dialog open={!!outlet} onOpenChange={(open: boolean) => { if (!open) onClose() }}>
       <DialogContent className="sm:max-w-md p-0 overflow-hidden rounded-2xl gap-0">
         
         {/* ── Header ── */}
-        <div className="bg-gradient-to-br from-[#FF6600] to-[#FF8C42] px-6 pt-6 pb-6">
+        <div className="bg-linear-to-br from-[#FF6600] to-[#FF8C42] px-6 pt-6 pb-6">
             <DialogHeader>
                 <DialogTitle className="text-white/70 text-sm font-medium mb-3">
                     Detail Outlet
