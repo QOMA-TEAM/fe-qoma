@@ -175,7 +175,7 @@ export function ModalEditPlan({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
+    <Dialog open={open} onOpenChange={(o: boolean) => !o && handleClose()}>
       <DialogContent className="sm:max-w-3xl rounded-xl p-0 overflow-hidden">
         <DialogHeader className="px-6 pt-5 pb-4">
           <DialogTitle className="text-base font-semibold text-gray-900">
